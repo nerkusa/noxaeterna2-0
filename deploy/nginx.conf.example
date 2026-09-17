@@ -1,0 +1,26 @@
+server {
+    listen 80;
+    server_name YOUR_DOMAIN_HERE; # например noxaeterna.duckdns.org
+
+    root /opt/noxaeterna2-0/build;
+    index index.html;
+
+    # React (client-side routing) — всё, что не файл, отдаём как index.html
+    location / {
+        try_files $uri /index.html;
+    }
+
+    # Прокси WebSocket-сервера (server/) на тот же домен/порт 443
+    location /ws {
+        proxy_pass http://127.0.0.1:8787;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_read_timeout 3600s;
+    }
+}
+
+# После этого запусти:
+#   sudo certbot --nginx -d YOUR_DOMAIN_HERE
+# certbot сам допишет сюда SSL (слушать 443, редирект с 80) и настроит автопродление.

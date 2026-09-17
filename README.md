@@ -19,13 +19,13 @@ ttrpg companion (React + собственный локальный realtime-се
    npm start
    ```
 
-## Деплой на свой VPS
+## Деплой на свой VPS (с бесплатным доменом)
 
-- Сервер (`server/`) — обычное Node-приложение, запускать через `pm2` или systemd:
-  `PORT=8787 node server/index.js`. Поставьте перед ним nginx как reverse proxy
-  с TLS (`wss://`), если фронтенд отдаётся по https — браузеры не разрешают
-  небезопасный `ws://` со страницы на `https://`.
-- Клиент собирается как обычно (`npm run build`) и раздаётся статикой (nginx/любой
-  веб-сервер). Перед сборкой пропишите в `.env` реальный адрес сокет-сервера:
-  `REACT_APP_WS_URL=wss://your-domain:8787` (или путь через nginx-проксирование).
-- Данные комнаты хранятся в `server/data.json` — бэкапьте этот файл при желании.
+Полная пошаговая инструкция (DuckDNS + Ubuntu + nginx + systemd + бесплатный
+HTTPS через Let's Encrypt) — [deploy/VPS_SETUP.md](deploy/VPS_SETUP.md).
+
+Кратко: сервер (`server/`) — обычный Node-процесс, держим его живым через
+systemd (готовый юнит в `deploy/nox-server.service`); nginx отдаёт собранный
+клиент и проксирует WebSocket на `/ws` (готовый конфиг в
+`deploy/nginx.conf.example`); `certbot --nginx` выдаёт бесплатный сертификат.
+Данные комнат хранятся в `server/data.json` — бэкапьте этот файл при желании.

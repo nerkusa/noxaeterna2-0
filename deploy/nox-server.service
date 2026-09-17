@@ -1,0 +1,15 @@
+[Unit]
+Description=Nox Aeterna realtime backend (WS server)
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/opt/noxaeterna2-0/server
+Environment=PORT=8787
+ExecStart=/usr/bin/node /opt/noxaeterna2-0/server/index.js
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
