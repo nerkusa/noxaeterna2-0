@@ -71,7 +71,7 @@ function PlayerAttackNotif(pr){
     var dv=isMag?(st.WILL||0):(st.DEX||0);
     var dg=isMag?(sk.mresist||0):(sk.dodge||0);
     var t=d+dv+dg;
-    var det=isMag?("d10("+d+")+WILL("+dv+")+M.Resist("+dg+")="+t):("d10("+d+")+DEX("+dv+")+Dodge("+dg+")="+t);
+    var det=isMag?("d10("+d+")+WILL("+dv+")+Сопр.магии("+dg+")="+t):("d10("+d+")+DEX("+dv+")+Уклонение("+dg+")="+t);
     var dodged=t>=atk.hitRoll;
     update(ref(db,"rooms/"+pr.room+"/pendingAttacks/"+id),{dodgeRoll:t,status:dodged?"done":"pending_dmg",dodgeDetail:det});
     addLog({who:npc.name,type:isMag?"magic":"dodge",label:(isMag?(dodged?"✨ Устоял против чуда — ":"❌ Не устоял против чуда — "):(dodged?"✅ Уклонился от ":"❌ Не уклонился от "))+atk.attackerName,detail:det+" vs "+atk.hitRoll,total:t});
@@ -110,8 +110,8 @@ function PlayerAttackNotif(pr){
       {/* Защита NPC */}
       <div style={{background:"#232532",border:"1px solid "+(isMag?"#a78bfa40":"#34374a"),borderRadius:10,padding:"8px 12px",marginBottom:10}}>
         <div style={{fontSize:8,color:"#9397ab",marginBottom:4}}>{isMag?("✨ Сопротивление чуду "+atk.npcName):("Уклонение "+atk.npcName)}</div>
-        <div style={{fontSize:9,color:"#9397ab",marginBottom:6}}>{isMag?("d10 + WILL("+npcWill+") + Miracle Resist("+npcMR+")"):("d10 + DEX("+npcDex+") + Dodge("+npcDodge+")")}</div>
-        <button onClick={doDodge} style={{width:"100%",padding:"10px",borderRadius:9,border:"none",background:isMag?"#7c3aed":"#10b981",color:"#fff",fontFamily:"'Inter',sans-serif",fontWeight:900,fontSize:14,cursor:"pointer"}}>{isMag?"✨ Бросить Miracle Resist!":"🛡️ Бросить уклонение!"}</button>
+        <div style={{fontSize:9,color:"#9397ab",marginBottom:6}}>{isMag?("d10 + WILL("+npcWill+") + Сопротивление магии("+npcMR+")"):("d10 + DEX("+npcDex+") + Уклонение("+npcDodge+")")}</div>
+        <button onClick={doDodge} style={{width:"100%",padding:"10px",borderRadius:9,border:"none",background:isMag?"#7c3aed":"#10b981",color:"#fff",fontFamily:"'Inter',sans-serif",fontWeight:900,fontSize:14,cursor:"pointer"}}>{isMag?"✨ Бросить Сопротивление магии!":"🛡️ Бросить уклонение!"}</button>
       </div>
       <button onClick={acceptHit} style={{width:"100%",padding:6,borderRadius:7,border:"2px solid "+accent+"40",background:"none",color:"#9397ab",fontWeight:700,fontSize:10,cursor:"pointer"}}>{isMag?"Принять чудо без сопротивления":"Принять удар без уклонения"}</button>
     </div>

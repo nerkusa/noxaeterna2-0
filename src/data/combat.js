@@ -7,7 +7,7 @@ function aimPen(n){return AIM_PEN[n]!==undefined?AIM_PEN[n]:2}
 function zoneByName(n){return ZONES.find(function(z){return z.name===n})||ZONES[2]}
 
 /* Прочность оружия (ячейки) по типу */
-var WEAP_DUR={Battle:30,Simple:20,Guns:20,Archery:20,Brawl:0};
+var WEAP_DUR={Battle:30,Simple:20,Guns:20,Archery:20,Thrown:15,Brawl:0};
 function weapDur(t){return WEAP_DUR[t]!==undefined?WEAP_DUR[t]:20}
 /* Какие типы брони «ломают» оружие данного типа урона (при попадании + антикрите) */
 var BREAK_VS={"К":["light","medium","heavy"],"Р":["medium","heavy"],"Д":["heavy"]};

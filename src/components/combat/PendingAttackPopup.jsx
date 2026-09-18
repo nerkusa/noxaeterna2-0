@@ -23,9 +23,9 @@ function PendingAttackPopup(pr){
   function doDodge(){
     var R=rollHit();var d=R.d;
     var dv=isMagic?(fs.WILL||0):(fs.DEX||0);
-    var dg=isMagic?(es["Magic Resist"]||0):(es.Dodge||0);
+    var dg=isMagic?(es["Сопротивление магии"]||0):(es["Уклонение"]||0);
     var t=d+dv+dg;
-    var det=isMagic?("d10("+d+")+WILL("+dv+")+M.Resist("+dg+")="+t):("d10("+d+")+DEX("+dv+")+Dodge("+dg+")="+t);
+    var det=isMagic?("d10("+d+")+WILL("+dv+")+Сопр.магии("+dg+")="+t):("d10("+d+")+DEX("+dv+")+Уклонение("+dg+")="+t);
     var dodgedNow=t>=atk.hitRoll;
     if(dodgedNow){
       /* Успех — ставим статус "dodged", ГМ видит результат с кнопкой Закрыть */
@@ -69,7 +69,7 @@ function PendingAttackPopup(pr){
         <div style={{fontSize:8,color:"#9397ab",marginBottom:4}}>{isMagic?"✨ Сопротивление чуду":"Твоё уклонение"}</div>
         {waiting
           ?<div>
-            <div style={{fontSize:9,color:"#9397ab",marginBottom:8}}>{isMagic?("d10 + WILL("+(fs.WILL||0)+") + Miracle Resist("+(es["Magic Resist"]||0)+")"):("d10 + DEX("+(fs.DEX||0)+") + Dodge("+(es.Dodge||0)+")")}</div>
+            <div style={{fontSize:9,color:"#9397ab",marginBottom:8}}>{isMagic?("d10 + WILL("+(fs.WILL||0)+") + Сопротивление магии("+(es["Сопротивление магии"]||0)+")"):("d10 + DEX("+(fs.DEX||0)+") + Уклонение("+(es["Уклонение"]||0)+")")}</div>
             <button onClick={doDodge} style={{width:"100%",padding:"10px",borderRadius:9,border:"none",background:isMagic?"#7c3aed":"#10b981",color:"#fff",fontFamily:"'Inter',sans-serif",fontWeight:900,fontSize:14,cursor:"pointer",marginBottom:6}}>{isMagic?"✨ Сопротивляться чуду!":"🛡️ Уклониться!"}</button>
             <button onClick={acceptHit} style={{width:"100%",padding:6,borderRadius:7,border:"2px solid #ef444440",background:"none",color:"#ef4444",fontWeight:700,fontSize:10,cursor:"pointer"}}>Принять удар</button>
           </div>

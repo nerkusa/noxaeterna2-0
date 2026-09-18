@@ -14,7 +14,7 @@ import InitiativeBar from '../combat/InitiativeBar';
 /* Встроенная рукопашная атака — есть у каждого NPC изначально */
 var FIST={name:"Кулаки",dice:"1d6",dmgType:"Д",bonus:0,type:"Brawl"};
 /* Навыки NPC и характеристика, от которой кидается бросок */
-var NPC_SK=[{k:"dodge",l:"Dodge",st:"DEX"},{k:"resist",l:"Resistance",st:"BODY"},{k:"brawl",l:"Brawl",st:"BODY"},{k:"battleWeapon",l:"Battle Wpn",st:"REF"},{k:"simpleWeapon",l:"Simple Wpn",st:"REF"},{k:"guns",l:"Guns",st:"REF"},{k:"archery",l:"Archery",st:"REF"},{k:"athletics",l:"Athletics",st:"BODY"},{k:"spellcast",l:"Miracle",st:"WILL"},{k:"mresist",l:"Miracle Resist",st:"WILL"}];
+var NPC_SK=[{k:"dodge",l:"Уклонение",st:"DEX"},{k:"resist",l:"Сопротивление",st:"BODY"},{k:"brawl",l:"Рукопашный бой",st:"BODY"},{k:"battleWeapon",l:"Боевое оружие",st:"REF"},{k:"simpleWeapon",l:"Простое оружие",st:"REF"},{k:"guns",l:"Огнестрельное оружие",st:"REF"},{k:"archery",l:"Стрельба",st:"REF"},{k:"thrown",l:"Метательное оружие",st:"REF"},{k:"athletics",l:"Атлетика",st:"BODY"},{k:"spellcast",l:"Чародейство",st:"WILL"},{k:"mresist",l:"Сопротивление магии",st:"WILL"}];
 
 function BestiaryEditor(pr){
 var templ=pr.npcTempl||{};var spawned=pr.spawned||{};
@@ -93,7 +93,7 @@ function npcAttack(s,w){
   var rv,skVal,skNm,atName;
   if(w.magic){rv=st.WILL||0;skVal=sk.spellcast||0;skNm="Spellcast";atName="WILL";}
   else if(w.type==="Brawl"){rv=st.BODY||0;skVal=sk.brawl||0;skNm="Brawl";atName="BODY";}
-  else{var skMap={Battle:"battleWeapon",Simple:"simpleWeapon",Guns:"guns",Archery:"archery"};skVal=sk[skMap[w.type]]||0;rv=st.REF||0;skNm=w.type;atName="REF";}
+  else{var skMap={Battle:"battleWeapon",Simple:"simpleWeapon",Guns:"guns",Archery:"archery",Thrown:"thrown"};skVal=sk[skMap[w.type]]||0;rv=st.REF||0;skNm=w.type;atName="REF";}
   var R=rollHit();var d=R.d;var aimP=(npcAim&&playerTgtId)?aimPen(playerZone):0;var t=d+rv+skVal+(w.bonus||0)-aimP;
   var tgtChar=playerTgtId?playerChars.find(function(x){return x._fbId===playerTgtId}):null;
   var tgtName=tgtChar?tgtChar.name:"";
@@ -163,7 +163,7 @@ function npcVsNpc(s,w){
   var rv,skVal,atName;
   if(w.magic){rv=st.WILL||0;skVal=sk.spellcast||0;atName="WILL";}
   else if(w.type==="Brawl"){rv=st.BODY||0;skVal=sk.brawl||0;atName="BODY";}
-  else{var skMap={Battle:"battleWeapon",Simple:"simpleWeapon",Guns:"guns",Archery:"archery"};skVal=sk[skMap[w.type]]||0;rv=st.REF||0;atName="REF";}
+  else{var skMap={Battle:"battleWeapon",Simple:"simpleWeapon",Guns:"guns",Archery:"archery",Thrown:"thrown"};skVal=sk[skMap[w.type]]||0;rv=st.REF||0;atName="REF";}
   var R=rollHit();var hit=R.d+rv+skVal+(w.bonus||0);
   var tst=tgt.stats||{};var tsk=tgt.skills||{};var D=rollHit();var dodge=D.d+(tst.DEX||0)+(tsk.dodge||0);
   if(dodge>=hit){pr.addLog({who:s.name,type:"dodge",label:"🤝 "+s.name+" → "+tgt.name+": промах (уклон "+dodge+" ≥ "+hit+")",detail:"",total:hit});sRollP({label:s.name+" → "+tgt.name,d10:R.d,crit:R.crit,fumble:R.fumble,parts:[{label:atName,value:rv},{label:"нав",value:skVal}],total:hit,subtext:"🛡 Уклонился ("+dodge+")"});return;}

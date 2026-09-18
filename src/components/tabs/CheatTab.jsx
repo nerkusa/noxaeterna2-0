@@ -30,7 +30,7 @@ export default function CheatTab() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <div style={{ textAlign: 'center', padding: '4px 0' }}>
-        <div style={{ fontFamily: "'Inter',sans-serif", fontWeight: 900, fontSize: 17 }}>📋 Памятка боя</div>
+        <div style={{ fontFamily: "'Inter',sans-serif", fontWeight: 900, fontSize: 17 }}>📜 Памятка боя</div>
         <div style={{ fontSize: 9, color: '#9397ab' }}>Как считается урон и броня</div>
       </div>
 
@@ -115,9 +115,9 @@ export default function CheatTab() {
           • <b>1–2 — срыв на СЕБЯ</b> (урон чуда по кастующему).<br />
           • <b>3 — срыв на СОЮЗНИКА</b> (по случайному своему).<br />
           • <b>4–6 — каст удался</b> → идём к защите цели.<br /><br />
-          <b style={{ color: '#34d399' }}>2) Защита цели — Miracle Resist:</b><br />
-          • Кастующий кидает <b>d10 + WILL + Miracle</b>.<br />
-          • Цель кидает <b>d10 + WILL + Miracle Resist</b>.<br />
+          <b style={{ color: '#34d399' }}>2) Защита цели — Сопротивление магии:</b><br />
+          • Кастующий кидает <b>d10 + WILL + Чародейство</b>.<br />
+          • Цель кидает <b>d10 + WILL + Сопротивление магии</b>.<br />
           • Если <b>≥ броска чуда — устояла</b> (урона нет), иначе <b>урон проходит</b>.<br />
           • <b>Враги-NPC и игроки</b> кастуют и защищаются одинаково. 🌟 крит чуда даёт ×1.5.
         </div>

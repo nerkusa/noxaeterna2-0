@@ -29,10 +29,10 @@ export const SHIELD_T = [
 // подкатегории для группировки
 const SUBLABEL = {
   armor: { light: '🟢 Лёгкая броня', medium: '🟡 Средняя броня', heavy: '🔴 Тяжёлая броня' },
-  weapon: { Battle: '⚔️ Боевое оружие', Simple: '🗡️ Простое оружие', Guns: '🔫 Огнестрел', Archery: '🏹 Лук', Brawl: '👊 Рукопашное' },
+  weapon: { Battle: '⚔️ Боевое оружие', Simple: '🗡️ Простое оружие', Guns: '🔫 Огнестрел', Archery: '🏹 Лук', Thrown: '🪃 Метательное', Brawl: '👊 Рукопашное' },
   shield: { light: '🟢 Лёгкий щит', medium: '🟡 Средний щит', tower: '🔵 Башенный щит' },
 };
-const SUBORDER = { armor: ['light', 'medium', 'heavy'], weapon: ['Battle', 'Simple', 'Guns', 'Archery', 'Brawl'], shield: ['light', 'medium', 'tower'] };
+const SUBORDER = { armor: ['light', 'medium', 'heavy'], weapon: ['Battle', 'Simple', 'Guns', 'Archery', 'Thrown', 'Brawl'], shield: ['light', 'medium', 'tower'] };
 function subOf(it) { if (it.cat === 'armor' || it.cat === 'shield') return it.type; if (it.cat === 'weapon') return it.wtype; return null; }
 
 function field(label, node) { return <div style={{ flex: 1 }}><label style={lbl}>{label}</label>{node}</div>; }
