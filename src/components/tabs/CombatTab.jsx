@@ -8,7 +8,6 @@ import { cF, mHP } from '../../utils/character';
 import { applyDmgToNpc } from '../../utils/combat';
 import { pk, r1, rN, sm, uid, rollHit } from '../../utils/dice';
 import ArmorSection from './ArmorSection';
-import InvTab from './InvTab';
 import ShopPicker from '../ShopPicker';
 import InitiativeBar from '../combat/InitiativeBar';
 
@@ -47,18 +46,18 @@ var profAbilityType=pf.abilityType||pdDef.abilityType||"flavor";
 
 return(<div style={{display:"flex",flexDirection:"column",gap:14}}>
 
-<div className="n-card">
-<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}><Lbl>Здоровье</Lbl><div style={{display:"flex",alignItems:"baseline",gap:3}}><span style={{fontWeight:700,fontSize:18,color:"#ef4444"}}>{curHp}</span><span style={{color:"var(--color-text-muted)"}}>/</span><span style={{fontWeight:700,fontSize:18}}>{mx}</span></div></div>
-<Bar pct={hpP} color="linear-gradient(90deg,#ef4444,#f87171)" h={9}/>
-<div style={{display:"flex",gap:5,justifyContent:"center",marginTop:8}}>{[-10,-5,-1,1,5,10].map(function(d){return <button key={d} onClick={function(){sv(Object.assign({},c,{curHp:Math.max(0,Math.min(mx,curHp+d))}))}} className="n-btn n-btn-secondary" style={{padding:"3px 9px",fontSize:11,color:"#ef4444"}}>{d>0?"+"+d:d}</button>})}</div>
+<div className="n-card" style={{padding:"10px 14px"}}>
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}><Lbl>Здоровье</Lbl><div style={{display:"flex",alignItems:"baseline",gap:3}}><span style={{fontWeight:700,fontSize:15,color:"#ef4444"}}>{curHp}</span><span style={{color:"var(--color-text-muted)",fontSize:12}}>/</span><span style={{fontWeight:700,fontSize:15}}>{mx}</span></div></div>
+<Bar pct={hpP} color="linear-gradient(90deg,#ef4444,#f87171)" h={6}/>
+<div style={{display:"flex",gap:4,justifyContent:"center",marginTop:6}}>{[-10,-5,-1,1,5,10].map(function(d){return <button key={d} onClick={function(){sv(Object.assign({},c,{curHp:Math.max(0,Math.min(mx,curHp+d))}))}} className="n-btn n-btn-secondary" style={{padding:"1px 7px",fontSize:10,color:"#ef4444"}}>{d>0?"+"+d:d}</button>})}</div>
 </div>
 
 <div style={{display:"flex",gap:8}}>
-<div className="n-card" style={{flex:1,display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 14px"}}>
+<div className="n-card" style={{flex:1,display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 14px"}}>
 <Lbl>Воля</Lbl>
-<div style={{display:"flex",alignItems:"center",gap:6}}><button onClick={function(){sv(Object.assign({},c,{curWill:Math.max(0,curW-1)}))}} className="n-btn n-btn-secondary" style={{width:24,height:24,padding:0,fontSize:12}}>−</button><span style={{fontWeight:700,fontSize:14,color:"var(--color-accent)"}}>{curW+"/"+mxW}</span><button onClick={function(){sv(Object.assign({},c,{curWill:Math.min(mxW,curW+1)}))}} className="n-btn n-btn-secondary" style={{width:24,height:24,padding:0,fontSize:12}}>+</button></div>
+<div style={{display:"flex",alignItems:"center",gap:5}}><button onClick={function(){sv(Object.assign({},c,{curWill:Math.max(0,curW-1)}))}} className="n-btn n-btn-secondary" style={{width:20,height:20,padding:0,fontSize:11}}>−</button><span style={{fontWeight:700,fontSize:13,color:"var(--color-accent)"}}>{curW+"/"+mxW}</span><button onClick={function(){sv(Object.assign({},c,{curWill:Math.min(mxW,curW+1)}))}} className="n-btn n-btn-secondary" style={{width:20,height:20,padding:0,fontSize:11}}>+</button></div>
 </div>
-<button onClick={function(){sv(Object.assign({},c,{curHp:mx,curWill:mxW,warriorBonus:false,warriorBonusUsed:false,sensitiveBonus:false,customStance:false,merchantUsed:false,repairUsed:false}));pr.addLog({who:c.name||"???",type:"rest",label:"Отдых — способности восстановлены",detail:"",total:0})}} className="n-btn n-btn-secondary" style={{color:"#34d399"}}>Отдых</button>
+<button onClick={function(){sv(Object.assign({},c,{curHp:mx,curWill:mxW,warriorBonus:false,warriorBonusUsed:false,sensitiveBonus:false,customStance:false,merchantUsed:false,repairUsed:false}));pr.addLog({who:c.name||"???",type:"rest",label:"Отдых — способности восстановлены",detail:"",total:0})}} className="n-btn n-btn-secondary" style={{color:"#34d399",padding:"6px 14px"}}>Отдых</button>
 </div>
 
 <div className="n-combat-grid">
@@ -199,10 +198,14 @@ else{oR({label:w.name+" Попад."+(aimP?" · "+selZone:""),d10:d,crit:R.crit,
 })()}
 </div>}
 
-{/* Инвентарь */}
+{/* Инвентарь — сводка только для чтения, управление в отдельной вкладке «Инв.» */}
 <div className="n-card">
 <Lbl>Инвентарь</Lbl>
-<div style={{marginTop:8}}><InvTab char={c} save={sv} shop={pr.shop}/></div>
+<div style={{marginTop:8,display:"flex",flexDirection:"column",gap:7}}>
+<div style={{display:"flex",justifyContent:"space-between",fontSize:12}}><span>Кошель</span><span style={{fontWeight:700,color:"#d97706"}}>{"серебро "+(c.gold||0)}</span></div>
+{(c.inventory||[]).length===0&&<div style={{fontSize:12,color:"var(--color-text-muted)",fontStyle:"italic"}}>Пусто</div>}
+{(c.inventory||[]).map(function(it,idx){return <div key={(it.id!=null?it.id:"i")+"_"+idx} style={{display:"flex",justifyContent:"space-between",fontSize:12}}><span>{it.name}</span><span style={{color:"var(--color-text-muted)"}}>{it.qty!=null?it.qty:"—"}</span></div>})}
+</div>
 </div>
 
 </div>
@@ -212,21 +215,6 @@ else{oR({label:w.name+" Попад."+(aimP?" · "+selZone:""),d10:d,crit:R.crit,
 <div style={{display:"flex",flexDirection:"column",gap:14}}>
 
 {pr.initiative&&<InitiativeBar initiative={pr.initiative}/>}
-
-{/* Прицельный удар */}
-<div className="n-card">
-<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}><Lbl>{"Прицельный удар"+(tgtNpc?" → "+tgtNpc.name:"")}</Lbl>{tgtNpc&&<button onClick={function(){sAim(!aim)}} title="Прицельный удар: бьёшь по выбранной зоне со штрафом к попаданию" className="n-btn n-btn-secondary" style={{padding:"3px 9px",fontSize:10,color:aim?"#f0b352":"var(--color-text-muted)",borderColor:aim?"#f59e0b":"var(--color-divider)"}}>{aim?("Прицельно (−"+aimPen(selZone)+")"):"Прицельно: выкл"}</button>}</div>
-{!tgtNpc&&<div style={{fontSize:12,color:"var(--color-text-muted)",fontStyle:"italic"}}>Выбери цель справа, чтобы прицелиться в зону</div>}
-{tgtNpc&&<div>
-<div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:6}}>
-{ZONES.map(function(z){var isSel=selZone===z.name;return <button key={z.name} onClick={function(){sZone(z.name)}} style={{padding:"8px 6px",borderRadius:9,border:"1.5px solid "+(isSel?"#f59e0b":"var(--color-divider)"),background:isSel?"rgba(245,158,11,.12)":"var(--color-sunken)",cursor:"pointer",opacity:aim&&!isSel?0.5:1,textAlign:"left"}}>
-<div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}><span style={{fontSize:12,fontWeight:700}}>{z.name}</span><span style={{fontSize:10,color:"var(--color-text-muted)"}}>{"×"+z.mult}</span></div>
-<div style={{fontSize:9,color:"var(--color-text-muted)",marginTop:2}}>{aim?"штраф к попаданию −"+aimPen(z.name):(z.ignoreArmor?"игнор брони":"")}</div>
-</button>})}
-</div>
-{aim&&<div style={{fontSize:11,color:"#f0b352",marginTop:6,fontStyle:"italic"}}>{"Прицельно в «"+selZone+"»: −"+aimPen(selZone)+" к попаданию, урон точно по этой зоне."}</div>}
-</div>}
-</div>
 
 {/* Ход: объявить действие / передать ход */}
 {(function(){
@@ -301,9 +289,9 @@ else{oR({label:w.name+" Попад."+(aimP?" · "+selZone:""),d10:d,crit:R.crit,
 </div>
 <div style={{display:"flex",flexDirection:"column",gap:14}}>
 
-{/* Цель */}
+{/* Цель + прицельный удар — один блок */}
 <div className="n-card">
-<Lbl>Цель</Lbl>
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}><Lbl>Цель</Lbl>{tgtNpc&&<button onClick={function(){sAim(!aim)}} title="Прицельный удар: бьёшь по выбранной зоне со штрафом к попаданию" className="n-btn n-btn-secondary" style={{padding:"3px 9px",fontSize:10,color:aim?"#f0b352":"var(--color-text-muted)",borderColor:aim?"#f59e0b":"var(--color-divider)"}}>{aim?("Прицельно (−"+aimPen(selZone)+")"):"Прицельно: выкл"}</button>}</div>
 <div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:8}}>
 {spawnedArr.length===0&&<div style={{fontSize:12,color:"var(--color-text-muted)",fontStyle:"italic"}}>На поле боя пока никого нет</div>}
 {spawnedArr.map(function(e){var nid=e[0];var n=e[1];var nHp=n.hp!==undefined?n.hp:n.maxHp;var hpPct=n.maxHp>0?(nHp/n.maxHp)*100:0;var isSel=tgtId===nid;
@@ -323,6 +311,16 @@ return(<div style={{marginTop:10,paddingTop:10,borderTop:"1px solid var(--color-
 </div>
 </div>);
 })()}
+{tgtNpc&&<div style={{marginTop:10,paddingTop:10,borderTop:"1px solid var(--color-divider)"}}>
+<div style={{fontSize:10,fontWeight:700,letterSpacing:.05,textTransform:"uppercase",color:"var(--color-text-muted)",marginBottom:6}}>Зона удара</div>
+<div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:6}}>
+{ZONES.map(function(z){var isSel=selZone===z.name;return <button key={z.name} onClick={function(){sZone(z.name)}} style={{padding:"8px 6px",borderRadius:9,border:"1.5px solid "+(isSel?"#f59e0b":"var(--color-divider)"),background:isSel?"rgba(245,158,11,.12)":"var(--color-sunken)",cursor:"pointer",opacity:aim&&!isSel?0.5:1,textAlign:"left"}}>
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}><span style={{fontSize:12,fontWeight:700}}>{z.name}</span><span style={{fontSize:10,color:"var(--color-text-muted)"}}>{"×"+z.mult}</span></div>
+<div style={{fontSize:9,color:"var(--color-text-muted)",marginTop:2}}>{aim?"штраф к попаданию −"+aimPen(z.name):(z.ignoreArmor?"игнор брони":"")}</div>
+</button>})}
+</div>
+{aim&&<div style={{fontSize:11,color:"#f0b352",marginTop:6,fontStyle:"italic"}}>{"Прицельно в «"+selZone+"»: −"+aimPen(selZone)+" к попаданию, урон точно по этой зоне."}</div>}
+</div>}
 </div>
 
 {/* Лог урона */}
