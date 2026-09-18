@@ -24,6 +24,15 @@ var items=[];
 (pr.logs||[]).forEach(function(l){items.push({kind:"roll",ts:l.ts||0,who:l.who,label:l.label,detail:l.detail,total:l.total})});
 items.sort(function(a,b){return a.ts-b.ts});
 
+function Avatar(ap){
+  var ch=(pr.characters||[]).find(function(c){return c.name===ap.name});
+  var isGM=ap.name==="Мастер";
+  var portrait=ch&&ch.portrait;
+  var initial=((ch&&ch.name)||ap.name||"?")[0];
+  var sz=ap.size||28;
+  return(<div style={{width:sz,height:sz,borderRadius:"50%",flexShrink:0,background:portrait?"none":(isGM?"linear-gradient(135deg,#7c3aed,#a78bfa)":"linear-gradient(135deg,var(--color-accent-2),var(--color-accent))"),display:"flex",alignItems:"center",justifyContent:"center",fontSize:Math.round(sz*0.42),fontWeight:700,color:"#161826",overflow:"hidden"}}>{portrait?<img src={portrait} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>:initial}</div>)
+}
+
 useEffect(function(){
   if(endRef.current)endRef.current.scrollIntoView({block:"end"});
 },[items.length]);
@@ -52,15 +61,21 @@ return(<div style={{display:"flex",flexDirection:"column",height:"100%",minHeigh
 <div style={{flex:1,minHeight:0,overflowY:"auto",display:"flex",flexDirection:"column",gap:10,paddingBottom:8}}>
 {items.length===0&&<div style={{textAlign:"center",padding:24,color:"var(--color-text-muted)",fontSize:12,fontStyle:"italic"}}>Пока тихо — напиши первым</div>}
 {items.map(function(it,i){
-  if(it.kind==="roll")return(<div key={i} className="n-roll-card">
-    <div style={{display:"flex",alignItems:"center",gap:6,fontSize:11,fontWeight:600,color:"var(--color-accent)",marginBottom:4}}><IconD10 size={13}/> {it.label}{it.who&&<span style={{color:"var(--color-text-muted)",fontWeight:400}}>{" · "+it.who}</span>}</div>
-    {it.detail&&<div style={{fontSize:11,color:"var(--color-text-muted)",fontFamily:"monospace",marginBottom:it.total?2:0}}>{it.detail}</div>}
-    {(it.total!==undefined&&it.total!==0)&&<div style={{fontSize:20,fontWeight:700}}>{it.total}</div>}
+  if(it.kind==="roll")return(<div key={i} style={{display:"flex",gap:8,alignSelf:"flex-start",maxWidth:"88%",alignItems:"flex-end"}}>
+    <Avatar name={it.who}/>
+    <div className="n-roll-card" style={{flex:1,minWidth:0}}>
+      <div style={{display:"flex",alignItems:"center",gap:6,fontSize:11,fontWeight:600,color:"var(--color-accent)",marginBottom:4}}><IconD10 size={13}/> {it.label}{it.who&&<span style={{color:"var(--color-text-muted)",fontWeight:400}}>{" · "+it.who}</span>}</div>
+      {it.detail&&<div style={{fontSize:11,color:"var(--color-text-muted)",fontFamily:"monospace",marginBottom:it.total?2:0}}>{it.detail}</div>}
+      {(it.total!==undefined&&it.total!==0)&&<div style={{fontSize:20,fontWeight:700}}>{it.total}</div>}
+    </div>
   </div>);
   var self=it.who===who;
-  return(<div key={i} className={"n-msg "+(self?"n-msg-self":"n-msg-other")}>
-    {!self&&<span className="n-msg-who">{it.who}</span>}
-    <span>{it.text}</span>
+  return(<div key={i} style={{display:"flex",gap:8,alignSelf:self?"flex-end":"flex-start",flexDirection:self?"row-reverse":"row",maxWidth:"88%",alignItems:"flex-end"}}>
+    <Avatar name={it.who}/>
+    <div className={"n-msg "+(self?"n-msg-self":"n-msg-other")} style={{maxWidth:"100%"}}>
+      {!self&&<span className="n-msg-who">{it.who}</span>}
+      <span>{it.text}</span>
+    </div>
   </div>);
 })}
 <div ref={endRef}/>

@@ -101,7 +101,7 @@ var _sd=useState(false);var showDonate=_sd[0];var sShowDonate=_sd[1];var _sb2=us
 if(!auth)return <Login onAuth={handleAuth}/>;
 var ca=Object.entries(chars).map(function(e){return Object.assign({},e[1],{_fbId:e[0]})});
 setRaces(racesData);setProfs(profsData);
-return(<div style={{fontFamily:"'Inter',sans-serif",color:"var(--color-text)",background:"var(--color-bg)",minHeight:"100vh",maxWidth:960,margin:"0 auto",display:"flex",flexDirection:"column"}}><style>{CSS}</style>
+return(<div style={{fontFamily:"'Inter',sans-serif",color:"var(--color-text)",background:"var(--color-bg)",minHeight:"100vh",width:"100%",display:"flex",flexDirection:"column"}}><style>{CSS}</style>
 {showDonate&&<DonatePage onClose={function(){sShowDonate(false)}} isGM={isGM} saveMap={saveMap} mapData={mapData}/>}
 {isGM&&<NpcHitPopup events={npcHits} onClear={clearNpcHit}/>}
 <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",rowGap:6,padding:"10px 16px",borderBottom:"1px solid var(--color-divider)",gap:8,flexShrink:0}}>
