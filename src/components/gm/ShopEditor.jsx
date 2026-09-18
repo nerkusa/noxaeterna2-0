@@ -63,8 +63,8 @@ export default function ShopEditor(pr) {
   const add = function () {
     const base = {
       armor: { cat: 'armor', name: 'Новая броня', type: 'light', slot: 'body', hp: 10, price: emptyCurrency(), desc: '' },
-      weapon: { cat: 'weapon', name: 'Новое оружие', wtype: 'Battle', dmgDice: '1d6', dmgType: 'Р', hands: 1, bonus: 0, dmgDice2h: '2d6', bonus2h: 0, price: emptyCurrency() },
-      shield: { cat: 'shield', name: 'Новый щит', type: 'light', hp: 15, price: emptyCurrency() },
+      weapon: { cat: 'weapon', name: 'Новое оружие', wtype: 'Battle', dmgDice: '1d6', dmgType: 'Р', hands: 1, bonus: 0, dmgDice2h: '2d6', bonus2h: 0, price: emptyCurrency(), desc: '' },
+      shield: { cat: 'shield', name: 'Новый щит', type: 'light', hp: 15, price: emptyCurrency(), desc: '' },
       item: { cat: 'item', name: 'Новый предмет', desc: '', price: emptyCurrency(), ptype: '', dice: '' },
     }[cat];
     const it = Object.assign({ id: uid() }, base);
@@ -77,8 +77,8 @@ export default function ShopEditor(pr) {
 
   function summary(it) {
     if (it.cat === 'armor') { const a = ARMOR_T.find(function (x) { return x.id === it.type; }); return (SLOT_LABEL[it.slot || 'body']) + ' · ' + (a ? a.name : it.type) + ' · ' + it.hp + ' HP'; }
-    if (it.cat === 'shield') { const s = SHIELD_T.find(function (x) { return x.id === it.type; }); return (s ? s.name + ' ' + (s.absorb * 100) + '%' : it.type) + ' · ' + it.hp + ' HP'; }
-    if (it.cat === 'weapon') { const h = it.hands === 2 ? 'двуруч.' : it.hands === 1.5 ? 'полуторн.' : 'одноруч.'; return it.wtype + ' · ' + it.dmgDice + (it.bonus ? '+' + it.bonus : '') + ' · ' + it.dmgType + ' · ' + h; }
+    if (it.cat === 'shield') { const s = SHIELD_T.find(function (x) { return x.id === it.type; }); return (s ? s.name + ' ' + (s.absorb * 100) + '%' : it.type) + ' · ' + it.hp + ' HP' + (it.desc ? ' · ' + it.desc : ''); }
+    if (it.cat === 'weapon') { const h = it.hands === 2 ? 'двуруч.' : it.hands === 1.5 ? 'полуторн.' : 'одноруч.'; return it.wtype + ' · ' + it.dmgDice + (it.bonus ? '+' + it.bonus : '') + ' · ' + it.dmgType + ' · ' + h + (it.desc ? ' · ' + it.desc : ''); }
     // item (и легаси tool/ammo) — обычная вещь, необязательно с функцией снаряда или ремкомплекта
     const parts = [];
     if (it.desc) parts.push(it.desc);
@@ -113,6 +113,7 @@ export default function ShopEditor(pr) {
             {field('HP щита', <LiveField type="number" value={it.hp} onCommit={function (val) { upd(it.id, { hp: parseInt(val) || 1 }); }} style={inp} />)}
           </div>
           {priceField(it)}
+          {field('Описание (для игроков)', <LiveField tag="textarea" value={it.desc || ''} onCommit={function (val) { upd(it.id, { desc: val }); }} placeholder="Как выглядит, откуда взялся…" style={Object.assign({}, inp, { minHeight: 40, resize: 'vertical' })} />)}
         </div>
       );
     }
@@ -141,6 +142,7 @@ export default function ShopEditor(pr) {
               {field('Бонус (2 руки)', <LiveField type="number" value={it.bonus2h} onCommit={function (val) { upd(it.id, { bonus2h: parseInt(val) || 0 }); }} style={inp} />)}
             </div>
           )}
+          {field('Описание (для игроков)', <LiveField tag="textarea" value={it.desc || ''} onCommit={function (val) { upd(it.id, { desc: val }); }} placeholder="Как выглядит, откуда взялось…" style={Object.assign({}, inp, { minHeight: 40, resize: 'vertical' })} />)}
         </div>
       );
     }
