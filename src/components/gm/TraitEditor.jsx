@@ -99,6 +99,21 @@ export default function TraitEditor(pr) {
                   {eff.type === 'dual_wield' && (
                     <div style={{ fontSize: 9, color: '#9397ab' }}>Персонаж с этой чертой сможет снарядить второе одноручное оружие и атаковать им во вкладке «Бой».</div>
                   )}
+                  {eff.type === 'armor_effectiveness' && (
+                    <div>
+                      <label style={lbl}>Доля защиты брони (1 = норма, 0.667 = 2/3, 0.5 = половина)</label>
+                      <input type="number" step="0.01" min="0" max="1" value={eff.value != null ? eff.value : 1} onChange={function (e) { updEffect(t.id, { value: Math.max(0, Math.min(1, parseFloat(e.target.value))) || 0 }); }} style={inp} />
+                    </div>
+                  )}
+                  {eff.type === 'cancels' && (
+                    <div>
+                      <label style={lbl}>Отменяет черту (протез компенсирует увечье)</label>
+                      <select value={eff.target || ''} onChange={function (e) { updEffect(t.id, { target: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}>
+                        <option value="">— выбери черту —</option>
+                        {traits.filter(function (x) { return x.id !== t.id; }).map(function (x) { return <option key={x.id} value={x.id}>{x.name}</option>; })}
+                      </select>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

@@ -1,7 +1,9 @@
 /* Черты — не покупаются очками, выдаются ГМ по ходу игры (обучение, ранения,
    сюжетные события). Каждая черта может нести effects[] — реальную механику:
    stat_bonus (+к характеристике), skill_bonus (+к навыку), hp_flat (+ХП),
-   dual_wield (открывает бой двумя одноручными оружиями во вкладке «Бой»).
+   dual_wield (открывает бой двумя одноручными оружиями во вкладке «Бой»),
+   armor_effectiveness (броня защищает слабее — доля от нормы, напр. 0.667),
+   cancels (отменяет эффекты другой черты — черта-«протез» компенсирует увечье).
    Черта без effects — чисто описательная, эффект отыгрывается вручную. */
 
 function genId(){return "tr_"+Date.now().toString(36)+Math.floor(Math.random()*1000).toString(36)}
@@ -18,6 +20,8 @@ var TRAIT_EFFECT_TYPES=[
   {id:"skill_bonus",name:"+ к навыку"},
   {id:"hp_flat",name:"+ к макс. ХП"},
   {id:"dual_wield",name:"⚔️⚔️ Бой двумя одноручными оружиями"},
+  {id:"armor_effectiveness",name:"🛡 Броня защищает слабее (доля, напр. 0.667 = 2/3)"},
+  {id:"cancels",name:"🦾 Протез — гасит эффекты другой черты"},
 ];
 
 var TRAITS=[
@@ -36,7 +40,8 @@ var TRAITS=[
   {id:"lucky",cat:"positive",group:"Особые",name:"Удачливый",desc:"Раз за сессию — переброс одного провального броска.",how:"Выживание против всех шансов в сюжетно значимый момент (даётся ведущим как награда).",effects:[]},
   {id:"alterna_mark",cat:"positive",group:"Особые",name:"Метка Альтерны",desc:"Мистическая связь с аномалией мира — уникальная активная способность (почти всегда в комплекте с негативным последствием).",how:"Контакт с аномалией/ритуал/сделка.",effects:[]},
   {id:"dual_wielder",cat:"positive",group:"Особые",name:"Двойной клинок",desc:"Открывает бой двумя одноручными оружиями одновременно — во вкладке «Бой» появляется слот для второго клинка и совместная атака.",how:"Долгая тренировка фехтования на двух клинках, обучение у наёмника/дуэлянта.",effects:[{type:"dual_wield"}]},
-  {id:"one_armed",cat:"negative",group:"Потеря конечностей",name:"Однорукий",desc:"Нет одной руки. Нельзя использовать двуручное оружие/действия. Штраф к силовым хватательным проверкам.",how:"Тяжёлое ранение в бою, ловушка, ампутация после заражения, пытки.",effects:[]},
+  {id:"one_armed",cat:"negative",group:"Потеря конечностей",name:"Однорукий",desc:"Нет одной руки. Нельзя использовать двуручное оружие/действия. Броня защищает на 2/3 от нормы (сложнее подогнать и закрепить одной рукой). −5 к Уклонению.",how:"Тяжёлое ранение в бою, ловушка, ампутация после заражения, пытки.",effects:[{type:"skill_bonus",skill:"Уклонение",amount:-5},{type:"armor_effectiveness",value:0.667}]},
+  {id:"prosthetic",cat:"positive",group:"Особые",name:"Протез",desc:"Искусная замена утраченной конечности/органа — гасит эффекты выбранной негативной черты (описание увечья в листе остаётся, но штрафы и ограничения по броне не действуют).",how:"Изготовлен ремесленником/алхимиком по сюжету, найден как артефакт, подарок наставника. Настраивается ГМ под конкретное увечье через поле «Отменяет черту».",effects:[{type:"cancels",target:"one_armed"}]},
   {id:"lame",cat:"negative",group:"Потеря конечностей",name:"Одноногий / хромой",desc:"Снижена скорость передвижения (или нужен костыль/протез). Штраф к уклонению и проверкам бега/прыжков.",how:"Серьёзная травма ноги без надлежащего лечения, обвал, нападение зверя.",effects:[{type:"skill_bonus",skill:"Уклонение",amount:-1}]},
   {id:"one_eyed",cat:"negative",group:"Потеря конечностей",name:"Без глаза",desc:"Потеряно периферийное зрение с одной стороны. Штраф к восприятию/дальнему бою.",how:"Удар в бою, осколок, несчастный случай, наказание от NPC.",effects:[{type:"stat_bonus",stat:"PRC",amount:-1}]},
   {id:"blind",cat:"negative",group:"Потеря конечностей",name:"Слепой",desc:"Полная потеря зрения. Визуальные проверки невозможны, компенсаторный бонус к слуху/осязанию.",how:"Тяжёлое ранение головы, яд/болезнь, ослепление как акт возмездия.",effects:[]},
@@ -63,9 +68,28 @@ var TRAITS=[
   {id:"perfectionist",cat:"mixed",group:"Характер",name:"Перфекционист",desc:"Бонус при наличии времени на подготовку, штраф в спешке.",how:"Проявляется и закрепляется по ходу отыгрыша.",effects:[]},
 ];
 
-function hasTraitEffect(c,traits,type){
+/* Плоский список эффектов всех назначенных персонажу черт, с учётом
+   отмены: если хоть одна назначенная черта содержит {type:"cancels",
+   target:X}, эффекты черты X в список не попадают (сама черта X при этом
+   остаётся в листе персонажа как есть — отменяется только механика). */
+function activeTraitEffects(c,traits){
   var ids=(c&&c.traits)||[];
-  return traits.some(function(t){return ids.indexOf(t.id)>=0&&(t.effects||[]).some(function(e){return e.type===type})});
+  var mine=traits.filter(function(t){return ids.indexOf(t.id)>=0});
+  var cancelled={};
+  mine.forEach(function(t){(t.effects||[]).forEach(function(e){if(e.type==="cancels"&&e.target)cancelled[e.target]=true})});
+  var out=[];
+  mine.forEach(function(t){if(cancelled[t.id])return;(t.effects||[]).forEach(function(e){out.push(e)})});
+  return out;
+}
+function hasTraitEffect(c,traits,type){
+  return activeTraitEffects(c,traits).some(function(e){return e.type===type});
+}
+/* Множитель эффективности брони (1 = норма, 0.667 = 2/3 и т.д.) — берём
+   минимум, если вдруг назначено несколько таких черт. */
+function armorEffectivenessOf(c,traits){
+  var effs=activeTraitEffects(c,traits).filter(function(e){return e.type==="armor_effectiveness"&&e.value!=null});
+  if(!effs.length)return 1;
+  return effs.reduce(function(v,e){return Math.min(v,e.value)},1);
 }
 
-export { TRAITS, TRAIT_CATEGORIES, TRAIT_EFFECT_TYPES, genId, hasTraitEffect };
+export { TRAITS, TRAIT_CATEGORIES, TRAIT_EFFECT_TYPES, genId, hasTraitEffect, activeTraitEffects, armorEffectivenessOf };

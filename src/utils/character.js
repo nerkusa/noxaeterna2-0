@@ -4,34 +4,34 @@ import { pk, r1 } from './dice';
 import { getRaces } from './raceStore';
 import { getProfs } from './profStore';
 import { getTraits } from './traitStore';
+import { armorPenaltyOf } from '../data/combat';
+import { activeTraitEffects } from '../data/traits';
 
 function iS(){var s={};SD.forEach(function(x){s[x.key]=1});return s}function iSk(){var s={};Object.values(SKD).flat().forEach(function(x){s[x.name]=0});return s}function uSP(s){return Object.values(s).reduce(function(a,b){return a+b},0)}function uSkP(s){var t=0;Object.values(SKD).flat().forEach(function(x){t+=x.x2?(s[x.name]||0)*2:(s[x.name]||0)});return t}function gE(b,bo){var r=Object.assign({},b);Object.entries(bo||{}).forEach(function(e){r[e[0]]=(r[e[0]]||0)+e[1]});return r}/* Object.assign({},iS(),c.stats) подставляет 1 для характеристик, которых
    не было в сохранённых данных (например, PRC у персонажей, созданных до
    её добавления) — без этого fs[key] был бы undefined и ломал бросок в NaN. */
 /* Черты (traits) добавляют бонусы к характеристикам/навыкам прямо здесь —
-   тогда они автоматически учитываются везде, где используются fs/eSk. */
+   тогда они автоматически учитываются везде, где используются fs/eSk.
+   activeTraitEffects уже учитывает отмену чертой-«протезом» (cancels). */
 function applyTraits(c,es,eSk){
-  var assigned=(c.traits||[]);
-  if(!assigned.length)return;
-  getTraits().filter(function(t){return assigned.indexOf(t.id)>=0}).forEach(function(t){
-    (t.effects||[]).forEach(function(e){
-      if(e.type==="stat_bonus"&&e.stat)es[e.stat]=(es[e.stat]||0)+(e.amount||0);
-      if(e.type==="skill_bonus"&&e.skill)eSk[e.skill]=(eSk[e.skill]||0)+(e.amount||0);
-    });
+  activeTraitEffects(c,getTraits()).forEach(function(e){
+    if(e.type==="stat_bonus"&&e.stat)es[e.stat]=(es[e.stat]||0)+(e.amount||0);
+    if(e.type==="skill_bonus"&&e.skill)eSk[e.skill]=(eSk[e.skill]||0)+(e.amount||0);
   });
 }
-function cF(c){var R=getRaces();var rc=R.find(function(r){return r.id===c.raceId})||R[0];var baseStats=Object.assign({},iS(),c.stats||{});var es=gE(baseStats,rc.st);if(rc.fp&&c.humanBonusStat)es[c.humanBonusStat]=(es[c.humanBonusStat]||0)+1;var eSk=gE(c.skills||iSk(),rc.sk);applyTraits(c,es,eSk);return{race:rc,fs:es,eSk:eSk}}
+function cF(c){var R=getRaces();var rc=R.find(function(r){return r.id===c.raceId})||R[0];var baseStats=Object.assign({},iS(),c.stats||{});var es=gE(baseStats,rc.st);if(rc.fp&&c.humanBonusStat)es[c.humanBonusStat]=(es[c.humanBonusStat]||0)+1;var eSk=gE(c.skills||iSk(),rc.sk);applyTraits(c,es,eSk);
+  /* Штраф к Уклонению от надетой тяжёлой брони/шлема/щита — складывается
+     в сам навык, поэтому автоматически участвует во всех бросках уклонения. */
+  var ap=armorPenaltyOf(c,es);if(ap.dodge)eSk["Уклонение"]=(eSk["Уклонение"]||0)+ap.dodge;
+  return{race:rc,fs:es,eSk:eSk}}
 /* ХП = BODY*2 + REF*2 + d10 (+ бонусы черт). Кубик бросается один раз
    (hpRoll хранится на персонаже) — иначе mHP пересчитывался бы заново на
    каждый рендер и максимум ХП «скакал» бы. */
 function mHP(f,c){
   var base=(f.BODY||0)*2+(f.REF||0)*2+((c&&c.hpRoll)||0);
-  var assigned=(c&&c.traits)||[];
-  if(!assigned.length)return Math.max(1,base);
+  if(!c)return Math.max(1,base);
   var bonus=0;
-  getTraits().filter(function(t){return assigned.indexOf(t.id)>=0}).forEach(function(t){
-    (t.effects||[]).forEach(function(e){if(e.type==="hp_flat")bonus+=(e.amount||0)});
-  });
+  activeTraitEffects(c,getTraits()).forEach(function(e){if(e.type==="hp_flat")bonus+=(e.amount||0)});
   return Math.max(1,base+bonus);
 }
 function nC(name){return{name:name||"",level:1,xp:0,profId:"none",raceId:"none",humanBonusStat:"",portrait:"",hair:"",height:"",weight:"",alignment:"",eyeColor:"",skinColor:"",bio:"",lifepath:[],stats:iS(),skills:iSk(),locked:false,curHp:null,hpOv:null,curWill:null,willOv:null,hpRoll:r1(10),weapons:[],lvlPts:0,spentLvlPts:0,armors:[],equippedHead:null,equippedBody:null,shield:null,shieldHp:0,shieldMaxHp:0,equippedWeapon:null,weaponMode:"1h",inventory:[],traits:[],currency:{gold:0,silver:0,bronze:0,copper:0}}}

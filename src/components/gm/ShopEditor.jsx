@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ARMOR_T } from '../../data/combat';
+import { ARMOR_T, SHIELD_T } from '../../data/combat';
 import { DT, WT } from '../../data/stats';
 import { uid } from '../../utils/dice';
 import { CUR_ORDER, CUR_LABEL, CUR_ICON, CUR_NAME, emptyCurrency, fmtCurrency, toCopper } from '../../utils/currency';
@@ -19,12 +19,6 @@ const CATS = [
 const PROJ_TYPES = ['Стрела', 'Болт', 'Пуля'];
 
 const REPAIR_DICE = ['1d4', '1d6', '1d8', '1d10', '1d12'];
-
-export const SHIELD_T = [
-  { id: 'light', name: 'Лёгкий', absorb: 0.5, bodyReq: 4 },
-  { id: 'medium', name: 'Средний', absorb: 0.75, bodyReq: 6 },
-  { id: 'tower', name: 'Башенный', absorb: 1.0, bodyReq: 8 },
-];
 
 // подкатегории для группировки
 const SUBLABEL = {

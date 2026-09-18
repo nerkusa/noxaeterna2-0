@@ -3,6 +3,8 @@ import { db, ref, set, update, remove } from '../../firebase';
 import { ZONES, zoneByName } from '../../data/combat';
 import { cF, mHP } from '../../utils/character';
 import { calcAE } from '../../utils/combat';
+import { armorEffectivenessOf } from '../../data/traits';
+import { getTraits } from '../../utils/traitStore';
 import { r1, rN, sm } from '../../utils/dice';
 import PlayerAttackNotif from './PlayerAttackNotif';
 
@@ -38,6 +40,12 @@ function GMAttackPanel(pr){
     var pArmorObj=(tgtChar.armors||[]).find(function(a){return a.id===pArmorId;});
     var pArmorType=pArmorObj?(pArmorObj.hp>0?pArmorObj.type:"none"):"none";
     var ae=zoneObj.ignoreArmor?{ad:0,hd:multiplied,desc:"🔓"+zoneObj.name+"×"+zoneObj.mult+" игнор→HP−"+multiplied}:calcAE(pArmorType,atk.dmgType||"Р",multiplied);
+    /* Черты (напр. «Однорукий») могут снижать эффективность брони носителя */
+    var armorEff=armorEffectivenessOf(tgtChar,getTraits());
+    if(!zoneObj.ignoreArmor&&armorEff<1&&ae.ad>0){
+      var reducedAd=Math.floor(ae.ad*armorEff);var lostAd=ae.ad-reducedAd;
+      ae=Object.assign({},ae,{ad:reducedAd,hd:ae.hd+lostAd,desc:ae.desc+" (броня слабее ×"+armorEff.toFixed(2)+")"});
+    }
     /* Щит — поглощает часть HP урона */
     var shieldDesc="";var shieldDmg=0;
     if(atk.shieldUsed&&atk.shieldAbsorb){

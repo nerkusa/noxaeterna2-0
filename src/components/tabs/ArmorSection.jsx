@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { db, ref, set } from '../../firebase';
-import { ARMOR_T, weapDur } from '../../data/combat';
+import { ARMOR_T, SHIELD_T, weapDur } from '../../data/combat';
 import { r1, uid, rollHit } from '../../utils/dice';
 import { tryPay } from '../../utils/currency';
 import ShopPicker from '../ShopPicker';
@@ -21,7 +21,6 @@ var _asl=useState("body");var asl=_asl[0];var sAsl=_asl[1];
 var _ah=useState(10);var ah=_ah[0];var sAH=_ah[1];
 var eqH=(c.armors||[]).find(function(a){return a.id===c.equippedHead});
 var eqB=(c.armors||[]).find(function(a){return a.id===c.equippedBody});
-var SHIELD_T=[{id:"light",name:"Лёгкий",absorb:0.5,bodyReq:4},{id:"medium",name:"Средний",absorb:0.75,bodyReq:6},{id:"tower",name:"Башенный",absorb:1.0,bodyReq:8}];
 var _ssadd=useState(false);var ssAdd=_ssadd[0];var sSsAdd=_ssadd[1];
 var _shn=useState("");var shn=_shn[0];var sShn=_shn[1];
 var _sht=useState("light");var sht=_sht[0];var sSht=_sht[1];

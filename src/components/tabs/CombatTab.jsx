@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { db, ref, set } from '../../firebase';
-import { ZONES, ARMOR_T, aimPen, weapDur, breaksVs } from '../../data/combat';
+import { ZONES, ARMOR_T, aimPen, weapDur, weaponWear, armorPenaltyOf, woundDmgPenalty } from '../../data/combat';
 import { getProfs } from '../../utils/profStore';
 import { DT, WS, WT, wStat, wtLabel } from '../../data/stats';
 import { PROF_DESC } from '../../data/professions';
@@ -41,6 +41,7 @@ var spawnedArr=Object.entries(spawned).filter(function(e){var hp=e[1].hp!==undef
 var tgtNpc=tgtId?spawned[tgtId]:null;
 var mx=c.hpOv||mHP(fs,c);var curHp=c.curHp!==null&&c.curHp!==undefined?c.curHp:mx;
 var mxW=c.willOv||fs.WILL||1;var curW=c.curWill!==null&&c.curWill!==undefined?c.curWill:mxW;
+var atkPen=armorPenaltyOf(c,fs).atk;var woundPen=woundDmgPenalty(curHp,mx);
 var hpP=mx>0?(curHp/mx)*100:0;
 var isGM=pr.isGM;
 var visibleLogs=(pr.logs||[]).filter(function(l){return isGM||(l.type!=="dmg_npc"&&l.type!=="spawn"&&l.type!=="gm_roll")});
@@ -130,16 +131,16 @@ return(<div key={(w.id!=null?w.id:"w")+"_"+wIdx} style={{background:isEq?"rgba(1
   }
 }} className="n-btn n-btn-secondary" style={{marginTop:6,fontSize:10,color:"#f0b352"}}>{"Перезарядить"+(ammo<=0?" · пусто":"")}</button>}
 <div style={{display:"flex",gap:6,marginTop:6}}>
-<button onClick={function(){if(broken){alert(w.name+" сломано — почини набором инструментов!");return}if(isGun&&ammo<=0){alert("Нет боеприпасов — перезаряди!");return}var R=rollHit();var d=R.d;var rv=fs[statKey]||0;var sv2=es[sk]||0;var warBon=(c.warriorBonus&&(pf.id==="warrior"||pf.abilityType==="bonus_attack"))?5:0;var _patch={};if(warBon)_patch.warriorBonus=false;var wP=null;if(isGun)wP=Object.assign(wP||{},{clip:clip,ammo:Math.max(0,ammo-1)});if(R.fumble&&tgtNpc&&wMaxDur>0){var _at=tgtNpc.armorBody||"none";var _ahp=tgtNpc.armorBodyHp||0;if(_ahp>0&&breaksVs(w.dmgType,_at))wP=Object.assign(wP||{},{maxDur:wMaxDur,dur:Math.max(0,wDur-1)});}if(wP)_patch.weapons=(c.weapons||[]).map(function(x){return x.id===w.id?Object.assign({},x,wP):x});if(Object.keys(_patch).length)sv(Object.assign({},c,_patch));var aimP=(aim&&tgtNpc)?aimPen(selZone):0;var t=d+rv+sv2+(w.bonus||0)+warBon-aimP;pr.addLog({who:c.name||"???",type:"hit",label:w.name+(tgtNpc?" → "+tgtNpc.name:"")+(aimP?" · "+selZone+"(−"+aimP+")":"")+(warBon?" · +5":"")+(R.crit?" · крит":R.fumble?" · провал":""),detail:"d10("+d+") + "+statKey+"("+rv+") + "+sk+"("+sv2+") + бонус("+(w.bonus||0)+")"+(aimP?" − прицел("+aimP+")":"")+" = "+t,total:t});
-if(tgtNpc&&tgtId&&pr.savePendingAttack){pr.savePendingAttack({id:"atk_"+Date.now(),fromPlayer:true,attackerId:c._fbId,attackerName:c.name||"???",npcId:tgtId,npcName:tgtNpc.name,hitRoll:t,atkD:d,atkREF:rv,atkStatName:statKey,atkSkill:sv2,atkSkillName:sk,atkBonus:w.bonus||0,atkCrit:R.crit,atkFumble:R.fumble,weaponName:w.name,dmgDice:activeDice||"1d6",dmgType:w.dmgType||"Р",dmgBonus:activeBon-durPen,zone:selZone,aimedZone:aimP?selZone:null,status:"pending_dodge",ts:Date.now()});}
-else{oR({label:w.name+" Попад."+(aimP?" · "+selZone:""),d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:statKey,value:rv},{label:sk,value:sv2},{label:"Бнс",value:w.bonus||0}].concat(aimP?[{label:"Прицел",value:-aimP}]:[]),total:t});}}}
+<button onClick={function(){if(broken){alert(w.name+" сломано — почини набором инструментов!");return}if(isGun&&ammo<=0){alert("Нет боеприпасов — перезаряди!");return}var R=rollHit();var d=R.d;var rv=fs[statKey]||0;var sv2=es[sk]||0;var warBon=(c.warriorBonus&&(pf.id==="warrior"||pf.abilityType==="bonus_attack"))?5:0;var _patch={};if(warBon)_patch.warriorBonus=false;var wP=null;if(isGun)wP=Object.assign(wP||{},{clip:clip,ammo:Math.max(0,ammo-1)});if(wMaxDur>0){wP=Object.assign(wP||{},{maxDur:wMaxDur,dur:Math.max(0,wDur-weaponWear(R.fumble))});}if(wP)_patch.weapons=(c.weapons||[]).map(function(x){return x.id===w.id?Object.assign({},x,wP):x});if(Object.keys(_patch).length)sv(Object.assign({},c,_patch));var aimP=(aim&&tgtNpc)?aimPen(selZone):0;var t=d+rv+sv2+(w.bonus||0)+warBon-aimP-atkPen;pr.addLog({who:c.name||"???",type:"hit",label:w.name+(tgtNpc?" → "+tgtNpc.name:"")+(aimP?" · "+selZone+"(−"+aimP+")":"")+(warBon?" · +5":"")+(R.crit?" · крит":R.fumble?" · провал":""),detail:"d10("+d+") + "+statKey+"("+rv+") + "+sk+"("+sv2+") + бонус("+(w.bonus||0)+")"+(aimP?" − прицел("+aimP+")":"")+(atkPen?" − шлем("+atkPen+")":"")+" = "+t,total:t});
+if(tgtNpc&&tgtId&&pr.savePendingAttack){pr.savePendingAttack({id:"atk_"+Date.now(),fromPlayer:true,attackerId:c._fbId,attackerName:c.name||"???",npcId:tgtId,npcName:tgtNpc.name,hitRoll:t,atkD:d,atkREF:rv,atkStatName:statKey,atkSkill:sv2,atkSkillName:sk,atkBonus:w.bonus||0,atkCrit:R.crit,atkFumble:R.fumble,weaponName:w.name,dmgDice:activeDice||"1d6",dmgType:w.dmgType||"Р",dmgBonus:activeBon-durPen-woundPen,zone:selZone,aimedZone:aimP?selZone:null,status:"pending_dodge",ts:Date.now()});}
+else{oR({label:w.name+" Попад."+(aimP?" · "+selZone:""),d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:statKey,value:rv},{label:sk,value:sv2},{label:"Бнс",value:w.bonus||0}].concat(aimP?[{label:"Прицел",value:-aimP}]:[]).concat(atkPen?[{label:"Шлем",value:-atkPen}]:[]),total:t});}}}
  className="n-btn n-btn-secondary" style={{flex:1,fontSize:11,color:"#60a5fa"}}>{"Попадание"+(tgtNpc?" → "+tgtNpc.name.slice(0,10):"")}</button>
 <button onClick={function(){
   var m=activeDice.match(/(\d+)d(\d+)/);if(!m)return;
   var dice=rN(parseInt(m[1]),parseInt(m[2]));
   var warDmgBon=(c.warriorBonus&&(pf.id==="warrior"||pf.abilityType==="bonus_attack"))?5:0;
   if(warDmgBon)sv(Object.assign({},c,{warriorBonus:false}));
-  var rawDmg=Math.max(0,sm(dice)+activeBon+warDmgBon-durPen);
+  var rawDmg=Math.max(0,sm(dice)+activeBon+warDmgBon-durPen-woundPen);
   if(tgtNpc&&tgtId&&saveSpawned){
     applyDmgToNpc(tgtNpc,rawDmg,w.dmgType,selZone,saveSpawned,spawned,tgtId,pr.addLog,c.name||"???",function(ev){
       var xpGain=tgtNpc.maxHp||0;
@@ -147,7 +148,7 @@ else{oR({label:w.name+" Попад."+(aimP?" · "+selZone:""),d10:d,crit:R.crit,
       if(pr.onNpcDeath)pr.onNpcDeath(ev);
     },w.name,pr.saveNpcHit);
   } else {
-    pr.addLog({who:c.name||"???",type:"dmg",label:w.name+" ("+w.dmgType+")"+(warDmgBon?" · +5":""),detail:activeDice+"["+dice.join(",")+"]"+(w.bonus?("+бнс("+w.bonus+")"):"")+(warDmgBon?"+5":"")+" = "+rawDmg,total:rawDmg});
+    pr.addLog({who:c.name||"???",type:"dmg",label:w.name+" ("+w.dmgType+")"+(warDmgBon?" · +5":""),detail:activeDice+"["+dice.join(",")+"]"+(w.bonus?("+бнс("+w.bonus+")"):"")+(warDmgBon?"+5":"")+(woundPen?" −раны("+woundPen+")":"")+" = "+rawDmg,total:rawDmg});
   }
   oR({label:w.name+" Урон",d10:null,parts:[{label:activeDice,value:sm(dice)},{label:"Бнс",value:activeBon+warDmgBon}],total:rawDmg,subtext:"Тип: "+w.dmgType+(warDmgBon?" · +5":"")+(tgtNpc?" → "+tgtNpc.name+"\nЗона: "+selZone:" (нет цели)")});
 }} className="n-btn n-btn-secondary" style={{flex:1,fontSize:11,color:"#dc2626"}}>{"Урон"+(tgtNpc?" → "+tgtNpc.name.slice(0,10):"")}</button>
@@ -157,10 +158,12 @@ else{oR({label:w.name+" Попад."+(aimP?" · "+selZone:""),d10:d,crit:R.crit,
   var mainW=(c.weapons||[]).find(function(w){return w.id===c.equippedWeapon&&w.hands===1});
   var offW=(c.weapons||[]).find(function(w){return w.id===c.equippedWeaponOff&&w.hands===1});
   if(!mainW||!offW||mainW.id===offW.id)return null;
-  function rollOne(w,penalty){var R=rollHit();var d=R.d;var statKey=wStat(w.type);var sk=WS[w.type]||"Простое оружие";var rv=fs[statKey]||0;var sv2=es[sk]||0;var t=d+rv+sv2+(w.bonus||0)-penalty;var m=w.dmgDice.match(/(\d+)d(\d+)/);var dice=m?rN(parseInt(m[1]),parseInt(m[2])):[0];var dmg=Math.max(0,sm(dice)+(w.bonus||0));return{hit:t,dmg:dmg,d:d,rv:rv,sv2:sv2,statKey:statKey,sk:sk}}
+  function rollOne(w,penalty){var R=rollHit();var d=R.d;var statKey=wStat(w.type);var sk=WS[w.type]||"Простое оружие";var rv=fs[statKey]||0;var sv2=es[sk]||0;var wMax=weapDur(w.type);var wD=(w.dur!==undefined&&w.dur!==null)?w.dur:wMax;var t=d+rv+sv2+(w.bonus||0)-penalty-atkPen;var m=w.dmgDice.match(/(\d+)d(\d+)/);var dice=m?rN(parseInt(m[1]),parseInt(m[2])):[0];var dmg=Math.max(0,sm(dice)+(w.bonus||0)-woundPen);var wP=wMax>0?{maxDur:wMax,dur:Math.max(0,wD-weaponWear(R.fumble))}:null;return{hit:t,dmg:dmg,d:d,rv:rv,sv2:sv2,statKey:statKey,sk:sk,fumble:R.fumble,wP:wP}}
   return(<button onClick={function(){
     var res1=rollOne(mainW,0);var res2=rollOne(offW,2);
-    pr.addLog({who:c.name||"???",type:"hit",label:"⚔️⚔️ Двойная атака: "+mainW.name+" + "+offW.name+(tgtNpc?" → "+tgtNpc.name:""),detail:mainW.name+": d10("+res1.d+")+"+res1.statKey+"("+res1.rv+")+"+res1.sk+"("+res1.sv2+")="+res1.hit+"\n"+offW.name+" (−2 офф-хенд): d10("+res2.d+")+"+res2.statKey+"("+res2.rv+")+"+res2.sk+"("+res2.sv2+")−2="+res2.hit,total:0});
+    var newWeapons=(c.weapons||[]).map(function(x){if(x.id===mainW.id&&res1.wP)return Object.assign({},x,res1.wP);if(x.id===offW.id&&res2.wP)return Object.assign({},x,res2.wP);return x});
+    sv(Object.assign({},c,{weapons:newWeapons}));
+    pr.addLog({who:c.name||"???",type:"hit",label:"⚔️⚔️ Двойная атака: "+mainW.name+" + "+offW.name+(tgtNpc?" → "+tgtNpc.name:""),detail:mainW.name+": d10("+res1.d+")+"+res1.statKey+"("+res1.rv+")+"+res1.sk+"("+res1.sv2+")"+(atkPen?"−шлем("+atkPen+")":"")+"="+res1.hit+"\n"+offW.name+" (−2 офф-хенд): d10("+res2.d+")+"+res2.statKey+"("+res2.rv+")+"+res2.sk+"("+res2.sv2+")−2"+(atkPen?"−шлем("+atkPen+")":"")+"="+res2.hit,total:0});
     oR({label:"Двойная атака",d10:null,parts:[{label:mainW.name+" попад.",value:res1.hit},{label:offW.name+" попад. (−2)",value:res2.hit}],total:res1.hit+res2.hit,subtext:mainW.name+" урон: "+res1.dmg+"\n"+offW.name+" урон: "+res2.dmg+(tgtNpc?"\n→ "+tgtNpc.name:"")});
   }} className="n-btn n-btn-primary" style={{width:"100%",marginTop:6}}>{"⚔️⚔️ Двойная атака: "+mainW.name+" + "+offW.name}</button>);
 })()}
