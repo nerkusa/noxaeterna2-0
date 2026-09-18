@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { ARMOR_T } from '../../data/combat';
 import { DT, WT } from '../../data/stats';
 import { uid } from '../../utils/dice';
-import { CUR_ORDER, CUR_LABEL, CUR_NAME, emptyCurrency, fmtCurrency, toCopper } from '../../utils/currency';
+import { CUR_ORDER, CUR_LABEL, CUR_ICON, CUR_NAME, emptyCurrency, fmtCurrency, toCopper } from '../../utils/currency';
+import LiveField from '../LiveField';
 
 const backBtn = { padding: '5px 12px', borderRadius: 6, border: '2px solid #34374a', background: '#1b1d29', color: '#e9e9ed', fontWeight: 700, fontSize: 11, cursor: 'pointer' };
 const inp = { width: '100%', padding: '6px 8px', border: '2px solid #34374a', borderRadius: 6, fontSize: 12, fontFamily: "'Inter',sans-serif", background: '#232532', color: '#e9e9ed', outline: 'none' };
@@ -54,7 +55,12 @@ export default function ShopEditor(pr) {
         <label style={lbl}>Цена</label>
         <div style={{ display: 'flex', gap: 3 }}>
           {CUR_ORDER.map(function (k) {
-            return <input key={k} type="number" min="0" value={p[k] || 0} onChange={function (e) { const np = Object.assign({}, p); np[k] = Math.max(0, parseInt(e.target.value) || 0); upd(it.id, { price: np }); }} title={CUR_NAME[k]} placeholder={CUR_LABEL[k]} style={Object.assign({}, inp, { minWidth: 0, textAlign: 'center', padding: '6px 2px' })} />;
+            return (
+              <div key={k} style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                <span style={{ fontSize: 11 }}>{CUR_ICON[k]}</span>
+                <LiveField type="number" min="0" value={p[k] || 0} onCommit={function (val) { const np = Object.assign({}, p); np[k] = Math.max(0, parseInt(val) || 0); upd(it.id, { price: np }); }} title={CUR_NAME[k]} placeholder={CUR_LABEL[k]} style={Object.assign({}, inp, { minWidth: 0, textAlign: 'center', padding: '6px 2px' })} />
+              </div>
+            );
           })}
         </div>
       </div>
@@ -91,26 +97,26 @@ export default function ShopEditor(pr) {
     if (it.cat === 'armor') {
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 6 }}>
-          {field('Название', <input value={it.name} onChange={function (e) { upd(it.id, { name: e.target.value }); }} style={inp} />)}
+          {field('Название', <LiveField value={it.name} onCommit={function (val) { upd(it.id, { name: val }); }} style={inp} />)}
           <div style={{ display: 'flex', gap: 6 }}>
             {field('Слот', <select value={it.slot || 'body'} onChange={function (e) { upd(it.id, { slot: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}><option value="head">Голова</option><option value="body">Тело</option></select>)}
             {field('Тип', <select value={it.type} onChange={function (e) { upd(it.id, { type: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}>{ARMOR_T.filter(function (a) { return a.id !== 'none'; }).map(function (a) { return <option key={a.id} value={a.id}>{a.name + ' (Body≥' + a.bodyReq + ')'}</option>; })}</select>)}
           </div>
           <div style={{ display: 'flex', gap: 6 }}>
-            {field('HP брони', <input type="number" value={it.hp} onChange={function (e) { upd(it.id, { hp: parseInt(e.target.value) || 1 }); }} style={inp} />)}
+            {field('HP брони', <LiveField type="number" value={it.hp} onCommit={function (val) { upd(it.id, { hp: parseInt(val) || 1 }); }} style={inp} />)}
           </div>
           {priceField(it)}
-          {field('Описание (для игроков)', <textarea value={it.desc || ''} onChange={function (e) { upd(it.id, { desc: e.target.value }); }} placeholder="Как выглядит, откуда взялась…" style={Object.assign({}, inp, { minHeight: 40, resize: 'vertical' })} />)}
+          {field('Описание (для игроков)', <LiveField tag="textarea" value={it.desc || ''} onCommit={function (val) { upd(it.id, { desc: val }); }} placeholder="Как выглядит, откуда взялась…" style={Object.assign({}, inp, { minHeight: 40, resize: 'vertical' })} />)}
         </div>
       );
     }
     if (it.cat === 'shield') {
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 6 }}>
-          {field('Название', <input value={it.name} onChange={function (e) { upd(it.id, { name: e.target.value }); }} style={inp} />)}
+          {field('Название', <LiveField value={it.name} onCommit={function (val) { upd(it.id, { name: val }); }} style={inp} />)}
           <div style={{ display: 'flex', gap: 6 }}>
             {field('Тип', <select value={it.type} onChange={function (e) { upd(it.id, { type: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}>{SHIELD_T.map(function (s) { return <option key={s.id} value={s.id}>{s.name + ' ' + (s.absorb * 100) + '% (Body≥' + s.bodyReq + ')'}</option>; })}</select>)}
-            {field('HP щита', <input type="number" value={it.hp} onChange={function (e) { upd(it.id, { hp: parseInt(e.target.value) || 1 }); }} style={inp} />)}
+            {field('HP щита', <LiveField type="number" value={it.hp} onCommit={function (val) { upd(it.id, { hp: parseInt(val) || 1 }); }} style={inp} />)}
           </div>
           {priceField(it)}
         </div>
@@ -119,26 +125,26 @@ export default function ShopEditor(pr) {
     if (it.cat === 'weapon') {
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 6 }}>
-          {field('Название', <input value={it.name} onChange={function (e) { upd(it.id, { name: e.target.value }); }} style={inp} />)}
+          {field('Название', <LiveField value={it.name} onCommit={function (val) { upd(it.id, { name: val }); }} style={inp} />)}
           <div style={{ display: 'flex', gap: 6 }}>
             {field('Тип', <select value={it.wtype} onChange={function (e) { upd(it.id, { wtype: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}>{WT.map(function (t) { return <option key={t} value={t}>{SUBLABEL.weapon[t] || t}</option>; })}</select>)}
             {field('Урон', <select value={it.dmgType} onChange={function (e) { upd(it.id, { dmgType: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}>{DT.map(function (t) { return <option key={t} value={t}>{t}</option>; })}</select>)}
             {field('Руки', <select value={it.hands} onChange={function (e) { upd(it.id, { hands: parseFloat(e.target.value) }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}><option value={1}>1</option><option value={1.5}>1.5</option><option value={2}>2</option></select>)}
           </div>
           <div style={{ display: 'flex', gap: 6 }}>
-            {field('Кубик', <input value={it.dmgDice} onChange={function (e) { upd(it.id, { dmgDice: e.target.value }); }} placeholder="1d6" style={inp} />)}
-            {field('Бонус', <input type="number" value={it.bonus} onChange={function (e) { upd(it.id, { bonus: parseInt(e.target.value) || 0 }); }} style={inp} />)}
+            {field('Кубик', <LiveField value={it.dmgDice} onCommit={function (val) { upd(it.id, { dmgDice: val }); }} placeholder="1d6" style={inp} />)}
+            {field('Бонус', <LiveField type="number" value={it.bonus} onCommit={function (val) { upd(it.id, { bonus: parseInt(val) || 0 }); }} style={inp} />)}
           </div>
           {priceField(it)}
           {(it.dmgType === 'П' || it.wtype === 'Archery') && (
             <div style={{ display: 'flex', gap: 6 }}>
-              {field(it.wtype === 'Archery' ? '🏹 Колчан (выстрелов)' : '🔫 Обойма (патронов)', <input type="number" value={it.clip || 1} onChange={function (e) { upd(it.id, { clip: parseInt(e.target.value) || 1 }); }} style={inp} />)}
+              {field(it.wtype === 'Archery' ? '🏹 Колчан (выстрелов)' : '🔫 Обойма (патронов)', <LiveField type="number" value={it.clip || 1} onCommit={function (val) { upd(it.id, { clip: parseInt(val) || 1 }); }} style={inp} />)}
             </div>
           )}
           {it.hands === 1.5 && (
             <div style={{ display: 'flex', gap: 6 }}>
-              {field('Кубик (2 руки)', <input value={it.dmgDice2h} onChange={function (e) { upd(it.id, { dmgDice2h: e.target.value }); }} placeholder="2d6" style={inp} />)}
-              {field('Бонус (2 руки)', <input type="number" value={it.bonus2h} onChange={function (e) { upd(it.id, { bonus2h: parseInt(e.target.value) || 0 }); }} style={inp} />)}
+              {field('Кубик (2 руки)', <LiveField value={it.dmgDice2h} onCommit={function (val) { upd(it.id, { dmgDice2h: val }); }} placeholder="2d6" style={inp} />)}
+              {field('Бонус (2 руки)', <LiveField type="number" value={it.bonus2h} onCommit={function (val) { upd(it.id, { bonus2h: parseInt(val) || 0 }); }} style={inp} />)}
             </div>
           )}
         </div>
@@ -147,8 +153,8 @@ export default function ShopEditor(pr) {
     // item (и легаси tool/ammo) — единая форма: обычная вещь + необязательные функции
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 6 }}>
-        {field('Название', <input value={it.name} onChange={function (e) { upd(it.id, { name: e.target.value }); }} style={inp} />)}
-        {field('Описание', <textarea value={it.desc} onChange={function (e) { upd(it.id, { desc: e.target.value }); }} style={Object.assign({}, inp, { minHeight: 40, resize: 'vertical' })} />)}
+        {field('Название', <LiveField value={it.name} onCommit={function (val) { upd(it.id, { name: val }); }} style={inp} />)}
+        {field('Описание', <LiveField tag="textarea" value={it.desc} onCommit={function (val) { upd(it.id, { desc: val }); }} style={Object.assign({}, inp, { minHeight: 40, resize: 'vertical' })} />)}
         {priceField(it)}
         <div style={{ display: 'flex', gap: 6 }}>
           {field('Тип снаряда (необязательно)', <select value={it.ptype || ''} onChange={function (e) { upd(it.id, { ptype: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}><option value="">— нет —</option>{PROJ_TYPES.map(function (p) { return <option key={p} value={p}>{p}</option>; })}</select>)}

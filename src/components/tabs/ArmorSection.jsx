@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { db, ref, set } from '../../firebase';
 import { ARMOR_T, weapDur } from '../../data/combat';
 import { r1, uid, rollHit } from '../../utils/dice';
+import { tryPay } from '../../utils/currency';
 import ShopPicker from '../ShopPicker';
 
 var SLOT_LABEL={head:"Голова",body:"Тело"};
@@ -44,7 +45,7 @@ return <div className="n-card" style={{display:"flex",flexDirection:"column",gap
 </div>
 </div>
 
-<ShopPicker color="#9184d9" label="Добавить броню" items={(pr.shop||[]).filter(function(i){return i.cat==="armor"})} subOf={function(it){return it.slot||"body"}} suborder={["head","body"]} sublabels={{head:"Голова",body:"Тело"}} sub={function(it){var a=ARMOR_T.find(function(x){return x.id===it.type});return (a?a.name:it.type)+" · "+it.hp+" HP"}} onPick={function(it){var at2=ARMOR_T.find(function(a){return a.id===it.type})||ARMOR_T[0];if(fs.BODY<at2.bodyReq){alert("BODY("+fs.BODY+")<"+at2.bodyReq);return}var slot=it.slot||"body";var newA={id:uid(),name:it.name,type:it.type,slot:slot,hp:it.hp,maxHp:it.hp,desc:it.desc||""};var upd={armors:(c.armors||[]).concat([newA])};var curEqId=slot==="head"?c.equippedHead:c.equippedBody;if(!curEqId)upd[slot==="head"?"equippedHead":"equippedBody"]=newA.id;sv(Object.assign({},c,upd))}}/>
+<ShopPicker color="#9184d9" label="Добавить броню" items={(pr.shop||[]).filter(function(i){return i.cat==="armor"})} subOf={function(it){return it.slot||"body"}} suborder={["head","body"]} sublabels={{head:"Голова",body:"Тело"}} sub={function(it){var a=ARMOR_T.find(function(x){return x.id===it.type});return (a?a.name:it.type)+" · "+it.hp+" HP"}} onPick={function(it){var at2=ARMOR_T.find(function(a){return a.id===it.type})||ARMOR_T[0];if(fs.BODY<at2.bodyReq){alert("BODY("+fs.BODY+")<"+at2.bodyReq);return}var pay=tryPay(c,it.price);if(pay===null)return;var slot=it.slot||"body";var newA={id:uid(),name:it.name,type:it.type,slot:slot,hp:it.hp,maxHp:it.hp,desc:it.desc||""};sv(Object.assign({},c,pay,{armors:(c.armors||[]).concat([newA])}))}}/>
 
 {saa&&<div style={{background:"var(--color-sunken)",borderRadius:10,padding:10,display:"flex",flexDirection:"column",gap:6}}>
 <input className="n-input" value={an} onChange={function(e){sAN(e.target.value)}} placeholder="Название брони"/>
@@ -53,7 +54,7 @@ return <div className="n-card" style={{display:"flex",flexDirection:"column",gap
 <select className="n-input" value={at} onChange={function(e){sAT(e.target.value)}} style={{flex:1,padding:"6px 8px",minHeight:34,cursor:"pointer"}}>{ARMOR_T.filter(function(a){return a.id!=="none"}).map(function(a){return <option key={a.id} value={a.id}>{a.name+" (Body≥"+a.bodyReq+")"}</option>})}</select>
 <input className="n-input" style={{width:60,padding:"6px 8px",minHeight:34}} type="number" value={ah} onChange={function(e){sAH(parseInt(e.target.value)||1)}} placeholder="HP"/>
 </div>
-<button onClick={function(){if(!an.trim())return;var at2=ARMOR_T.find(function(a){return a.id===at})||ARMOR_T[0];if(fs.BODY<at2.bodyReq){alert("BODY("+fs.BODY+")<"+at2.bodyReq);return}var newA={id:uid(),name:an.trim(),type:at,slot:asl,hp:ah,maxHp:ah};var upd={armors:(c.armors||[]).concat([newA])};var curEqId=asl==="head"?c.equippedHead:c.equippedBody;if(!curEqId)upd[asl==="head"?"equippedHead":"equippedBody"]=newA.id;sv(Object.assign({},c,upd));sAN("");sSAA(false)}} className="n-btn n-btn-primary" style={{alignSelf:"flex-start"}}>Добавить</button>
+<button onClick={function(){if(!an.trim())return;var at2=ARMOR_T.find(function(a){return a.id===at})||ARMOR_T[0];if(fs.BODY<at2.bodyReq){alert("BODY("+fs.BODY+")<"+at2.bodyReq);return}var newA={id:uid(),name:an.trim(),type:at,slot:asl,hp:ah,maxHp:ah};sv(Object.assign({},c,{armors:(c.armors||[]).concat([newA])}));sAN("");sSAA(false)}} className="n-btn n-btn-primary" style={{alignSelf:"flex-start"}}>Добавить</button>
 </div>}
 
 {/* Голова / Тело */}
@@ -84,7 +85,7 @@ return(<div key={slot} style={{padding:"8px 10px",background:"var(--color-sunken
 <div style={{fontSize:10,fontWeight:600,color:"var(--color-text-muted)",textTransform:"uppercase",letterSpacing:.05}}>{"Щит (левая рука)"+(shieldBlocked?" · недоступен":"")}</div>
 <button onClick={function(){sSsAdd(!ssAdd)}} className="n-btn n-btn-secondary" style={{padding:"3px 8px",fontSize:10}}>{ssAdd?"✕":"+ Добавить"}</button>
 </div>
-<ShopPicker color="#38bdf8" label="Взять щит из магазина" items={(pr.shop||[]).filter(function(i){return i.cat==="shield"})} subOf={function(it){return it.type}} suborder={["light","medium","tower"]} sublabels={{light:"Лёгкий",medium:"Средний",tower:"Башенный"}} sub={function(it){var t=SHIELD_T.find(function(x){return x.id===it.type});return (t?t.name+" "+(t.absorb*100)+"%":it.type)+" · "+it.hp+" HP"}} onPick={function(it){var t=SHIELD_T.find(function(x){return x.id===it.type})||SHIELD_T[0];if(fs.BODY<t.bodyReq){alert("BODY("+fs.BODY+")<"+t.bodyReq);return}sv(Object.assign({},c,{shields:(c.shields||[]).concat([{id:uid(),name:it.name,type:it.type,absorb:t.absorb,hp:it.hp,maxHp:it.hp}])}))}}/>
+<ShopPicker color="#38bdf8" label="Взять щит из магазина" items={(pr.shop||[]).filter(function(i){return i.cat==="shield"})} subOf={function(it){return it.type}} suborder={["light","medium","tower"]} sublabels={{light:"Лёгкий",medium:"Средний",tower:"Башенный"}} sub={function(it){var t=SHIELD_T.find(function(x){return x.id===it.type});return (t?t.name+" "+(t.absorb*100)+"%":it.type)+" · "+it.hp+" HP"}} onPick={function(it){var t=SHIELD_T.find(function(x){return x.id===it.type})||SHIELD_T[0];if(fs.BODY<t.bodyReq){alert("BODY("+fs.BODY+")<"+t.bodyReq);return}var pay=tryPay(c,it.price);if(pay===null)return;sv(Object.assign({},c,pay,{shields:(c.shields||[]).concat([{id:uid(),name:it.name,type:it.type,absorb:t.absorb,hp:it.hp,maxHp:it.hp}])}))}}/>
 {ssAdd&&<div style={{background:"var(--color-bg)",borderRadius:8,padding:8,marginBottom:6,display:"flex",flexDirection:"column",gap:6}}>
 <input className="n-input" value={shn} onChange={function(e){sShn(e.target.value)}} placeholder="Название щита"/>
 <div style={{display:"flex",gap:6}}>

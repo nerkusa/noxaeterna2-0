@@ -82,7 +82,7 @@ function saveRaces(d){if(!room)return;set(ref(db,"rooms/"+room+"/races"),d)}
 function saveProfs(d){if(!room)return;set(ref(db,"rooms/"+room+"/profs"),d)}
 function saveNpcHit(ev){if(!room)return;var id=Date.now()+"_"+Math.floor(Math.random()*1000);set(ref(db,"rooms/"+room+"/npcHits/"+id),ev)}
 function clearNpcHit(id){if(!room)return;remove(ref(db,"rooms/"+room+"/npcHits/"+id))}
-function saveShop(d){if(!room)return;set(ref(db,"rooms/"+room+"/shop"),d)}
+function saveShop(d){if(!room)return;set(ref(db,"rooms/"+room+"/shop"),d);sShop(d)}
 function saveInitiative(d){if(!room)return;set(ref(db,"rooms/"+room+"/initiative"),d)}
 function changeAccount(currentPassword,newLogin,newPassword){
   return authChangeAccount(room,auth.login,currentPassword,newLogin,newPassword).then(function(res){

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { emptyCurrency, toCopper, fmtCurrency } from '../utils/currency';
 
 // Reusable "take from shop" picker.
 // props: items, color, onPick(item), sub(item)->string, label,
@@ -8,11 +9,15 @@ export default function ShopPicker(pr) {
   const items = pr.items || [];
   const color = pr.color || '#f59e0b';
 
+  function priceOf(it) { return (it.price && typeof it.price === 'object') ? it.price : emptyCurrency(); }
+
   function row(it) {
+    const price = priceOf(it);
+    const cost = toCopper(price);
     return (
       <div key={it.id} style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#1b1d29', border: '1px solid #34374a', borderRadius: 6, padding: '4px 7px' }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: '#e9e9ed' }}>{it.name}{it.price ? <span style={{ fontSize: 8, color: '#d97706', marginLeft: 5 }}>{'💰 ' + it.price}</span> : null}</div>
+          <div style={{ fontSize: 10, fontWeight: 700, color: '#e9e9ed' }}>{it.name}{cost > 0 ? <span style={{ fontSize: 8, color: '#d97706', marginLeft: 5 }}>{'💰 ' + fmtCurrency(price)}</span> : null}</div>
           {pr.sub && <div style={{ fontSize: 8, color: '#9397ab' }}>{pr.sub(it)}</div>}
         </div>
         <button onClick={function () { pr.onPick(it); setOpen(false); }} style={{ padding: '3px 9px', borderRadius: 5, border: 'none', background: color, color: '#161826', fontWeight: 700, fontSize: 9, cursor: 'pointer' }}>Взять</button>

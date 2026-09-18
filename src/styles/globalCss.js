@@ -21,6 +21,7 @@ var CSS = `
 
 *{box-sizing:border-box}
 body{margin:0;font-family:'Inter',sans-serif}
+input,textarea,select,button{color:inherit;font-family:inherit}
 
 @keyframes slideIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}

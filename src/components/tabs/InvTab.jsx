@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { S } from '../../styles/ui';
 import { uid } from '../../utils/dice';
-import { CUR_ORDER, CUR_LABEL, emptyCurrency, toCopper, fromCopper, fmtCurrency } from '../../utils/currency';
+import { CUR_ORDER, CUR_LABEL, CUR_ICON, emptyCurrency, toCopper, fromCopper, fmtCurrency } from '../../utils/currency';
+import LiveField from '../LiveField';
 
 function InvTab(pr){var c=pr.char;var sv=pr.save;var _a=useState("");var ni=_a[0];var sNI=_a[1];var _sp=useState(false);var spOpen=_sp[0];var sSpOpen=_sp[1];
 var shopItems=(pr.shop||[]).filter(function(i){return i.cat==="item"||i.cat==="tool"||i.cat==="ammo"});
@@ -10,6 +11,8 @@ var curr=c.currency||{gold:0,silver:(c.gold||0),bronze:0,copper:0};
 function addLocal(){if(!ni.trim())return;sv(Object.assign({},c,{inventory:(c.inventory||[]).concat([{id:uid(),name:ni.trim(),qty:1,equipped:false}])}));sNI("")}
 
 function setCur(k,d){var nc=Object.assign({},curr);nc[k]=Math.max(0,(nc[k]||0)+d);sv(Object.assign({},c,{currency:nc}))}
+
+function setCurAbs(k,val){var nc=Object.assign({},curr);nc[k]=Math.max(0,parseInt(val)||0);sv(Object.assign({},c,{currency:nc}))}
 
 function priceOf(it){return (it.price&&typeof it.price==="object")?it.price:emptyCurrency()}
 
@@ -56,9 +59,10 @@ return(<div key={it.id} style={{display:"flex",alignItems:"center",gap:6,backgro
 </div>}
 <div style={{background:"#2a2008",borderRadius:8,padding:"6px 8px",display:"flex",flexWrap:"wrap",gap:8,justifyContent:"space-between"}}>
 {CUR_ORDER.map(function(k){return(<div key={k} style={{display:"flex",alignItems:"center",gap:3}}>
+<span style={{fontSize:11}}>{CUR_ICON[k]}</span>
 <span style={{fontSize:8,color:"#9397ab",fontWeight:700,width:14}}>{CUR_LABEL[k]}</span>
 <button onClick={function(){setCur(k,-1)}} style={S.sm}>−</button>
-<span style={{fontFamily:"'Inter',sans-serif",fontSize:12,fontWeight:700,color:"#d97706",minWidth:20,textAlign:"center"}}>{curr[k]||0}</span>
+<LiveField type="number" min="0" value={curr[k]||0} onCommit={function(val){setCurAbs(k,val)}} style={{fontFamily:"'Inter',sans-serif",fontSize:12,fontWeight:700,color:"#d97706",background:"#1b1d29",border:"1px solid #34374a",borderRadius:5,width:44,textAlign:"center",padding:"2px 0",outline:"none"}}/>
 <button onClick={function(){setCur(k,1)}} style={S.sm}>+</button>
 </div>)})}
 </div>

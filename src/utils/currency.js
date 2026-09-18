@@ -2,6 +2,7 @@
    1 золото = 10 серебра, 1 серебро = 100 бронзы, 1 бронза = 10 меди. */
 var CUR_ORDER = ["gold", "silver", "bronze", "copper"];
 var CUR_LABEL = { gold: "З", silver: "С", bronze: "Бр", copper: "М" };
+var CUR_ICON = { gold: "🟡", silver: "⚪", bronze: "🟠", copper: "🟤" };
 var CUR_NAME = { gold: "Золото", silver: "Серебро", bronze: "Бронза", copper: "Медь" };
 var CUR_RATE = { gold: 10000, silver: 1000, bronze: 10, copper: 1 };
 
@@ -28,4 +29,16 @@ function fmtCurrency(cur) {
   return parts.length ? parts.join(" ") : "0" + CUR_LABEL.copper;
 }
 
-export { CUR_ORDER, CUR_LABEL, CUR_NAME, CUR_RATE, emptyCurrency, toCopper, fromCopper, fmtCurrency };
+/* Списывает цену с кошелька персонажа. Возвращает патч {currency:...} для
+   слияния в sv(), {} если вещь бесплатная, или null (с alert) если денег
+   не хватает — вызывающий код в этом случае должен прервать покупку. */
+function tryPay(char, price) {
+  var cost = toCopper(price);
+  if (cost <= 0) return {};
+  var curr = (char && char.currency) || emptyCurrency();
+  var have = toCopper(curr);
+  if (have < cost) { alert("Не хватает денег: нужно " + fmtCurrency(price) + ", у тебя " + fmtCurrency(curr)); return null; }
+  return { currency: fromCopper(have - cost) };
+}
+
+export { CUR_ORDER, CUR_LABEL, CUR_ICON, CUR_NAME, CUR_RATE, emptyCurrency, toCopper, fromCopper, fmtCurrency, tryPay };
