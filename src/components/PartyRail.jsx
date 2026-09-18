@@ -17,7 +17,7 @@ return(<aside style={{width:320,flexShrink:0,borderLeft:"1px solid var(--color-d
 {chars.map(function(c){
   var inf=cF(c);var fs=inf.fs;
   var pf=getProfs().find(function(p){return p.id===c.profId});
-  var mx=c.hpOv||mHP(fs);var hp=(c.curHp!==null&&c.curHp!==undefined)?c.curHp:mx;var hpP=mx>0?(hp/mx)*100:0;
+  var mx=c.hpOv||mHP(fs,c);var hp=(c.curHp!==null&&c.curHp!==undefined)?c.curHp:mx;var hpP=mx>0?(hp/mx)*100:0;
   return(<div key={c._fbId} className="n-card" style={{padding:12,display:"flex",flexDirection:"column",gap:10}}>
     <button onClick={function(){setOpen(c._fbId)}} style={{display:"flex",alignItems:"center",gap:12,border:"none",background:"transparent",cursor:"pointer",textAlign:"left",padding:0}}>
       <div style={{position:"relative",flexShrink:0}}>

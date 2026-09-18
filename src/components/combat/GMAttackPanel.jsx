@@ -46,7 +46,7 @@ function GMAttackPanel(pr){
       shieldDesc=" 🛡 "+atk.shieldName+" поглотил "+absorbed;
       /* HP щита обновится ниже через shields[] */
     }
-    var inf2=cF(tgtChar);var pMx=tgtChar.hpOv||mHP(inf2.fs);
+    var inf2=cF(tgtChar);var pMx=tgtChar.hpOv||mHP(inf2.fs,tgtChar);
     var pCur=tgtChar.curHp!==null&&tgtChar.curHp!==undefined?tgtChar.curHp:pMx;
     var newHp=Math.max(0,pCur-ae.hd);
     /* Пишем только изменённые поля персонажа, чтобы не затирать

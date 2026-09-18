@@ -14,7 +14,7 @@ var inf=cF(c);var fs=inf.fs;var es=inf.eSk;var rc=inf.race||{};
 var pf=getProfs().find(function(p){return p.id===c.profId})||getProfs()[0];
 var _os=useState(null);var oSt=_os[0];var sOS=_os[1];
 var _un=useState(null);var undo=_un[0];var sU=_un[1];
-var mx=c.hpOv||mHP(fs);var curHp=c.curHp!==null&&c.curHp!==undefined?c.curHp:mx;var hpP=mx>0?(curHp/mx)*100:0;
+var mx=c.hpOv||mHP(fs,c);var curHp=c.curHp!==null&&c.curHp!==undefined?c.curHp:mx;var hpP=mx>0?(curHp/mx)*100:0;
 var mxW=c.willOv||fs.WILL||1;var curW=c.curWill!==null&&c.curWill!==undefined?c.curWill:mxW;var wP=mxW>0?(curW/mxW)*100:0;
 var xp=c.xp||0;var xpP=xp%100;
 var bsk=rc.bsp?1:0;var stL=40-uSP(c.stats||{});var skL=(60+bsk)-uSkP(c.skills||{});

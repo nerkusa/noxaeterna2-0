@@ -8,7 +8,7 @@ function CharacterViewModal(pr){
 var c=pr.char;
 var inf=cF(c);var fs=inf.fs;var es=inf.eSk;var rc=inf.race;
 var pf=getProfs().find(function(p){return p.id===c.profId})||getProfs()[0];
-var mx=c.hpOv||mHP(fs);var hp=(c.curHp!==null&&c.curHp!==undefined)?c.curHp:mx;var hpP=mx>0?(hp/mx)*100:0;
+var mx=c.hpOv||mHP(fs,c);var hp=(c.curHp!==null&&c.curHp!==undefined)?c.curHp:mx;var hpP=mx>0?(hp/mx)*100:0;
 var mxW=c.willOv||fs.WILL||1;var w=(c.curWill!==null&&c.curWill!==undefined)?c.curWill:mxW;var wP=mxW>0?(w/mxW)*100:0;
 var equipped=(c.weapons||[]).find(function(x){return x.id===c.equippedWeapon});
 var armorNames=(c.armors||[]).filter(function(a){return a.id===c.equippedHead||a.id===c.equippedBody}).map(function(a){return a.name});

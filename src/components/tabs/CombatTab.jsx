@@ -7,6 +7,8 @@ import { PROF_DESC } from '../../data/professions';
 import { cF, mHP } from '../../utils/character';
 import { applyDmgToNpc } from '../../utils/combat';
 import { tryPay } from '../../utils/currency';
+import { hasTraitEffect } from '../../data/traits';
+import { getTraits } from '../../utils/traitStore';
 import { pk, r1, rN, sm, uid, rollHit } from '../../utils/dice';
 import ArmorSection from './ArmorSection';
 import InvTab from './InvTab';
@@ -19,6 +21,7 @@ function Bar(pr){return(<div style={{height:pr.h||8,borderRadius:4,background:"v
 function CombatTab(pr){
 var c=pr.char;var sv=pr.save;var oR=pr.onRoll;var inf=cF(c);var fs=inf.fs;var es=inf.eSk;
 var pf=getProfs().find(function(p){return p.id===c.profId})||getProfs()[0];
+var hasDualWield=hasTraitEffect(c,getTraits(),"dual_wield");
 var _sa=useState(false);var sa=_sa[0];var sSA=_sa[1];
 var _wn=useState("");var wn=_wn[0];var sWN=_wn[1];
 var _wt=useState("Battle");var wt=_wt[0];var sWT=_wt[1];
@@ -36,7 +39,7 @@ var _mint=useState("");var mInt=_mint[0];var sMInt=_mint[1];
 var spawned=pr.spawned||{};var saveSpawned=pr.saveSpawned;
 var spawnedArr=Object.entries(spawned).filter(function(e){var hp=e[1].hp!==undefined?e[1].hp:e[1].maxHp;return hp>0});
 var tgtNpc=tgtId?spawned[tgtId]:null;
-var mx=c.hpOv||mHP(fs);var curHp=c.curHp!==null&&c.curHp!==undefined?c.curHp:mx;
+var mx=c.hpOv||mHP(fs,c);var curHp=c.curHp!==null&&c.curHp!==undefined?c.curHp:mx;
 var mxW=c.willOv||fs.WILL||1;var curW=c.curWill!==null&&c.curWill!==undefined?c.curWill:mxW;
 var hpP=mx>0?(curHp/mx)*100:0;
 var isGM=pr.isGM;
@@ -86,12 +89,12 @@ return(<div style={{display:"flex",flexDirection:"column",gap:14}}>
 <button onClick={function(){if(!wn.trim())return;var newW={id:uid(),name:wn.trim(),type:wt,dmgType:wdt,bonus:wb,dmgDice:wdi,hands:wh};if(wh===1.5){newW.dmgDice2h=wdi2;newW.bonus2h=wb2;}if(wdt==="П"||wt==="Archery"){newW.clip=wcl;newW.ammo=wcl;newW.ammoType=wam;}sv(Object.assign({},c,{weapons:(c.weapons||[]).concat([newW])}));sWN("");sSA(false);sWH(1);sWDI("1d6");sWDI2("2d6");sWB2(0);sWCL(1);}} className="n-btn n-btn-primary" style={{alignSelf:"flex-start"}}>Добавить</button>
 </div>}
 {(c.weapons||[]).length===0&&!sa&&<div style={{textAlign:"center",padding:"16px 8px",color:"var(--color-text-muted)",fontStyle:"italic",fontSize:12,border:"1px dashed var(--color-divider)",borderRadius:10}}>Нет оружия — добавь его из магазина выше</div>}
-{(c.weapons||[]).map(function(w,wIdx){var sk=WS[w.type]||"Простое оружие";var statKey=wStat(w.type);var isEq=c.equippedWeapon===w.id;var isGun=w.dmgType==="П"||w.type==="Archery";var clip=w.clip||(isGun?1:0);var ammo=(w.ammo!==undefined&&w.ammo!==null)?w.ammo:clip;
+{(c.weapons||[]).map(function(w,wIdx){var sk=WS[w.type]||"Простое оружие";var statKey=wStat(w.type);var isEq=c.equippedWeapon===w.id;var isEqOff=c.equippedWeaponOff===w.id;var isGun=w.dmgType==="П"||w.type==="Archery";var clip=w.clip||(isGun?1:0);var ammo=(w.ammo!==undefined&&w.ammo!==null)?w.ammo:clip;
 var wMaxDur=(w.maxDur!==undefined&&w.maxDur!==null)?w.maxDur:weapDur(w.type);var wDur=(w.dur!==undefined&&w.dur!==null)?w.dur:wMaxDur;var broken=wMaxDur>0&&wDur<=0;
 var durPct=wMaxDur>0?(wDur/wMaxDur):1;var durPen=wMaxDur>0?(durPct<=0.30?10:(durPct<=0.50?5:0)):0;
 var atype=w.ammoType||(w.type==="Archery"?"Стрела":(w.dmgType==="П"?"Пуля":null));
 var projLeft=atype?(c.inventory||[]).filter(function(i){return i.proj&&i.ptype===atype}).reduce(function(s,i){return s+(i.qty||0)},0):0;var curMode=c.weaponMode||"1h";var activeDice=(w.hands===1.5&&curMode==="2h")?(w.dmgDice2h||w.dmgDice):w.dmgDice;var activeBon=(w.hands===1.5&&curMode==="2h")?(w.bonus2h!==undefined?w.bonus2h:w.bonus||0):(w.bonus||0);var handsLabel=w.hands===2?"двуручное":w.hands===1.5?"полуторное":"одноручное";
-return(<div key={(w.id!=null?w.id:"w")+"_"+wIdx} style={{background:isEq?"rgba(16,185,129,.08)":"var(--color-sunken)",border:"1px solid "+(isEq?"rgba(16,185,129,.3)":"var(--color-divider)"),borderRadius:10,padding:"9px 10px",marginBottom:6}}>
+return(<div key={(w.id!=null?w.id:"w")+"_"+wIdx} style={{background:isEq?"rgba(16,185,129,.08)":isEqOff?"rgba(56,189,248,.08)":"var(--color-sunken)",border:"1px solid "+(isEq?"rgba(16,185,129,.3)":isEqOff?"rgba(56,189,248,.3)":"var(--color-divider)"),borderRadius:10,padding:"9px 10px",marginBottom:6}}>
 <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:4}}>
 <div style={{fontWeight:700,fontSize:13}}>{w.name}</div>
 <div style={{fontSize:11,color:"var(--color-text-muted)",fontWeight:600}}>{activeDice+(activeBon?"+"+activeBon:"")}</div>
@@ -104,8 +107,9 @@ return(<div key={(w.id!=null?w.id:"w")+"_"+wIdx} style={{background:isEq?"rgba(1
 {isGun&&<span style={{fontSize:10,fontWeight:700,color:ammo<=0?"#ef4444":"#f0b352"}}>{ammo+"/"+clip}{atype?" · "+atype+": "+projLeft:""}</span>}
 </div>
 <div style={{display:"flex",gap:4}}>
-<button onClick={function(){var newEq=isEq?null:w.id;var upd={equippedWeapon:newEq};if(w.hands===2&&c.equippedShield)upd.equippedShield=null;sv(Object.assign({},c,upd));}} className="n-btn n-btn-secondary" style={{padding:"3px 8px",fontSize:10,color:isEq?"#34d399":"var(--color-text-muted)",borderColor:isEq?"rgba(16,185,129,.4)":"var(--color-divider)"}}>{isEq?"Снаряжено":"Снарядить"}</button>
-<button onClick={function(){if(!window.confirm("Удалить "+w.name+"?"))return;var upd={weapons:(c.weapons||[]).filter(function(x,j){return j!==wIdx})};if(isEq)upd.equippedWeapon=null;sv(Object.assign({},c,upd))}} title={isEq?"Удалить (снимется с руки)":"Удалить"} style={{background:"none",border:"none",color:"#ef4444",fontSize:13,cursor:"pointer"}}>✕</button>
+<button onClick={function(){var newEq=isEq?null:w.id;var upd={equippedWeapon:newEq};if(w.hands===2&&c.equippedShield)upd.equippedShield=null;if(newEq&&c.equippedWeaponOff===w.id)upd.equippedWeaponOff=null;sv(Object.assign({},c,upd));}} className="n-btn n-btn-secondary" style={{padding:"3px 8px",fontSize:10,color:isEq?"#34d399":"var(--color-text-muted)",borderColor:isEq?"rgba(16,185,129,.4)":"var(--color-divider)"}}>{isEq?"Снаряжено":"Снарядить"}</button>
+{hasDualWield&&w.hands===1&&<button onClick={function(){var newEq=isEqOff?null:w.id;var upd={equippedWeaponOff:newEq};if(newEq&&c.equippedWeapon===w.id)upd.equippedWeapon=null;sv(Object.assign({},c,upd));}} title="Во вторую руку (черта «Двойной клинок»)" className="n-btn n-btn-secondary" style={{padding:"3px 8px",fontSize:10,color:isEqOff?"#38bdf8":"var(--color-text-muted)",borderColor:isEqOff?"rgba(56,189,248,.4)":"var(--color-divider)"}}>{isEqOff?"Во 2-й руке":"⚔️ Во 2-ю руку"}</button>}
+<button onClick={function(){if(!window.confirm("Удалить "+w.name+"?"))return;var upd={weapons:(c.weapons||[]).filter(function(x,j){return j!==wIdx})};if(isEq)upd.equippedWeapon=null;if(isEqOff)upd.equippedWeaponOff=null;sv(Object.assign({},c,upd))}} title={isEq?"Удалить (снимется с руки)":"Удалить"} style={{background:"none",border:"none",color:"#ef4444",fontSize:13,cursor:"pointer"}}>✕</button>
 </div>
 </div>
 {w.hands===1.5&&<div style={{display:"flex",gap:4,marginTop:6}}>
@@ -149,6 +153,17 @@ else{oR({label:w.name+" Попад."+(aimP?" · "+selZone:""),d10:d,crit:R.crit,
 }} className="n-btn n-btn-secondary" style={{flex:1,fontSize:11,color:"#dc2626"}}>{"Урон"+(tgtNpc?" → "+tgtNpc.name.slice(0,10):"")}</button>
 </div>
 </div>)})}
+{hasDualWield&&(function(){
+  var mainW=(c.weapons||[]).find(function(w){return w.id===c.equippedWeapon&&w.hands===1});
+  var offW=(c.weapons||[]).find(function(w){return w.id===c.equippedWeaponOff&&w.hands===1});
+  if(!mainW||!offW||mainW.id===offW.id)return null;
+  function rollOne(w,penalty){var R=rollHit();var d=R.d;var statKey=wStat(w.type);var sk=WS[w.type]||"Простое оружие";var rv=fs[statKey]||0;var sv2=es[sk]||0;var t=d+rv+sv2+(w.bonus||0)-penalty;var m=w.dmgDice.match(/(\d+)d(\d+)/);var dice=m?rN(parseInt(m[1]),parseInt(m[2])):[0];var dmg=Math.max(0,sm(dice)+(w.bonus||0));return{hit:t,dmg:dmg,d:d,rv:rv,sv2:sv2,statKey:statKey,sk:sk}}
+  return(<button onClick={function(){
+    var res1=rollOne(mainW,0);var res2=rollOne(offW,2);
+    pr.addLog({who:c.name||"???",type:"hit",label:"⚔️⚔️ Двойная атака: "+mainW.name+" + "+offW.name+(tgtNpc?" → "+tgtNpc.name:""),detail:mainW.name+": d10("+res1.d+")+"+res1.statKey+"("+res1.rv+")+"+res1.sk+"("+res1.sv2+")="+res1.hit+"\n"+offW.name+" (−2 офф-хенд): d10("+res2.d+")+"+res2.statKey+"("+res2.rv+")+"+res2.sk+"("+res2.sv2+")−2="+res2.hit,total:0});
+    oR({label:"Двойная атака",d10:null,parts:[{label:mainW.name+" попад.",value:res1.hit},{label:offW.name+" попад. (−2)",value:res2.hit}],total:res1.hit+res2.hit,subtext:mainW.name+" урон: "+res1.dmg+"\n"+offW.name+" урон: "+res2.dmg+(tgtNpc?"\n→ "+tgtNpc.name:"")});
+  }} className="n-btn n-btn-primary" style={{width:"100%",marginTop:6}}>{"⚔️⚔️ Двойная атака: "+mainW.name+" + "+offW.name}</button>);
+})()}
 </div>
 
 {/* Броня игрока */}
@@ -156,7 +171,7 @@ else{oR({label:w.name+" Попад."+(aimP?" · "+selZone:""),d10:d,crit:R.crit,
 
 {pr.initiative&&<InitiativeBar initiative={pr.initiative}/>}
 
-{/* Ход: объявить действие / передать ход */}
+{/* Ход: передать ход */}
 {(function(){
   var init=pr.initiative;var myTurn=!!(init&&Array.isArray(init.list)&&init.list.length&&init.list[init.turn||0]&&init.list[init.turn||0].id===c._fbId);
   function announce(a){pr.addLog({who:c.name||"???",type:"stance",label:(c.name||"???")+" объявляет: "+a,detail:"",total:0})}
@@ -168,9 +183,8 @@ else{oR({label:w.name+" Попад."+(aimP?" · "+selZone:""),d10:d,crit:R.crit,
   }
   return(<div className="n-card">
     <Lbl>Ход</Lbl>
-    <div style={{display:"flex",gap:6,flexWrap:"wrap",marginTop:8}}>
-      {["Атака","Защита","Реакция","Предмет"].map(function(a){return <button key={a} onClick={function(){announce(a)}} className="n-btn n-btn-secondary" style={{flex:"1 1 21%",fontSize:12,padding:"8px 4px"}}>{a}</button>})}
-      <button onClick={passTurn} disabled={!!init&&!myTurn} title={init&&!myTurn?"Сейчас не твой ход":"Передать ход следующему"} className="n-btn" style={{flex:"1 1 100%",fontSize:12,padding:"8px 4px",border:"1.5px solid "+(init&&!myTurn?"var(--color-divider)":"#f59e0b"),color:init&&!myTurn?"var(--color-text-muted)":"#f0b352"}}>Передать ход</button>
+    <div style={{marginTop:8}}>
+      <button onClick={passTurn} disabled={!!init&&!myTurn} title={init&&!myTurn?"Сейчас не твой ход":"Передать ход следующему"} className="n-btn" style={{width:"100%",fontSize:12,padding:"8px 4px",border:"1.5px solid "+(init&&!myTurn?"var(--color-divider)":"#f59e0b"),color:init&&!myTurn?"var(--color-text-muted)":"#f0b352"}}>Передать ход</button>
     </div>
   </div>);
 })()}
@@ -201,7 +215,7 @@ else{oR({label:w.name+" Попад."+(aimP?" · "+selZone:""),d10:d,crit:R.crit,
       if(!actAllies.length)actAllies=(pr.characters||[]).filter(function(x){return x._fbId!==c._fbId});
       var ally=actAllies.length>0?pk(actAllies):null;
       if(ally&&pr.room){
-        var aInf=cF(ally);var aMx=ally.hpOv||mHP(aInf.fs);var aCur=ally.curHp!==null&&ally.curHp!==undefined?ally.curHp:aMx;var aNewHp=Math.max(0,aCur-ft);
+        var aInf=cF(ally);var aMx=ally.hpOv||mHP(aInf.fs,ally);var aCur=ally.curHp!==null&&ally.curHp!==undefined?ally.curHp:aMx;var aNewHp=Math.max(0,aCur-ft);
         var aUpd=Object.assign({},ally,{curHp:aNewHp});delete aUpd._fbId;
         set(ref(db,"rooms/"+pr.room+"/characters/"+ally._fbId),aUpd);
         set(ref(db,"rooms/"+pr.room+"/dmgEvents/"+ally._fbId),{attackerName:(c.name||"???")+" (срыв магии)",dmg:ft,oldHp:aCur,newHp:aNewHp,maxHp:aMx,ts:Date.now()});

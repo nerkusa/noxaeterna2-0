@@ -66,7 +66,7 @@ function endCombat(){if(pr.saveInitiative)pr.saveInitiative(null)}
 /* Применить урон к игроку (с учётом брони и зоны) */
 function applyDmgToPlayer(ptgt,rawDmg,dmgType,zoneName,who){
   var inf2=cF(ptgt);var fs2=inf2.fs;
-  var pMx=ptgt.hpOv||mHP(fs2);
+  var pMx=ptgt.hpOv||mHP(fs2,ptgt);
   var pCur=ptgt.curHp!==null&&ptgt.curHp!==undefined?ptgt.curHp:pMx;
   var pZone=ZONES.find(function(x){return x.name===zoneName})||ZONES[2];
   var multiplied=Math.floor(rawDmg*pZone.mult);
@@ -221,7 +221,7 @@ return(<div style={{flex:1,display:"flex",flexDirection:"column"}}>
 <label style={Object.assign({},S.lb,{color:"#60a5fa"})}>🎯 Цель NPC-атак (игрок)</label>
 {playerChars.length===0&&<div style={{fontSize:9,color:"#9397ab",fontStyle:"italic",padding:"4px 0"}}>Нет активных игроков — отметь игроков "В игру" в панели ГМ</div>}
 <div style={{display:"flex",flexWrap:"wrap",gap:3,marginTop:3}}>
-{playerChars.map(function(pc){var inf2=cF(pc);var pMx=pc.hpOv||mHP(inf2.fs);var pCur=pc.curHp!==null&&pc.curHp!==undefined?pc.curHp:pMx;var pPct=pMx>0?(pCur/pMx)*100:0;var isSel=playerTgtId===pc._fbId;
+{playerChars.map(function(pc){var inf2=cF(pc);var pMx=pc.hpOv||mHP(inf2.fs,pc);var pCur=pc.curHp!==null&&pc.curHp!==undefined?pc.curHp:pMx;var pPct=pMx>0?(pCur/pMx)*100:0;var isSel=playerTgtId===pc._fbId;
 return <button key={pc._fbId} onClick={function(){sPlayerTgt(isSel?null:pc._fbId)}} style={{padding:"3px 7px",borderRadius:6,border:"2px solid "+(isSel?"#3b82f6":"#34374a"),background:isSel?"#12233a":"#1b1d29",fontSize:9,fontWeight:isSel?700:400,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:1}}>
 <span>{pc.name}</span>
 <div style={{width:40,height:4,background:"#232532",borderRadius:2,overflow:"hidden"}}><div style={{height:"100%",width:pPct+"%",background:pPct<=25?"#ef4444":pPct<=50?"#f59e0b":"#10b981",borderRadius:2}}/></div>

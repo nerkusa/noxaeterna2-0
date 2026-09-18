@@ -39,7 +39,7 @@ var items=[];
 items.sort(function(a,b){return a.ts-b.ts});
 
 function fmtYkt(ts){
-  try{return new Intl.DateTimeFormat('ru-RU',{timeZone:'Asia/Yakutsk',hour:'2-digit',minute:'2-digit'}).format(new Date(ts))+" YKT"}
+  try{return new Intl.DateTimeFormat('ru-RU',{timeZone:'Asia/Yakutsk',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}).format(new Date(ts))}
   catch(e){return ""}
 }
 
