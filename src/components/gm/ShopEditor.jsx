@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ARMOR_T } from '../../data/combat';
 import { DT, WT } from '../../data/stats';
 import { uid } from '../../utils/dice';
+import { CUR_ORDER, CUR_LABEL, CUR_NAME, emptyCurrency, fmtCurrency, toCopper } from '../../utils/currency';
 
 const backBtn = { padding: '5px 12px', borderRadius: 6, border: '2px solid #34374a', background: '#1b1d29', color: '#e9e9ed', fontWeight: 700, fontSize: 11, cursor: 'pointer' };
 const inp = { width: '100%', padding: '6px 8px', border: '2px solid #34374a', borderRadius: 6, fontSize: 12, fontFamily: "'Inter',sans-serif", background: '#232532', color: '#e9e9ed', outline: 'none' };
@@ -35,6 +36,7 @@ const SLOT_LABEL = { head: 'Голова', body: 'Тело' };
 function subOf(it) { if (it.cat === 'armor') return it.slot || 'body'; if (it.cat === 'shield') return it.type; if (it.cat === 'weapon') return it.wtype; return null; }
 
 function field(label, node) { return <div style={{ flex: 1 }}><label style={lbl}>{label}</label>{node}</div>; }
+function priceOf(it) { return (it.price && typeof it.price === 'object') ? it.price : emptyCurrency(); }
 
 export default function ShopEditor(pr) {
   const shop = Array.isArray(pr.shop) ? pr.shop : [];
@@ -45,12 +47,25 @@ export default function ShopEditor(pr) {
   const persist = function (arr) { saveShop(arr); };
   const upd = function (id, patch) { persist(shop.map(function (i) { return i.id === id ? Object.assign({}, i, patch) : i; })); };
   const del = function (id) { if (window.confirm('Удалить вещь из магазина?')) persist(shop.filter(function (i) { return i.id !== id; })); };
+  const priceField = function (it) {
+    const p = priceOf(it);
+    return (
+      <div style={{ flex: 1 }}>
+        <label style={lbl}>Цена</label>
+        <div style={{ display: 'flex', gap: 3 }}>
+          {CUR_ORDER.map(function (k) {
+            return <input key={k} type="number" min="0" value={p[k] || 0} onChange={function (e) { const np = Object.assign({}, p); np[k] = Math.max(0, parseInt(e.target.value) || 0); upd(it.id, { price: np }); }} title={CUR_NAME[k]} placeholder={CUR_LABEL[k]} style={Object.assign({}, inp, { minWidth: 0, textAlign: 'center', padding: '6px 2px' })} />;
+          })}
+        </div>
+      </div>
+    );
+  };
   const add = function () {
     const base = {
-      armor: { cat: 'armor', name: 'Новая броня', type: 'light', slot: 'body', hp: 10, price: '', desc: '' },
-      weapon: { cat: 'weapon', name: 'Новое оружие', wtype: 'Battle', dmgDice: '1d6', dmgType: 'Р', hands: 1, bonus: 0, dmgDice2h: '2d6', bonus2h: 0, price: '' },
-      shield: { cat: 'shield', name: 'Новый щит', type: 'light', hp: 15, price: '' },
-      item: { cat: 'item', name: 'Новый предмет', desc: '', price: '', ptype: '', dice: '' },
+      armor: { cat: 'armor', name: 'Новая броня', type: 'light', slot: 'body', hp: 10, price: emptyCurrency(), desc: '' },
+      weapon: { cat: 'weapon', name: 'Новое оружие', wtype: 'Battle', dmgDice: '1d6', dmgType: 'Р', hands: 1, bonus: 0, dmgDice2h: '2d6', bonus2h: 0, price: emptyCurrency() },
+      shield: { cat: 'shield', name: 'Новый щит', type: 'light', hp: 15, price: emptyCurrency() },
+      item: { cat: 'item', name: 'Новый предмет', desc: '', price: emptyCurrency(), ptype: '', dice: '' },
     }[cat];
     const it = Object.assign({ id: uid() }, base);
     persist(shop.concat([it]));
@@ -83,8 +98,8 @@ export default function ShopEditor(pr) {
           </div>
           <div style={{ display: 'flex', gap: 6 }}>
             {field('HP брони', <input type="number" value={it.hp} onChange={function (e) { upd(it.id, { hp: parseInt(e.target.value) || 1 }); }} style={inp} />)}
-            {field('Цена', <input value={it.price} onChange={function (e) { upd(it.id, { price: e.target.value }); }} placeholder="напр. 200" style={inp} />)}
           </div>
+          {priceField(it)}
           {field('Описание (для игроков)', <textarea value={it.desc || ''} onChange={function (e) { upd(it.id, { desc: e.target.value }); }} placeholder="Как выглядит, откуда взялась…" style={Object.assign({}, inp, { minHeight: 40, resize: 'vertical' })} />)}
         </div>
       );
@@ -96,8 +111,8 @@ export default function ShopEditor(pr) {
           <div style={{ display: 'flex', gap: 6 }}>
             {field('Тип', <select value={it.type} onChange={function (e) { upd(it.id, { type: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}>{SHIELD_T.map(function (s) { return <option key={s.id} value={s.id}>{s.name + ' ' + (s.absorb * 100) + '% (Body≥' + s.bodyReq + ')'}</option>; })}</select>)}
             {field('HP щита', <input type="number" value={it.hp} onChange={function (e) { upd(it.id, { hp: parseInt(e.target.value) || 1 }); }} style={inp} />)}
-            {field('Цена', <input value={it.price} onChange={function (e) { upd(it.id, { price: e.target.value }); }} style={inp} />)}
           </div>
+          {priceField(it)}
         </div>
       );
     }
@@ -113,8 +128,8 @@ export default function ShopEditor(pr) {
           <div style={{ display: 'flex', gap: 6 }}>
             {field('Кубик', <input value={it.dmgDice} onChange={function (e) { upd(it.id, { dmgDice: e.target.value }); }} placeholder="1d6" style={inp} />)}
             {field('Бонус', <input type="number" value={it.bonus} onChange={function (e) { upd(it.id, { bonus: parseInt(e.target.value) || 0 }); }} style={inp} />)}
-            {field('Цена', <input value={it.price} onChange={function (e) { upd(it.id, { price: e.target.value }); }} style={inp} />)}
           </div>
+          {priceField(it)}
           {(it.dmgType === 'П' || it.wtype === 'Archery') && (
             <div style={{ display: 'flex', gap: 6 }}>
               {field(it.wtype === 'Archery' ? '🏹 Колчан (выстрелов)' : '🔫 Обойма (патронов)', <input type="number" value={it.clip || 1} onChange={function (e) { upd(it.id, { clip: parseInt(e.target.value) || 1 }); }} style={inp} />)}
@@ -134,7 +149,7 @@ export default function ShopEditor(pr) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 6 }}>
         {field('Название', <input value={it.name} onChange={function (e) { upd(it.id, { name: e.target.value }); }} style={inp} />)}
         {field('Описание', <textarea value={it.desc} onChange={function (e) { upd(it.id, { desc: e.target.value }); }} style={Object.assign({}, inp, { minHeight: 40, resize: 'vertical' })} />)}
-        {field('Цена', <input value={it.price} onChange={function (e) { upd(it.id, { price: e.target.value }); }} placeholder="напр. 50" style={inp} />)}
+        {priceField(it)}
         <div style={{ display: 'flex', gap: 6 }}>
           {field('Тип снаряда (необязательно)', <select value={it.ptype || ''} onChange={function (e) { upd(it.id, { ptype: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}><option value="">— нет —</option>{PROJ_TYPES.map(function (p) { return <option key={p} value={p}>{p}</option>; })}</select>)}
           {field('Кубик починки (необязательно)', <select value={it.dice || ''} onChange={function (e) { upd(it.id, { dice: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}><option value="">— нет —</option>{REPAIR_DICE.map(function (d) { return <option key={d} value={d}>{d}</option>; })}</select>)}
@@ -150,7 +165,7 @@ export default function ShopEditor(pr) {
       <div key={it.id} style={{ border: '2px solid #34374a', borderRadius: 9, background: '#1b1d29', padding: '7px 9px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontFamily: "'Inter',sans-serif", fontWeight: 700, fontSize: 12, color: '#e9e9ed' }}>{it.name}{it.price ? <span style={{ fontSize: 9, color: '#d97706', marginLeft: 5 }}>{'💰 ' + it.price}</span> : null}</div>
+            <div style={{ fontFamily: "'Inter',sans-serif", fontWeight: 700, fontSize: 12, color: '#e9e9ed' }}>{it.name}{toCopper(priceOf(it)) > 0 ? <span style={{ fontSize: 9, color: '#d97706', marginLeft: 5 }}>{'💰 ' + fmtCurrency(priceOf(it))}</span> : null}</div>
             <div style={{ fontSize: 8, color: '#9397ab' }}>{summary(it)}</div>
           </div>
           <button onClick={function () { del(it.id); }} style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: 13, cursor: 'pointer' }}>🗑</button>

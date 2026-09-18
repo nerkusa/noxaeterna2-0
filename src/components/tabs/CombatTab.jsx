@@ -8,6 +8,7 @@ import { cF, mHP } from '../../utils/character';
 import { applyDmgToNpc } from '../../utils/combat';
 import { pk, r1, rN, sm, uid, rollHit } from '../../utils/dice';
 import ArmorSection from './ArmorSection';
+import InvTab from './InvTab';
 import ShopPicker from '../ShopPicker';
 import InitiativeBar from '../combat/InitiativeBar';
 
@@ -152,68 +153,6 @@ else{oR({label:w.name+" Попад."+(aimP?" · "+selZone:""),d10:d,crit:R.crit,
 {/* Броня игрока */}
 <ArmorSection char={c} save={sv} finalStats={fs} finalSkills={es} shop={pr.shop} characters={pr.characters} room={pr.room} addLog={pr.addLog} onRoll={oR}/>
 
-</div>
-<div style={{display:"flex",flexDirection:"column",gap:14}}>
-
-{/* Профессия */}
-{pf.id!=="none"&&<div className="n-card">
-<Lbl>Профессия</Lbl>
-<div style={{fontWeight:700,fontSize:15,marginTop:6}}>{pf.name}</div>
-{profDesc&&<div style={{fontSize:12,color:"var(--color-text-muted)",lineHeight:1.55,marginTop:4}}>{profDesc}</div>}
-<div style={{borderTop:"1px solid var(--color-divider)",margin:"10px 0"}}/>
-{(function(){
-  if(pf.id==="warrior"||profAbilityType==="bonus_attack"){
-    var cbActive=c.warriorBonus;var cbUsed=c.warriorBonusUsed;
-    return(<div>
-      <div style={{fontSize:12,color:"var(--color-text)",lineHeight:1.55,marginBottom:8}}>{(pf.abN||"Способность")+": "+(pf.abilityDesc||pdDef.abilityDesc||(cbActive?"Активна — следующая атака +5":"Один раз в день: +5 к атаке в одном ходу"))}</div>
-      <div style={{display:"flex",gap:6}}>
-        <button disabled={cbUsed} onClick={function(){sv(Object.assign({},c,{warriorBonus:true,warriorBonusUsed:true}))}} className="n-btn" style={{flex:1,border:"none",background:cbUsed?"var(--color-divider)":cbActive?"#10b981":"#f59e0b",color:cbUsed?"var(--color-text-muted)":"#fff",fontSize:12}}>{cbUsed?(cbActive?"+5 активен":"Использовано сегодня"):"Активировать +5"}</button>
-        {cbActive&&<button onClick={function(){sv(Object.assign({},c,{warriorBonus:false}))}} className="n-btn n-btn-secondary" style={{fontSize:11}}>Снять</button>}
-        {cbUsed&&<button onClick={function(){sv(Object.assign({},c,{warriorBonus:false,warriorBonusUsed:false}))}} title="Сбросить (новый день)" className="n-btn n-btn-secondary" style={{fontSize:11}}>Сброс</button>}
-      </div>
-    </div>);
-  }
-  if(pf.id==="sensitive"||profAbilityType==="toggle"){
-    var senActive=pf.id==="sensitive"?c.sensitiveBonus:c.customStance;
-    var toggleKey=pf.id==="sensitive"?"sensitiveBonus":"customStance";
-    return(<div>
-      <div style={{fontSize:12,color:"var(--color-text)",lineHeight:1.55,marginBottom:8}}>{(pf.abN||"Способность")+": "+(pf.abilityDesc||pdDef.abilityDesc||"Переключатель режима")}</div>
-      <button onClick={function(){var u={};u[toggleKey]=!senActive;sv(Object.assign({},c,u))}} className="n-btn" style={{width:"100%",border:"none",background:senActive?"#10b981":"var(--color-accent)",color:"#fff",fontSize:12}}>{senActive?"Активно — нажми чтобы выключить":"Активировать"}</button>
-    </div>);
-  }
-  if(profAbilityType==="roll_charisma"){
-    var merchantUsed=!!c.merchantUsed;
-    return(<div>
-      <div style={{fontSize:12,color:"var(--color-text)",lineHeight:1.55,marginBottom:8}}>{(pf.abN||"Способность")+": "+(pf.abilityDesc||pdDef.abilityDesc||"")}</div>
-      <button disabled={merchantUsed} onClick={function(){if(merchantUsed)return;sv(Object.assign({},c,{merchantUsed:true}));var d=r1(10);var ev=fs.EMP||0;var sk=es["Убеждение"]||0;var t=d+ev+sk+5;pr.addLog({who:c.name||"???",type:"skill",label:(pf.abN||"Убеждение")+" +5",detail:"d10("+d+")+EMP("+ev+")+Убеждение("+sk+")+5 = "+t,total:t});oR({label:(pf.abN||"Убеждение")+" (+5)",d10:d,parts:[{label:"EMP",value:ev},{label:"Убеждение",value:sk},{label:"+5",value:5}],total:t})}} className="n-btn" style={{width:"100%",border:"none",background:merchantUsed?"var(--color-divider)":"var(--color-accent)",color:merchantUsed?"var(--color-text-muted)":"#fff",fontSize:12}}>{merchantUsed?"Использовано (отдых сбросит)":"Бросить Убеждение (+5)"}</button>
-    </div>);
-  }
-  if(profAbilityType==="check"){
-    return(<div>
-      <div style={{fontSize:12,color:"var(--color-text)",lineHeight:1.55,marginBottom:8}}>{(pf.abN||"Способность")+": "+(pf.abilityDesc||pdDef.abilityDesc||"")}</div>
-      <button onClick={function(){var d=r1(10);var hit=d>=6;pr.addLog({who:c.name||"???",type:"skill",label:(pf.abN||"Проверка")+": оценка механизма",detail:"d10="+d+(hit?" — успех":" — неудача"),total:d});oR({label:pf.abN||"Проверка",d10:d,parts:[],total:d,subtext:hit?"Успех — оценено!":"Неудача"})}} className="n-btn" style={{width:"100%",border:"none",background:"#f59e0b",color:"#fff",fontSize:12}}>Проверить механизм</button>
-    </div>);
-  }
-  return(pf.abilityDesc||pdDef.abilityDesc)?<div style={{fontSize:12,color:"var(--color-text)",lineHeight:1.55}}>{(pf.abN||"Способность")+": "+(pf.abilityDesc||pdDef.abilityDesc)}</div>:null;
-})()}
-</div>}
-
-{/* Инвентарь — сводка только для чтения, управление в отдельной вкладке «Инв.» */}
-<div className="n-card">
-<Lbl>Инвентарь</Lbl>
-<div style={{marginTop:8,display:"flex",flexDirection:"column",gap:7}}>
-<div style={{display:"flex",justifyContent:"space-between",fontSize:12}}><span>Кошель</span><span style={{fontWeight:700,color:"#d97706"}}>{"серебро "+(c.gold||0)}</span></div>
-{(c.inventory||[]).length===0&&<div style={{fontSize:12,color:"var(--color-text-muted)",fontStyle:"italic"}}>Пусто</div>}
-{(c.inventory||[]).map(function(it,idx){return <div key={(it.id!=null?it.id:"i")+"_"+idx} style={{display:"flex",justifyContent:"space-between",fontSize:12}}><span>{it.name}</span><span style={{color:"var(--color-text-muted)"}}>{it.qty!=null?it.qty:"—"}</span></div>})}
-</div>
-</div>
-
-</div>
-</div>
-
-<div className="n-combat-grid">
-<div style={{display:"flex",flexDirection:"column",gap:14}}>
-
 {pr.initiative&&<InitiativeBar initiative={pr.initiative}/>}
 
 {/* Ход: объявить действие / передать ход */}
@@ -289,9 +228,63 @@ else{oR({label:w.name+" Попад."+(aimP?" · "+selZone:""),d10:d,crit:R.crit,
 </div>
 <div style={{display:"flex",flexDirection:"column",gap:14}}>
 
-{/* Цель + прицельный удар — один блок */}
+{/* Профессия */}
+{pf.id!=="none"&&<div className="n-card">
+<Lbl>Профессия</Lbl>
+<div style={{fontWeight:700,fontSize:15,marginTop:6}}>{pf.name}</div>
+{profDesc&&<div style={{fontSize:12,color:"var(--color-text-muted)",lineHeight:1.55,marginTop:4}}>{profDesc}</div>}
+<div style={{borderTop:"1px solid var(--color-divider)",margin:"10px 0"}}/>
+{(function(){
+  if(pf.id==="warrior"||profAbilityType==="bonus_attack"){
+    var cbActive=c.warriorBonus;var cbUsed=c.warriorBonusUsed;
+    return(<div>
+      <div style={{fontSize:12,color:"var(--color-text)",lineHeight:1.55,marginBottom:8}}>{(pf.abN||"Способность")+": "+(pf.abilityDesc||pdDef.abilityDesc||(cbActive?"Активна — следующая атака +5":"Один раз в день: +5 к атаке в одном ходу"))}</div>
+      <div style={{display:"flex",gap:6}}>
+        <button disabled={cbUsed} onClick={function(){sv(Object.assign({},c,{warriorBonus:true,warriorBonusUsed:true}))}} className="n-btn" style={{flex:1,border:"none",background:cbUsed?"var(--color-divider)":cbActive?"#10b981":"#f59e0b",color:cbUsed?"var(--color-text-muted)":"#fff",fontSize:12}}>{cbUsed?(cbActive?"+5 активен":"Использовано сегодня"):"Активировать +5"}</button>
+        {cbActive&&<button onClick={function(){sv(Object.assign({},c,{warriorBonus:false}))}} className="n-btn n-btn-secondary" style={{fontSize:11}}>Снять</button>}
+        {cbUsed&&<button onClick={function(){sv(Object.assign({},c,{warriorBonus:false,warriorBonusUsed:false}))}} title="Сбросить (новый день)" className="n-btn n-btn-secondary" style={{fontSize:11}}>Сброс</button>}
+      </div>
+    </div>);
+  }
+  if(pf.id==="sensitive"||profAbilityType==="toggle"){
+    var senActive=pf.id==="sensitive"?c.sensitiveBonus:c.customStance;
+    var toggleKey=pf.id==="sensitive"?"sensitiveBonus":"customStance";
+    return(<div>
+      <div style={{fontSize:12,color:"var(--color-text)",lineHeight:1.55,marginBottom:8}}>{(pf.abN||"Способность")+": "+(pf.abilityDesc||pdDef.abilityDesc||"Переключатель режима")}</div>
+      <button onClick={function(){var u={};u[toggleKey]=!senActive;sv(Object.assign({},c,u))}} className="n-btn" style={{width:"100%",border:"none",background:senActive?"#10b981":"var(--color-accent)",color:"#fff",fontSize:12}}>{senActive?"Активно — нажми чтобы выключить":"Активировать"}</button>
+    </div>);
+  }
+  if(profAbilityType==="roll_charisma"){
+    var merchantUsed=!!c.merchantUsed;
+    return(<div>
+      <div style={{fontSize:12,color:"var(--color-text)",lineHeight:1.55,marginBottom:8}}>{(pf.abN||"Способность")+": "+(pf.abilityDesc||pdDef.abilityDesc||"")}</div>
+      <button disabled={merchantUsed} onClick={function(){if(merchantUsed)return;sv(Object.assign({},c,{merchantUsed:true}));var d=r1(10);var ev=fs.EMP||0;var sk=es["Убеждение"]||0;var t=d+ev+sk+5;pr.addLog({who:c.name||"???",type:"skill",label:(pf.abN||"Убеждение")+" +5",detail:"d10("+d+")+EMP("+ev+")+Убеждение("+sk+")+5 = "+t,total:t});oR({label:(pf.abN||"Убеждение")+" (+5)",d10:d,parts:[{label:"EMP",value:ev},{label:"Убеждение",value:sk},{label:"+5",value:5}],total:t})}} className="n-btn" style={{width:"100%",border:"none",background:merchantUsed?"var(--color-divider)":"var(--color-accent)",color:merchantUsed?"var(--color-text-muted)":"#fff",fontSize:12}}>{merchantUsed?"Использовано (отдых сбросит)":"Бросить Убеждение (+5)"}</button>
+    </div>);
+  }
+  if(profAbilityType==="check"){
+    return(<div>
+      <div style={{fontSize:12,color:"var(--color-text)",lineHeight:1.55,marginBottom:8}}>{(pf.abN||"Способность")+": "+(pf.abilityDesc||pdDef.abilityDesc||"")}</div>
+      <button onClick={function(){var d=r1(10);var hit=d>=6;pr.addLog({who:c.name||"???",type:"skill",label:(pf.abN||"Проверка")+": оценка механизма",detail:"d10="+d+(hit?" — успех":" — неудача"),total:d});oR({label:pf.abN||"Проверка",d10:d,parts:[],total:d,subtext:hit?"Успех — оценено!":"Неудача"})}} className="n-btn" style={{width:"100%",border:"none",background:"#f59e0b",color:"#fff",fontSize:12}}>Проверить механизм</button>
+    </div>);
+  }
+  return(pf.abilityDesc||pdDef.abilityDesc)?<div style={{fontSize:12,color:"var(--color-text)",lineHeight:1.55}}>{(pf.abN||"Способность")+": "+(pf.abilityDesc||pdDef.abilityDesc)}</div>:null;
+})()}
+</div>}
+
+{/* Инвентарь — полностью функционален прямо здесь */}
 <div className="n-card">
-<div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}><Lbl>Цель</Lbl>{tgtNpc&&<button onClick={function(){sAim(!aim)}} title="Прицельный удар: бьёшь по выбранной зоне со штрафом к попаданию" className="n-btn n-btn-secondary" style={{padding:"3px 9px",fontSize:10,color:aim?"#f0b352":"var(--color-text-muted)",borderColor:aim?"#f59e0b":"var(--color-divider)"}}>{aim?("Прицельно (−"+aimPen(selZone)+")"):"Прицельно: выкл"}</button>}</div>
+<Lbl>Инвентарь</Lbl>
+<div style={{marginTop:8}}>
+<InvTab char={c} save={sv} shop={pr.shop}/>
+</div>
+</div>
+
+{/* Цель + прицельный удар — один блок, открыт по умолчанию */}
+<div className="n-card">
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+<Lbl>Цель</Lbl>
+<button onClick={function(){sAim(!aim)}} title="Прицельный удар: бьёшь по выбранной зоне со штрафом к попаданию" style={{padding:"6px 14px",borderRadius:8,border:"none",fontWeight:800,fontSize:12,letterSpacing:.02,cursor:"pointer",background:aim?"linear-gradient(90deg,#f59e0b,#f0b352)":"var(--color-sunken)",color:aim?"#1a1206":"var(--color-text-muted)",boxShadow:aim?"0 0 0 1.5px #f59e0b, 0 2px 8px rgba(245,158,11,.35)":"0 0 0 1.5px var(--color-divider)",transition:"all .15s"}}>{aim?("⚔ Прицельный удар (−"+aimPen(selZone)+")"):"⚔ Прицельный удар"}</button>
+</div>
 <div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:8}}>
 {spawnedArr.length===0&&<div style={{fontSize:12,color:"var(--color-text-muted)",fontStyle:"italic"}}>На поле боя пока никого нет</div>}
 {spawnedArr.map(function(e){var nid=e[0];var n=e[1];var nHp=n.hp!==undefined?n.hp:n.maxHp;var hpPct=n.maxHp>0?(nHp/n.maxHp)*100:0;var isSel=tgtId===nid;
@@ -320,6 +313,16 @@ return(<div style={{marginTop:10,paddingTop:10,borderTop:"1px solid var(--color-
 </button>})}
 </div>
 {aim&&<div style={{fontSize:11,color:"#f0b352",marginTop:6,fontStyle:"italic"}}>{"Прицельно в «"+selZone+"»: −"+aimPen(selZone)+" к попаданию, урон точно по этой зоне."}</div>}
+</div>}
+{!tgtNpc&&<div style={{marginTop:10,paddingTop:10,borderTop:"1px solid var(--color-divider)",opacity:.45}}>
+<div style={{fontSize:10,fontWeight:700,letterSpacing:.05,textTransform:"uppercase",color:"var(--color-text-muted)",marginBottom:6}}>Зона удара</div>
+<div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:6}}>
+{ZONES.map(function(z){var isSel=selZone===z.name;return <button key={z.name} disabled onClick={function(){sZone(z.name)}} style={{padding:"8px 6px",borderRadius:9,border:"1.5px solid "+(isSel?"#f59e0b":"var(--color-divider)"),background:isSel?"rgba(245,158,11,.12)":"var(--color-sunken)",cursor:"not-allowed",textAlign:"left"}}>
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}><span style={{fontSize:12,fontWeight:700}}>{z.name}</span><span style={{fontSize:10,color:"var(--color-text-muted)"}}>{"×"+z.mult}</span></div>
+<div style={{fontSize:9,color:"var(--color-text-muted)",marginTop:2}}>{z.ignoreArmor?"игнор брони":""}</div>
+</button>})}
+</div>
+<div style={{fontSize:10,color:"var(--color-text-muted)",marginTop:6,fontStyle:"italic"}}>Выбери цель выше, чтобы бить по зонам</div>
 </div>}
 </div>
 
