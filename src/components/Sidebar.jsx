@@ -4,6 +4,7 @@ import { S } from '../styles/ui';
 import { cF, mHP, uSP, uSkP } from '../utils/character';
 import { rollHit } from '../utils/dice';
 import { getProfs } from '../utils/profStore';
+import { IconD10 } from '../icons/index';
 
 /* Постоянная левая колонка — характеристики и навыки видны всегда,
    не прячутся за вкладкой (в отличие от остального листа персонажа). */
@@ -55,8 +56,8 @@ return(<div key={st.key} style={{marginBottom:1}}>
 <span style={{fontSize:10,color:"var(--color-text-muted)",width:9}}>{op?"⌄":"›"}</span>
 <span style={{fontSize:11,fontWeight:700,color:st.color,width:30,flexShrink:0}}>{st.key}</span>
 <span className="n-sidebar-hide-compact" style={{flex:1,fontSize:13,color:"var(--color-text)",minWidth:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{st.full}</span>
-<span style={{fontSize:15,fontWeight:600}}>{v}</span>
-<span onClick={function(e){e.stopPropagation();var R=rollHit();var d=R.d;var t=d+v;if(pr.addLog)pr.addLog({who:c.name||"???",type:"skill",label:"Бросок "+st.key+(R.crit?" 🌟КРИТ":R.fumble?" 💀ПРОВАЛ":""),detail:"🎲"+d+" + "+st.key+"("+v+") = "+t,total:t});oR({label:st.key,d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:st.key,value:v}],total:t})}} title="Бросить характеристику" style={{fontSize:13,color:st.color,cursor:"pointer",padding:"2px 2px 2px 4px"}}>🎲</span>
+<span style={{fontSize:16,fontWeight:700,color:"var(--color-text)"}}>{v}</span>
+<span onClick={function(e){e.stopPropagation();var R=rollHit();var d=R.d;var t=d+v;if(pr.addLog)pr.addLog({who:c.name||"???",type:"skill",label:"Бросок "+st.key+(R.crit?" 🌟КРИТ":R.fumble?" 💀ПРОВАЛ":""),detail:"d10("+d+") + "+st.key+"("+v+") = "+t,total:t});oR({label:st.key,d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:st.key,value:v}],total:t})}} title="Бросить характеристику" style={{color:st.color,cursor:"pointer",padding:"2px 2px 2px 4px",display:"flex",alignItems:"center"}}><IconD10 size={13}/></span>
 </button>
 <div style={{display:"flex",justifyContent:"flex-end",gap:4,padding:"0 8px 2px"}}>
 <button onClick={function(){uS(st.key,-1)}} style={Object.assign({},S.sm,{width:20,height:18,fontSize:10})}>−</button>
@@ -68,7 +69,7 @@ return(<div key={st.key} style={{marginBottom:1}}>
 <button onClick={function(){uSk(sk.name,-1)}} style={Object.assign({},S.sm,{width:18,height:18,fontSize:9})}>−</button>
 <span style={{fontSize:13,fontWeight:700,minWidth:16,textAlign:"center",color:ev>0?st.color:"var(--color-text-muted)"}}>{ev}</span>
 <button onClick={function(){uSk(sk.name,1)}} style={Object.assign({},S.sm,{width:18,height:18,fontSize:9,color:st.color})}>+</button>
-<span onClick={function(){var R=rollHit();var d=R.d;var sv2=fs[st.key];var t=d+sv2+ev;if(pr.addLog)pr.addLog({who:c.name||"???",type:"skill",label:"Бросок "+skLabel(sk.name)+(R.crit?" 🌟КРИТ":R.fumble?" 💀ПРОВАЛ":""),detail:"🎲"+d+" + "+st.key+"("+sv2+") + "+skLabel(sk.name)+"("+ev+") = "+t,total:t});oR({label:skLabel(sk.name),d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:st.key,value:sv2},{label:skLabel(sk.name),value:ev}],total:t})}} style={{fontSize:12,color:st.color,cursor:"pointer",opacity:ev>0?1:0.4}}>🎲</span>
+<span onClick={function(){var R=rollHit();var d=R.d;var sv2=fs[st.key];var t=d+sv2+ev;if(pr.addLog)pr.addLog({who:c.name||"???",type:"skill",label:"Бросок "+skLabel(sk.name)+(R.crit?" 🌟КРИТ":R.fumble?" 💀ПРОВАЛ":""),detail:"d10("+d+") + "+st.key+"("+sv2+") + "+skLabel(sk.name)+"("+ev+") = "+t,total:t});oR({label:skLabel(sk.name),d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:st.key,value:sv2},{label:skLabel(sk.name),value:ev}],total:t})}} style={{color:st.color,cursor:"pointer",opacity:ev>0?1:0.4,display:"flex",alignItems:"center"}}><IconD10 size={12}/></span>
 </div>)})}
 </div>}
 </div>)})}

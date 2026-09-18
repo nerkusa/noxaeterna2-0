@@ -8,4 +8,7 @@ var IconChat=function(){return <svg width="18" height="18" viewBox="0 0 24 24" f
 
 var IconScroll=function(){return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M8 4h11a2 2 0 0 1 0 4H8"/><path d="M8 20h11a2 2 0 0 0 0-4H8"/><path d="M8 4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2"/><line x1="11" y1="9.5" x2="16" y2="9.5"/><line x1="11" y1="12" x2="16" y2="12"/><line x1="11" y1="14.5" x2="14.5" y2="14.5"/></svg>};
 
-export { IconChar, IconBattle, IconInv, IconLib, IconParty, IconChat, IconScroll };
+/* d10 — кита-силуэт десятигранника с ребром посередине */
+var IconD10=function(pr){var s=(pr&&pr.size)||16;var st=(pr&&pr.style)||{};return <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round" style={st}><path d="M12 2 L20 8.5 L15.5 21 L8.5 21 L4 8.5 Z"/><path d="M4 8.5 L20 8.5"/></svg>};
+
+export { IconChar, IconBattle, IconInv, IconLib, IconParty, IconChat, IconScroll, IconD10 };
