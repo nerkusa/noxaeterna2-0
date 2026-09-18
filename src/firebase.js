@@ -57,6 +57,9 @@ function connect() {
     } else if (msg.t === 'auth' && msg.rid != null) {
       var w3 = waiters.get(msg.rid);
       if (w3) { waiters.delete(msg.rid); w3.resolve({ ok: !!msg.ok, error: msg.error || null, login: msg.login, role: msg.role }); }
+    } else if (msg.t === 'change_account' && msg.rid != null) {
+      var w4 = waiters.get(msg.rid);
+      if (w4) { waiters.delete(msg.rid); w4.resolve({ ok: !!msg.ok, error: msg.error || null, login: msg.login, role: msg.role }); }
     }
   };
 }
@@ -139,6 +142,14 @@ function authRegister(login, password) {
   });
 }
 
+function authChangeAccount(room, oldLogin, currentPassword, newLogin, newPassword) {
+  return new Promise(function (resolve) {
+    var rid = 'r' + (ridSeq++);
+    waiters.set(rid, { resolve: resolve });
+    send({ t: 'change_account', room: room, oldLogin: oldLogin, currentPassword: currentPassword, newLogin: newLogin, newPassword: newPassword || null, rid: rid });
+  });
+}
+
 var db = {};
 
-export { db, ref, set, get, onValue, update, remove, push, authLogin, authRegister };
+export { db, ref, set, get, onValue, update, remove, push, authLogin, authRegister, authChangeAccount };

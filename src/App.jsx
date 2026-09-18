@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { db, ref, set, get, onValue, update, remove } from './firebase';
+import { db, ref, set, get, onValue, update, remove, authChangeAccount } from './firebase';
 import { CSS } from './styles/globalCss';
 import { nC } from './utils/character';
 import { setRaces } from './utils/raceStore';
@@ -83,6 +83,15 @@ function saveNpcHit(ev){if(!room)return;var id=Date.now()+"_"+Math.floor(Math.ra
 function clearNpcHit(id){if(!room)return;remove(ref(db,"rooms/"+room+"/npcHits/"+id))}
 function saveShop(d){if(!room)return;set(ref(db,"rooms/"+room+"/shop"),d)}
 function saveInitiative(d){if(!room)return;set(ref(db,"rooms/"+room+"/initiative"),d)}
+function changeAccount(currentPassword,newLogin,newPassword){
+  return authChangeAccount(room,auth.login,currentPassword,newLogin,newPassword).then(function(res){
+    if(res.ok){
+      setAuth({login:res.login,role:res.role});
+      try{localStorage.setItem("nox_session",JSON.stringify({login:res.login,role:res.role}))}catch(e){}
+    }
+    return res;
+  })
+}
 function leave(){
   if(!window.confirm("Выйти?"))return;
   setAuth(null);sCh({});sLo({});sLg([]);
@@ -103,6 +112,6 @@ return(<div style={{fontFamily:"'Inter',sans-serif",color:"var(--color-text)",ba
 <button onClick={leave} className="n-btn" style={{color:"#ef4444",padding:"5px 8px",fontSize:11}}>Выйти</button>
 </div>
 </div>
-{isGM?<GMPanel characters={ca} saveChar={saveChar} deleteChar={deleteChar} lore={lore} saveLore={saveLore} logs={logs} addLog={addLog} clearLogs={clearLogs} chat={chat} sendChat={sendChat} myName={auth.login} mapData={mapData} saveMap={saveMap} npcTempl={npcTempl} saveNpcTempl={saveNpcTempl} spawned={spawned} saveSpawned={saveSpawned} roomCode={room} pendAtk={pendAtk} savePendingAttack={savePendingAttack} clearPendingAttack={clearPendingAttack} showBest={showBestApp} setShowBest={sShowBestApp} races={racesData} saveRaces={saveRaces} saveNpcHit={saveNpcHit} shop={shop} saveShop={saveShop} initiative={initiative} saveInitiative={saveInitiative} profs={profsData} saveProfs={saveProfs}/>:(function(){var my=ca.find(function(c){return c._fbId===pId});if(!my)return <div style={{padding:20,textAlign:"center"}}><div style={{fontFamily:"'Inter',sans-serif",fontSize:16,fontWeight:700}}>⏳ Подключение...</div></div>;return <GameView char={my} save={function(d){saveChar(pId,d)}} isGM={false} logs={logs} addLog={addLog} chat={chat} sendChat={sendChat} lore={lore} mapData={mapData} saveMap={saveMap} characters={ca} spawned={spawned} saveSpawned={saveSpawned} pendAtk={pendAtk} clearPendingAttack={clearPendingAttack} savePendingAttack={savePendingAttack} room={room} dmgEvents={dmgEvents} clearDmgEvent={clearDmgEvent} saveNpcHit={saveNpcHit} shop={shop} initiative={initiative}/>})()}
+{isGM?<GMPanel characters={ca} saveChar={saveChar} deleteChar={deleteChar} lore={lore} saveLore={saveLore} logs={logs} addLog={addLog} clearLogs={clearLogs} chat={chat} sendChat={sendChat} myName={auth.login} mapData={mapData} saveMap={saveMap} npcTempl={npcTempl} saveNpcTempl={saveNpcTempl} spawned={spawned} saveSpawned={saveSpawned} roomCode={room} pendAtk={pendAtk} savePendingAttack={savePendingAttack} clearPendingAttack={clearPendingAttack} showBest={showBestApp} setShowBest={sShowBestApp} races={racesData} saveRaces={saveRaces} saveNpcHit={saveNpcHit} shop={shop} saveShop={saveShop} initiative={initiative} saveInitiative={saveInitiative} profs={profsData} saveProfs={saveProfs}/>:(function(){var my=ca.find(function(c){return c._fbId===pId});if(!my)return <div style={{padding:20,textAlign:"center"}}><div style={{fontFamily:"'Inter',sans-serif",fontSize:16,fontWeight:700}}>⏳ Подключение...</div></div>;return <GameView char={my} save={function(d){saveChar(pId,d)}} isGM={false} logs={logs} addLog={addLog} chat={chat} sendChat={sendChat} lore={lore} mapData={mapData} saveMap={saveMap} characters={ca} spawned={spawned} saveSpawned={saveSpawned} pendAtk={pendAtk} clearPendingAttack={clearPendingAttack} savePendingAttack={savePendingAttack} room={room} dmgEvents={dmgEvents} clearDmgEvent={clearDmgEvent} saveNpcHit={saveNpcHit} shop={shop} initiative={initiative} changeAccount={changeAccount}/>})()}
 </div>)}
 

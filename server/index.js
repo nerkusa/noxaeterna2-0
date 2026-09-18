@@ -171,6 +171,41 @@ wss.on('connection', function (ws) {
       const u = users[login];
       const ok = !!u && hashPassword(password, u.salt) === u.hash;
       ws.send(JSON.stringify({ t: 'auth', rid: msg.rid, ok: ok, error: ok ? null : 'Неверный логин или пароль', login: login, role: 'player' }));
+    } else if (msg.t === 'change_account') {
+      const room = String(msg.room || '').trim();
+      const oldLogin = String(msg.oldLogin || '').trim();
+      const currentPassword = String(msg.currentPassword || '');
+      const newLogin = String(msg.newLogin || '').trim() || oldLogin;
+      const newPassword = msg.newPassword ? String(msg.newPassword) : null;
+      let error = null;
+      const u = users[oldLogin];
+      if (oldLogin.toLowerCase() === ADMIN_LOGIN.toLowerCase()) error = 'Аккаунт ГМ нельзя изменить здесь';
+      else if (!u) error = 'Аккаунт не найден';
+      else if (hashPassword(currentPassword, u.salt) !== u.hash) error = 'Неверный текущий пароль';
+      else if (newLogin.length < 3) error = 'Логин слишком короткий (мин. 3 символа)';
+      else if (newPassword !== null && newPassword.length < 4) error = 'Новый пароль слишком короткий (мин. 4 символа)';
+      else if (newLogin.toLowerCase() === ADMIN_LOGIN.toLowerCase()) error = 'Этот логин занят';
+      else if (newLogin.toLowerCase() !== oldLogin.toLowerCase() && users[newLogin]) error = 'Такой логин уже есть';
+      if (!error) {
+        const salt = newPassword !== null ? crypto.randomBytes(16).toString('hex') : u.salt;
+        const hash = newPassword !== null ? hashPassword(newPassword, salt) : u.hash;
+        if (newLogin !== oldLogin) delete users[oldLogin];
+        users[newLogin] = { salt: salt, hash: hash };
+        scheduleUsersSave();
+        if (newLogin !== oldLogin && room) {
+          const segsOld = splitPath('rooms/' + room + '/characters/' + oldLogin);
+          const segsNew = splitPath('rooms/' + room + '/characters/' + newLogin);
+          const charData = getAt(segsOld);
+          if (charData !== null) {
+            setAt(segsNew, charData);
+            setAt(segsOld, null);
+            scheduleSave();
+            notify(segsOld);
+            notify(segsNew);
+          }
+        }
+      }
+      ws.send(JSON.stringify({ t: 'change_account', rid: msg.rid, ok: !error, error: error, login: newLogin, role: 'player' }));
     }
   });
 
