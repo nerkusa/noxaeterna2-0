@@ -49,7 +49,7 @@ export default function ShopEditor(pr) {
   const del = function (id) { if (window.confirm('Удалить вещь из магазина?')) persist(shop.filter(function (i) { return i.id !== id; })); };
   const add = function () {
     const base = {
-      armor: { cat: 'armor', name: 'Новая броня', type: 'light', slot: 'body', hp: 10, price: '' },
+      armor: { cat: 'armor', name: 'Новая броня', type: 'light', slot: 'body', hp: 10, price: '', desc: '' },
       weapon: { cat: 'weapon', name: 'Новое оружие', wtype: 'Battle', dmgDice: '1d6', dmgType: 'Р', hands: 1, bonus: 0, dmgDice2h: '2d6', bonus2h: 0, price: '' },
       shield: { cat: 'shield', name: 'Новый щит', type: 'light', hp: 15, price: '' },
       item: { cat: 'item', name: 'Новый предмет', desc: '', price: '' },
@@ -86,6 +86,7 @@ export default function ShopEditor(pr) {
             {field('HP брони', <input type="number" value={it.hp} onChange={function (e) { upd(it.id, { hp: parseInt(e.target.value) || 1 }); }} style={inp} />)}
             {field('Цена', <input value={it.price} onChange={function (e) { upd(it.id, { price: e.target.value }); }} placeholder="напр. 200" style={inp} />)}
           </div>
+          {field('Описание (для игроков)', <textarea value={it.desc || ''} onChange={function (e) { upd(it.id, { desc: e.target.value }); }} placeholder="Как выглядит, откуда взялась…" style={Object.assign({}, inp, { minHeight: 40, resize: 'vertical' })} />)}
         </div>
       );
     }
