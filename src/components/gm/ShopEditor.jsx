@@ -11,9 +11,7 @@ const CATS = [
   { id: 'armor', name: '🛡️ Броня', color: '#10b981' },
   { id: 'weapon', name: '⚔️ Оружие', color: '#3b82f6' },
   { id: 'shield', name: '🛡 Щиты', color: '#0ea5e9' },
-  { id: 'item', name: '🎒 Расходники', color: '#f59e0b' },
-  { id: 'tool', name: '🔧 Инструменты', color: '#a78bfa' },
-  { id: 'ammo', name: '🏹 Боеприпасы', color: '#84cc16' },
+  { id: 'item', name: '🎒 Вещи', color: '#f59e0b' },
 ];
 
 const PROJ_TYPES = ['Стрела', 'Болт', 'Пуля'];
@@ -52,25 +50,26 @@ export default function ShopEditor(pr) {
       armor: { cat: 'armor', name: 'Новая броня', type: 'light', slot: 'body', hp: 10, price: '', desc: '' },
       weapon: { cat: 'weapon', name: 'Новое оружие', wtype: 'Battle', dmgDice: '1d6', dmgType: 'Р', hands: 1, bonus: 0, dmgDice2h: '2d6', bonus2h: 0, price: '' },
       shield: { cat: 'shield', name: 'Новый щит', type: 'light', hp: 15, price: '' },
-      item: { cat: 'item', name: 'Новый предмет', desc: '', price: '' },
-      tool: { cat: 'tool', name: 'Лёгкий набор инструментов', dice: '1d4', desc: 'Починка снаряжения', price: '' },
-      ammo: { cat: 'ammo', name: 'Стрелы', ptype: 'Стрела', price: '' },
+      item: { cat: 'item', name: 'Новый предмет', desc: '', price: '', ptype: '', dice: '' },
     }[cat];
     const it = Object.assign({ id: uid() }, base);
     persist(shop.concat([it]));
     setEditId(it.id);
   };
 
-  const items = shop.filter(function (i) { return i.cat === cat; });
+  const items = shop.filter(function (i) { return cat === 'item' ? (i.cat === 'item' || i.cat === 'tool' || i.cat === 'ammo') : i.cat === cat; });
   const catColor = (CATS.find(function (c) { return c.id === cat; }) || CATS[0]).color;
 
   function summary(it) {
     if (it.cat === 'armor') { const a = ARMOR_T.find(function (x) { return x.id === it.type; }); return (SLOT_LABEL[it.slot || 'body']) + ' · ' + (a ? a.name : it.type) + ' · ' + it.hp + ' HP'; }
     if (it.cat === 'shield') { const s = SHIELD_T.find(function (x) { return x.id === it.type; }); return (s ? s.name + ' ' + (s.absorb * 100) + '%' : it.type) + ' · ' + it.hp + ' HP'; }
     if (it.cat === 'weapon') { const h = it.hands === 2 ? 'двуруч.' : it.hands === 1.5 ? 'полуторн.' : 'одноруч.'; return it.wtype + ' · ' + it.dmgDice + (it.bonus ? '+' + it.bonus : '') + ' · ' + it.dmgType + ' · ' + h; }
-    if (it.cat === 'tool') { return '🔧 Починка ' + (it.dice || '1d4') + (it.desc ? ' · ' + it.desc : ''); }
-    if (it.cat === 'ammo') { return '🏹 ' + (it.ptype || 'Стрела'); }
-    return it.desc || '';
+    // item (и легаси tool/ammo) — обычная вещь, необязательно с функцией снаряда или ремкомплекта
+    const parts = [];
+    if (it.desc) parts.push(it.desc);
+    if (it.ptype || it.cat === 'ammo') parts.push('🏹 Снаряд: ' + (it.ptype || 'Стрела'));
+    if (it.dice || it.cat === 'tool') parts.push('🔧 Починка ' + (it.dice || '1d4'));
+    return parts.join(' · ');
   }
 
   function editForm(it) {
@@ -130,36 +129,17 @@ export default function ShopEditor(pr) {
         </div>
       );
     }
-    if (it.cat === 'tool') {
-      return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 6 }}>
-          {field('Название', <input value={it.name} onChange={function (e) { upd(it.id, { name: e.target.value }); }} placeholder="Лёгкий / Средний / Тяжёлый набор" style={inp} />)}
-          <div style={{ display: 'flex', gap: 6 }}>
-            {field('Кубик починки', <select value={it.dice || '1d4'} onChange={function (e) { upd(it.id, { dice: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}>{REPAIR_DICE.map(function (d) { return <option key={d} value={d}>{d}</option>; })}</select>)}
-            {field('Цена', <input value={it.price} onChange={function (e) { upd(it.id, { price: e.target.value }); }} placeholder="напр. 100" style={inp} />)}
-          </div>
-          {field('Описание', <input value={it.desc} onChange={function (e) { upd(it.id, { desc: e.target.value }); }} style={inp} />)}
-          <div style={{ fontSize: 8, color: '#9397ab', fontStyle: 'italic' }}>Этим кубиком игрок чинит броню (1 раз в день). У Ремесленника добавляется +CRA.</div>
-        </div>
-      );
-    }
-    if (it.cat === 'ammo') {
-      return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 6 }}>
-          {field('Название', <input value={it.name} onChange={function (e) { upd(it.id, { name: e.target.value }); }} placeholder="Стрелы / Болты / Патроны" style={inp} />)}
-          <div style={{ display: 'flex', gap: 6 }}>
-            {field('Тип снаряда', <select value={it.ptype || 'Стрела'} onChange={function (e) { upd(it.id, { ptype: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}>{PROJ_TYPES.map(function (p) { return <option key={p} value={p}>{p}</option>; })}</select>)}
-            {field('Цена', <input value={it.price} onChange={function (e) { upd(it.id, { price: e.target.value }); }} style={inp} />)}
-          </div>
-          <div style={{ fontSize: 8, color: '#9397ab', fontStyle: 'italic' }}>Игрок берёт их в инвентарь; перезарядка оружия тратит снаряды нужного типа.</div>
-        </div>
-      );
-    }
+    // item (и легаси tool/ammo) — единая форма: обычная вещь + необязательные функции
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 6 }}>
         {field('Название', <input value={it.name} onChange={function (e) { upd(it.id, { name: e.target.value }); }} style={inp} />)}
         {field('Описание', <textarea value={it.desc} onChange={function (e) { upd(it.id, { desc: e.target.value }); }} style={Object.assign({}, inp, { minHeight: 40, resize: 'vertical' })} />)}
         {field('Цена', <input value={it.price} onChange={function (e) { upd(it.id, { price: e.target.value }); }} placeholder="напр. 50" style={inp} />)}
+        <div style={{ display: 'flex', gap: 6 }}>
+          {field('Тип снаряда (необязательно)', <select value={it.ptype || ''} onChange={function (e) { upd(it.id, { ptype: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}><option value="">— нет —</option>{PROJ_TYPES.map(function (p) { return <option key={p} value={p}>{p}</option>; })}</select>)}
+          {field('Кубик починки (необязательно)', <select value={it.dice || ''} onChange={function (e) { upd(it.id, { dice: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}><option value="">— нет —</option>{REPAIR_DICE.map(function (d) { return <option key={d} value={d}>{d}</option>; })}</select>)}
+        </div>
+        <div style={{ fontSize: 8, color: '#9397ab', fontStyle: 'italic' }}>Тип снаряда делает вещь боеприпасом (тратится при перезарядке нужного оружия). Кубик починки делает вещь ремкомплектом (чинит снаряжение 1 раз в день). Можно оставить оба поля пустыми — тогда это просто предмет.</div>
       </div>
     );
   }
