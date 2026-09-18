@@ -252,7 +252,11 @@ else{oR({label:w.name+" Попад."+(aimP?" 🎯"+selZone:""),d10:d,crit:R.crit
   if(warDmgBon)sv(Object.assign({},c,{warriorBonus:false}));
   var rawDmg=Math.max(0,sm(dice)+activeBon+warDmgBon-durPen);
   if(tgtNpc&&tgtId&&saveSpawned){
-    applyDmgToNpc(tgtNpc,rawDmg,w.dmgType,selZone,saveSpawned,spawned,tgtId,pr.addLog,c.name||"???",pr.onNpcDeath,w.name,pr.saveNpcHit);
+    applyDmgToNpc(tgtNpc,rawDmg,w.dmgType,selZone,saveSpawned,spawned,tgtId,pr.addLog,c.name||"???",function(ev){
+      var xpGain=tgtNpc.maxHp||0;
+      if(xpGain>0){sv(Object.assign({},c,{xp:(c.xp||0)+xpGain}));pr.addLog({who:c.name||"???",type:"xp",label:"⭐ Опыт за "+tgtNpc.name,detail:"+"+xpGain+" XP",total:0});}
+      if(pr.onNpcDeath)pr.onNpcDeath(ev);
+    },w.name,pr.saveNpcHit);
   } else {
     pr.addLog({who:c.name||"???",type:"dmg",label:"💥 "+w.name+" ("+w.dmgType+")"+(warDmgBon?" ⚔️+5":""),detail:activeDice+"["+dice.join(",")+"]"+(w.bonus?("+бнс("+w.bonus+")"):"")+(warDmgBon?"+⚔️5":"")+" = "+rawDmg,total:rawDmg});
   }

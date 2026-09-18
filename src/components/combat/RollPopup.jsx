@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { IconD10 } from '../../icons/index';
 
 var ROLL_MS=650;
 
@@ -38,7 +39,7 @@ return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.55)",displ
 <div style={{fontSize:12,color:"#9397ab",fontWeight:700,marginBottom:4}}>{r.label}</div>
 <div style={{background:"#232532",border:"2px solid #34374a",borderRadius:10,padding:"8px 10px",marginBottom:8,position:"relative"}}>
 {iC&&!isDmg&&<div style={{position:"absolute",inset:0,borderRadius:10,background:"radial-gradient(circle,rgba(245,158,11,.25),transparent 70%)",animation:"critFlash 0.5s ease-out"}}/>}
-<div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:4,flexWrap:"wrap",position:"relative"}}>{!isDmg&&<span style={{fontFamily:"'Inter',sans-serif",fontSize:20,fontWeight:900,color:iC?"#d97706":iF?"#dc2626":"#3b82f6"}}>{"🎲"+r.d10}</span>}{(r.parts||[]).map(function(pt,i){return <span key={i} style={{display:"flex",alignItems:"center",gap:2}}><span style={{color:"#9397ab",fontSize:13}}>+</span><span style={{background:"#2b2e40",borderRadius:5,padding:"2px 6px",textAlign:"center"}}><span style={{color:"#9397ab",fontSize:7,display:"block"}}>{pt.label}</span><span style={{fontFamily:"'Inter',sans-serif",fontSize:13,fontWeight:700}}>{pt.value}</span></span></span>})}</div>
+<div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:4,flexWrap:"wrap",position:"relative"}}>{!isDmg&&<span style={{display:"flex",alignItems:"center",gap:3,fontFamily:"'Inter',sans-serif",fontSize:20,fontWeight:900,color:iC?"#d97706":iF?"#dc2626":"#3b82f6"}}><IconD10 size={18}/>{r.d10}</span>}{(r.parts||[]).map(function(pt,i){return <span key={i} style={{display:"flex",alignItems:"center",gap:2}}><span style={{color:"#9397ab",fontSize:13}}>+</span><span style={{background:"#2b2e40",borderRadius:5,padding:"2px 6px",textAlign:"center"}}><span style={{color:"#9397ab",fontSize:7,display:"block"}}>{pt.label}</span><span style={{fontFamily:"'Inter',sans-serif",fontSize:13,fontWeight:700}}>{pt.value}</span></span></span>})}</div>
 </div>
 <div style={{fontFamily:"'Inter',sans-serif",fontSize:30,fontWeight:900,color:isDmg?"#dc2626":iC?"#d97706":iF?"#dc2626":"#e9e9ed"}}>{"= "+r.total}</div>
 {iC&&<div style={{fontSize:13,color:"#d97706",fontWeight:700}}>🌟 КРИТ!</div>}{iF&&<div style={{fontSize:13,color:"#dc2626",fontWeight:700}}>💀 ПРОВАЛ!</div>}{r.subtext&&<div style={{fontSize:10,marginTop:3,color:"#c084fc",fontWeight:600,whiteSpace:"pre-line"}}>{r.subtext}</div>}

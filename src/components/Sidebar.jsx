@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { SD, SKD, skLabel } from '../data/stats';
 import { S } from '../styles/ui';
-import { cF, mHP, uSP, uSkP } from '../utils/character';
+import { cF, mHP, uSP, uSkP, rndStats } from '../utils/character';
 import { rollHit } from '../utils/dice';
 import { getProfs } from '../utils/profStore';
 import { IconD10 } from '../icons/index';
@@ -13,8 +13,10 @@ var c=pr.char;var sv=pr.save;var oR=pr.onRoll;
 var inf=cF(c);var fs=inf.fs;var es=inf.eSk;var rc=inf.race||{};
 var pf=getProfs().find(function(p){return p.id===c.profId})||getProfs()[0];
 var _os=useState(null);var oSt=_os[0];var sOS=_os[1];
+var _un=useState(null);var undo=_un[0];var sU=_un[1];
 var mx=c.hpOv||mHP(fs);var curHp=c.curHp!==null&&c.curHp!==undefined?c.curHp:mx;var hpP=mx>0?(curHp/mx)*100:0;
 var mxW=c.willOv||fs.WILL||1;var curW=c.curWill!==null&&c.curWill!==undefined?c.curWill:mxW;var wP=mxW>0?(curW/mxW)*100:0;
+var xp=c.xp||0;var xpP=xp%100;
 var bsk=rc.bsp?1:0;var stL=40-uSP(c.stats||{});var skL=(60+bsk)-uSkP(c.skills||{});
 var raceBonusTags=Object.entries(rc.st||{}).map(function(e){var sd=SD.find(function(s){return s.key===e[0]});return{label:"+"+e[1]+" "+(sd?sd.key:e[0]),color:sd?sd.color:"var(--color-accent)"}});
 function uS(k,d){var stats=Object.assign({},c.stats);if(c.locked){if(d<0)return;var avL=(c.lvlPts||0)-(c.spentLvlPts||0);if(avL<5)return;stats[k]=(stats[k]||0)+1;if(stats[k]>10)return;sv(Object.assign({},c,{stats:stats,spentLvlPts:(c.spentLvlPts||0)+5}));return}stats[k]=(stats[k]||0)+d;if(stats[k]<1||stats[k]>8)return;if(uSP(stats)>40)return;sv(Object.assign({},c,{stats:stats}))}
@@ -41,6 +43,10 @@ return(<aside className="n-sidebar" style={{flexShrink:0,borderRight:"1px solid 
 <div>
   <div style={{display:"flex",justifyContent:"space-between",fontSize:10,fontWeight:600,letterSpacing:.06,textTransform:"uppercase",color:"var(--color-text-muted)",marginBottom:3}}><span>Воля</span><span style={{color:"var(--color-text)",textTransform:"none",fontWeight:700}}>{curW+" / "+mxW}</span></div>
   <div style={{height:6,borderRadius:3,background:"var(--color-sunken)",overflow:"hidden"}}><div style={{width:wP+"%",height:"100%",background:"linear-gradient(90deg,var(--color-accent),var(--color-accent-2))"}}/></div>
+</div>
+<div>
+  <div style={{display:"flex",justifyContent:"space-between",fontSize:10,fontWeight:600,letterSpacing:.06,textTransform:"uppercase",color:"var(--color-text-muted)",marginBottom:3}}><span>Опыт</span><span style={{color:"var(--color-text)",textTransform:"none",fontWeight:700}}>{xp+" XP"}</span></div>
+  <div style={{height:6,borderRadius:3,background:"var(--color-sunken)",overflow:"hidden"}}><div style={{width:xpP+"%",height:"100%",background:"linear-gradient(90deg,#f59e0b,#fbbf24)"}}/></div>
 </div>
 </div>
 
@@ -73,6 +79,12 @@ return(<div key={st.key} style={{marginBottom:1}}>
 </div>)})}
 </div>}
 </div>)})}
+</div>
+
+<div style={{padding:"10px 14px 14px",borderTop:"1px solid var(--color-divider)",display:"flex",gap:8}}>
+{!c.locked&&<button onClick={function(){sU({name:c.name,raceId:c.raceId,humanBonusStat:c.humanBonusStat,stats:Object.assign({},c.stats),skills:Object.assign({},c.skills)});var r=rndStats(c.profId,c.raceId);sv(Object.assign({},c,r,{curHp:null,curWill:null}))}} className="n-btn n-btn-secondary" style={{flex:1,color:"#f0b352",borderColor:"#f59e0b40"}}>Рандом</button>}
+{!c.locked&&undo&&<button onClick={function(){sv(Object.assign({},c,undo,{curHp:null,curWill:null}));sU(null)}} className="n-btn n-btn-secondary" style={{color:"var(--color-accent)"}}>Отменить</button>}
+<button onClick={function(){sv(Object.assign({},c,{locked:!c.locked}))}} className="n-btn n-btn-secondary" style={{flex:c.locked?1:"none",color:c.locked?"#ef4444":"#10b981",borderColor:c.locked?"#ef444440":"#10b98140"}}>{c.locked?"Заперт":"Открыт"}</button>
 </div>
 </aside>)}
 
