@@ -3,13 +3,13 @@ import MapView from '../tabs/MapView';
 import LoreContent from '../LoreContent';
 import { normalizeSections, sectionsToObj, newSection, downscaleImage, MAP_META, LORE_COLORS, LORE_ICONS } from '../../utils/lore';
 
-const backBtn = { padding: '5px 12px', borderRadius: 6, border: '2px solid #322d24', background: '#1d1a14', color: '#ece5d8', fontWeight: 700, fontSize: 11, cursor: 'pointer' };
-const lbl = { display: 'block', fontSize: 9, fontWeight: 700, color: '#a89a82', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 3 };
-const inp = { width: '100%', padding: '7px 8px', border: '2px solid #322d24', borderRadius: 6, fontSize: 12, fontFamily: "'Nunito',sans-serif", background: '#262219', color: '#ece5d8', outline: 'none' };
+const backBtn = { padding: '5px 12px', borderRadius: 6, border: '2px solid #34374a', background: '#1b1d29', color: '#e9e9ed', fontWeight: 700, fontSize: 11, cursor: 'pointer' };
+const lbl = { display: 'block', fontSize: 9, fontWeight: 700, color: '#9397ab', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 3 };
+const inp = { width: '100%', padding: '7px 8px', border: '2px solid #34374a', borderRadius: 6, fontSize: 12, fontFamily: "'Inter',sans-serif", background: '#232532', color: '#e9e9ed', outline: 'none' };
 const addBtn = { flex: 1, padding: '9px', borderRadius: 8, border: '2px solid #8b5cf640', background: '#1f1330', color: '#a78bfa', fontWeight: 700, fontSize: 11, cursor: 'pointer', display: 'block', textAlign: 'center' };
-const blockWrap = { background: '#1d1a14', border: '2px solid #322d24', borderRadius: 10, padding: 10 };
-const miniBtn = { width: 24, height: 22, borderRadius: 5, border: '1px solid #322d24', background: '#262219', color: '#a89a82', fontSize: 11, cursor: 'pointer', lineHeight: 1, padding: 0 };
-const fmtBtn = { padding: '4px 8px', borderRadius: 5, border: '1px solid #322d24', background: '#262219', color: '#cabfa9', fontSize: 11, cursor: 'pointer' };
+const blockWrap = { background: '#1b1d29', border: '2px solid #34374a', borderRadius: 10, padding: 10 };
+const miniBtn = { width: 24, height: 22, borderRadius: 5, border: '1px solid #34374a', background: '#232532', color: '#9397ab', fontSize: 11, cursor: 'pointer', lineHeight: 1, padding: 0 };
+const fmtBtn = { padding: '4px 8px', borderRadius: 5, border: '1px solid #34374a', background: '#232532', color: '#b2b6ca', fontSize: 11, cursor: 'pointer' };
 
 function BlockEditor(pr) {
   const block = pr.block;
@@ -39,8 +39,8 @@ function BlockEditor(pr) {
   if (block.type === 'image') {
     return (
       <div style={blockWrap}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}><span style={{ fontSize: 9, color: '#a89a82', fontWeight: 700 }}>🖼️ Изображение</span>{ctrls}</div>
-        {block.value && <img src={block.value} alt="" style={{ width: '100%', borderRadius: 8, border: '2px solid #322d24', marginBottom: 6, display: 'block' }} />}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}><span style={{ fontSize: 9, color: '#9397ab', fontWeight: 700 }}>🖼️ Изображение</span>{ctrls}</div>
+        {block.value && <img src={block.value} alt="" style={{ width: '100%', borderRadius: 8, border: '2px solid #34374a', marginBottom: 6, display: 'block' }} />}
         <label style={{ display: 'inline-block', padding: '6px 10px', borderRadius: 6, border: '1px solid #8b5cf640', background: '#1f1330', color: '#a78bfa', fontSize: 10, fontWeight: 700, cursor: 'pointer', marginBottom: 6 }}>🔄 Заменить<input type="file" accept="image/*" style={{ display: 'none' }} onChange={function (e) { const f = e.target.files && e.target.files[0]; if (f) pr.onReplaceImage(f); }} /></label>
         <input placeholder="Подпись (необязательно)" value={block.caption || ''} onChange={function (e) { pr.onChange({ caption: e.target.value }); }} style={inp} />
       </div>
@@ -49,7 +49,7 @@ function BlockEditor(pr) {
 
   return (
     <div style={blockWrap}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}><span style={{ fontSize: 9, color: '#a89a82', fontWeight: 700 }}>📝 Текст</span>{ctrls}</div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}><span style={{ fontSize: 9, color: '#9397ab', fontWeight: 700 }}>📝 Текст</span>{ctrls}</div>
       <div style={{ display: 'flex', gap: 3, marginBottom: 4, flexWrap: 'wrap' }}>
         <button onMouseDown={function (e) { e.preventDefault(); }} onClick={function () { wrap('**', '**'); }} style={fmtBtn}><b>Ж</b></button>
         <button onMouseDown={function (e) { e.preventDefault(); }} onClick={function () { wrap('*', '*'); }} style={fmtBtn}><i>К</i></button>
@@ -70,8 +70,8 @@ function EditCard(pr) {
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 9, border: '2px solid ' + color + '20', background: color + '0c' }}>
       <div style={{ width: 30, height: 30, borderRadius: 6, background: color + '1c', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, flexShrink: 0 }}>{meta.icon}</div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: 11, color: '#ece5d8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{meta.title}</div>
-        {pr.subtitle && <div style={{ fontSize: 8, color: '#a89a82' }}>{pr.subtitle}</div>}
+        <div style={{ fontFamily: "'Inter',sans-serif", fontWeight: 700, fontSize: 11, color: '#e9e9ed', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{meta.title}</div>
+        {pr.subtitle && <div style={{ fontSize: 8, color: '#9397ab' }}>{pr.subtitle}</div>}
       </div>
       {!pr.locked && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -136,7 +136,7 @@ export default function LoreEditor(pr) {
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <button onClick={function () { setPreview(false); }} style={Object.assign({}, backBtn, { color: '#a78bfa', alignSelf: 'flex-start' })}>← Редактировать</button>
-          <div style={{ textAlign: 'center' }}><div style={{ fontSize: 28 }}>{sec.icon}</div><div style={{ fontFamily: "'Cinzel',serif", fontWeight: 900, fontSize: 16, color: sec.color }}>{sec.title}</div></div>
+          <div style={{ textAlign: 'center' }}><div style={{ fontSize: 28 }}>{sec.icon}</div><div style={{ fontFamily: "'Inter',sans-serif", fontWeight: 900, fontSize: 16, color: sec.color }}>{sec.title}</div></div>
           <LoreContent section={sec} />
         </div>
       );
@@ -148,7 +148,7 @@ export default function LoreEditor(pr) {
           <button onClick={function () { setEditId(null); }} style={backBtn}>← Разделы</button>
           <button onClick={function () { setPreview(true); }} style={Object.assign({}, backBtn, { color: '#34d399', borderColor: '#10b98140' })}>👁 Превью</button>
         </div>
-        <div style={{ background: '#1d1a14', border: '2px solid #322d24', borderRadius: 10, padding: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ background: '#1b1d29', border: '2px solid #34374a', borderRadius: 10, padding: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div>
             <label style={lbl}>Название</label>
             <input value={sec.title} onChange={function (e) { updateSection(sec.id, { title: e.target.value }); }} style={inp} />
@@ -157,7 +157,7 @@ export default function LoreEditor(pr) {
             <label style={lbl}>Иконка</label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
               {LORE_ICONS.map(function (ic) {
-                return <button key={ic} onClick={function () { updateSection(sec.id, { icon: ic }); }} style={{ width: 30, height: 30, borderRadius: 6, border: '2px solid ' + (sec.icon === ic ? sec.color : '#322d24'), background: sec.icon === ic ? sec.color + '22' : '#262219', fontSize: 15, cursor: 'pointer' }}>{ic}</button>;
+                return <button key={ic} onClick={function () { updateSection(sec.id, { icon: ic }); }} style={{ width: 30, height: 30, borderRadius: 6, border: '2px solid ' + (sec.icon === ic ? sec.color : '#34374a'), background: sec.icon === ic ? sec.color + '22' : '#232532', fontSize: 15, cursor: 'pointer' }}>{ic}</button>;
               })}
             </div>
           </div>
@@ -165,7 +165,7 @@ export default function LoreEditor(pr) {
             <label style={lbl}>Цвет</label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {LORE_COLORS.map(function (c) {
-                return <button key={c} onClick={function () { updateSection(sec.id, { color: c }); }} style={{ width: 26, height: 26, borderRadius: '50%', border: '3px solid ' + (sec.color === c ? '#ece5d8' : 'transparent'), background: c, cursor: 'pointer', padding: 0 }} />;
+                return <button key={c} onClick={function () { updateSection(sec.id, { color: c }); }} style={{ width: 26, height: 26, borderRadius: '50%', border: '3px solid ' + (sec.color === c ? '#e9e9ed' : 'transparent'), background: c, cursor: 'pointer', padding: 0 }} />;
               })}
             </div>
           </div>
@@ -192,9 +192,9 @@ export default function LoreEditor(pr) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
       <div style={{ textAlign: 'center', padding: '6px 0' }}>
-        <div style={{ fontFamily: "'Cinzel',serif", fontWeight: 900, fontSize: 16, color: '#a78bfa' }}>📚 Редактор</div>
+        <div style={{ fontFamily: "'Inter',sans-serif", fontWeight: 900, fontSize: 16, color: '#a78bfa' }}>📚 Редактор</div>
       </div>
-      <button onClick={addSection} style={{ padding: 10, borderRadius: 9, border: '2px dashed #8b5cf660', background: '#1f1330', color: '#a78bfa', fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>➕ Новый раздел</button>
+      <button onClick={addSection} style={{ padding: 10, borderRadius: 9, border: '2px dashed #8b5cf660', background: '#1f1330', color: '#a78bfa', fontFamily: "'Inter',sans-serif", fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>➕ Новый раздел</button>
       <EditCard meta={MAP_META} subtitle="🗺️ Карта мира — нажми, чтобы открыть" onOpen={function () { setEditId('map'); }} locked />
       {sections.map(function (s, i) {
         const imgs = (s.blocks || []).filter(function (b) { return b.type === 'image'; }).length;
@@ -205,7 +205,7 @@ export default function LoreEditor(pr) {
           onDown={function () { moveSection(s.id, 1); }}
           first={i === 0} last={i === sections.length - 1} />;
       })}
-      {sections.length === 0 && <div style={{ textAlign: 'center', padding: 16, color: '#a89a82', fontSize: 11 }}>Разделов пока нет — создай первый кнопкой выше</div>}
+      {sections.length === 0 && <div style={{ textAlign: 'center', padding: 16, color: '#9397ab', fontSize: 11 }}>Разделов пока нет — создай первый кнопкой выше</div>}
     </div>
   );
 }

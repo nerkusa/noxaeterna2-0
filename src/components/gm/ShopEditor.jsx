@@ -3,9 +3,9 @@ import { ARMOR_T } from '../../data/combat';
 import { DT, WT } from '../../data/stats';
 import { uid } from '../../utils/dice';
 
-const backBtn = { padding: '5px 12px', borderRadius: 6, border: '2px solid #322d24', background: '#1d1a14', color: '#ece5d8', fontWeight: 700, fontSize: 11, cursor: 'pointer' };
-const inp = { width: '100%', padding: '6px 8px', border: '2px solid #322d24', borderRadius: 6, fontSize: 12, fontFamily: "'Nunito',sans-serif", background: '#262219', color: '#ece5d8', outline: 'none' };
-const lbl = { display: 'block', fontSize: 8, fontWeight: 700, color: '#a89a82', textTransform: 'uppercase', letterSpacing: 0.4, marginBottom: 2 };
+const backBtn = { padding: '5px 12px', borderRadius: 6, border: '2px solid #34374a', background: '#1b1d29', color: '#e9e9ed', fontWeight: 700, fontSize: 11, cursor: 'pointer' };
+const inp = { width: '100%', padding: '6px 8px', border: '2px solid #34374a', borderRadius: 6, fontSize: 12, fontFamily: "'Inter',sans-serif", background: '#232532', color: '#e9e9ed', outline: 'none' };
+const lbl = { display: 'block', fontSize: 8, fontWeight: 700, color: '#9397ab', textTransform: 'uppercase', letterSpacing: 0.4, marginBottom: 2 };
 
 const CATS = [
   { id: 'armor', name: '🛡️ Броня', color: '#10b981' },
@@ -134,7 +134,7 @@ export default function ShopEditor(pr) {
             {field('Цена', <input value={it.price} onChange={function (e) { upd(it.id, { price: e.target.value }); }} placeholder="напр. 100" style={inp} />)}
           </div>
           {field('Описание', <input value={it.desc} onChange={function (e) { upd(it.id, { desc: e.target.value }); }} style={inp} />)}
-          <div style={{ fontSize: 8, color: '#a89a82', fontStyle: 'italic' }}>Этим кубиком игрок чинит броню (1 раз в день). У Ремесленника добавляется +CRA.</div>
+          <div style={{ fontSize: 8, color: '#9397ab', fontStyle: 'italic' }}>Этим кубиком игрок чинит броню (1 раз в день). У Ремесленника добавляется +CRA.</div>
         </div>
       );
     }
@@ -146,7 +146,7 @@ export default function ShopEditor(pr) {
             {field('Тип снаряда', <select value={it.ptype || 'Стрела'} onChange={function (e) { upd(it.id, { ptype: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}>{PROJ_TYPES.map(function (p) { return <option key={p} value={p}>{p}</option>; })}</select>)}
             {field('Цена', <input value={it.price} onChange={function (e) { upd(it.id, { price: e.target.value }); }} style={inp} />)}
           </div>
-          <div style={{ fontSize: 8, color: '#a89a82', fontStyle: 'italic' }}>Игрок берёт их в инвентарь; перезарядка оружия тратит снаряды нужного типа.</div>
+          <div style={{ fontSize: 8, color: '#9397ab', fontStyle: 'italic' }}>Игрок берёт их в инвентарь; перезарядка оружия тратит снаряды нужного типа.</div>
         </div>
       );
     }
@@ -162,11 +162,11 @@ export default function ShopEditor(pr) {
   function itemRow(it) {
     const open = editId === it.id;
     return (
-      <div key={it.id} style={{ border: '2px solid #322d24', borderRadius: 9, background: '#1d1a14', padding: '7px 9px' }}>
+      <div key={it.id} style={{ border: '2px solid #34374a', borderRadius: 9, background: '#1b1d29', padding: '7px 9px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: 12, color: '#ece5d8' }}>{it.name}{it.price ? <span style={{ fontSize: 9, color: '#d97706', marginLeft: 5 }}>{'💰 ' + it.price}</span> : null}</div>
-            <div style={{ fontSize: 8, color: '#a89a82' }}>{summary(it)}</div>
+            <div style={{ fontFamily: "'Inter',sans-serif", fontWeight: 700, fontSize: 12, color: '#e9e9ed' }}>{it.name}{it.price ? <span style={{ fontSize: 9, color: '#d97706', marginLeft: 5 }}>{'💰 ' + it.price}</span> : null}</div>
+            <div style={{ fontSize: 8, color: '#9397ab' }}>{summary(it)}</div>
           </div>
           <button onClick={function () { del(it.id); }} style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: 13, cursor: 'pointer' }}>🗑</button>
           <button onClick={function () { setEditId(open ? null : it.id); }} style={{ padding: '4px 9px', borderRadius: 6, border: '1px solid ' + catColor + '40', background: catColor + '18', color: catColor, fontWeight: 700, fontSize: 10, cursor: 'pointer' }}>{open ? '✕' : '✏️'}</button>
@@ -196,20 +196,20 @@ export default function ShopEditor(pr) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
       <button onClick={pr.onBack} style={Object.assign({}, backBtn, { alignSelf: 'flex-start' })}>← Назад</button>
       <div style={{ textAlign: 'center' }}>
-        <div style={{ fontFamily: "'Cinzel',serif", fontWeight: 900, fontSize: 16, color: '#f0b352' }}>🛒 Магазин / Вещи</div>
-        <div style={{ fontSize: 9, color: '#a89a82' }}>Добавляй вещи — игроки берут их из своего листа</div>
+        <div style={{ fontFamily: "'Inter',sans-serif", fontWeight: 900, fontSize: 16, color: '#f0b352' }}>🛒 Магазин / Вещи</div>
+        <div style={{ fontSize: 9, color: '#9397ab' }}>Добавляй вещи — игроки берут их из своего листа</div>
       </div>
 
       <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
         {CATS.map(function (cc) {
           const on = cat === cc.id;
-          return <button key={cc.id} onClick={function () { setCat(cc.id); setEditId(null); }} style={{ flex: '1 1 40%', padding: '6px 2px', borderRadius: 7, border: '2px solid ' + cc.color + (on ? '' : '20'), background: on ? cc.color + '20' : '#1d1a14', color: cc.color, fontWeight: 700, fontSize: 10, cursor: 'pointer' }}>{cc.name}</button>;
+          return <button key={cc.id} onClick={function () { setCat(cc.id); setEditId(null); }} style={{ flex: '1 1 40%', padding: '6px 2px', borderRadius: 7, border: '2px solid ' + cc.color + (on ? '' : '20'), background: on ? cc.color + '20' : '#1b1d29', color: cc.color, fontWeight: 700, fontSize: 10, cursor: 'pointer' }}>{cc.name}</button>;
         })}
       </div>
 
-      <button onClick={add} style={{ padding: 9, borderRadius: 8, border: '2px dashed ' + catColor + '60', background: catColor + '12', color: catColor, fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>➕ Добавить</button>
+      <button onClick={add} style={{ padding: 9, borderRadius: 8, border: '2px dashed ' + catColor + '60', background: catColor + '12', color: catColor, fontFamily: "'Inter',sans-serif", fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>➕ Добавить</button>
 
-      {items.length === 0 && <div style={{ textAlign: 'center', padding: 14, color: '#a89a82', fontSize: 11, fontStyle: 'italic' }}>Пусто — добавь первую вещь</div>}
+      {items.length === 0 && <div style={{ textAlign: 'center', padding: 14, color: '#9397ab', fontSize: 11, fontStyle: 'italic' }}>Пусто — добавь первую вещь</div>}
       {grouped ? grouped : items.map(itemRow)}
     </div>
   );

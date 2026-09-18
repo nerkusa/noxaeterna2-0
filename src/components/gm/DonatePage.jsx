@@ -47,18 +47,18 @@ var CONDITIONS=[
   "Налог на донат. 50% стоимости выплачивается заданиями от ДМа.",
 ];
 
-var S2={inp:{width:"100%",padding:"4px 6px",border:"1px solid #4b3800",borderRadius:5,fontSize:9,fontFamily:"'Nunito',sans-serif",background:"#1a1008",color:"#f0d9a8",outline:"none"}};
+var S2={inp:{width:"100%",padding:"4px 6px",border:"1px solid #4b3800",borderRadius:5,fontSize:9,fontFamily:"'Inter',sans-serif",background:"#161826",color:"#f0d9a8",outline:"none"}};
 
-return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.95)",zIndex:1000,overflowY:"auto",fontFamily:"'Nunito',sans-serif"}}>
+return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.95)",zIndex:1000,overflowY:"auto",fontFamily:"'Inter',sans-serif"}}>
 <div style={{maxWidth:560,margin:"0 auto",padding:"16px 12px 40px"}}>
 
 {/* Header */}
 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
-  <div style={{display:"flex",alignItems:"center",gap:8}}><div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:18,color:"#f59e0b"}}>💰 Донат-магазин</div>{isGM&&<span style={{fontSize:8,background:"#f59e0b20",color:"#f59e0b",border:"1px solid #f59e0b40",borderRadius:4,padding:"1px 6px"}}>ГМ</span>}</div>
+  <div style={{display:"flex",alignItems:"center",gap:8}}><div style={{fontFamily:"'Inter',sans-serif",fontWeight:900,fontSize:18,color:"#f59e0b"}}>💰 Донат-магазин</div>{isGM&&<span style={{fontSize:8,background:"#f59e0b20",color:"#f59e0b",border:"1px solid #f59e0b40",borderRadius:4,padding:"1px 6px"}}>ГМ</span>}</div>
   <div style={{display:"flex",gap:6,alignItems:"center"}}>
-    {isGM&&<button onClick={function(){sEditMode(!editMode);sEditPack(null)}} style={{padding:"4px 12px",borderRadius:5,border:"2px solid #f59e0b",background:editMode?"#f59e0b":"transparent",color:editMode?"#1a1008":"#f59e0b",cursor:"pointer",fontSize:10,fontWeight:700,fontFamily:"'Cinzel',serif"}}>{editMode?"✓ Готово":"✏️ Редактировать"}</button>}
-    {!isGM&&<span style={{fontSize:8,color:"#b8ad97",fontStyle:"italic"}}>режим просмотра</span>}
-    <button onClick={onClose} style={{background:"none",border:"1px solid #3a3429",borderRadius:5,padding:"4px 12px",color:"#ece5d8",cursor:"pointer",fontSize:10}}>✕ Закрыть</button>
+    {isGM&&<button onClick={function(){sEditMode(!editMode);sEditPack(null)}} style={{padding:"4px 12px",borderRadius:5,border:"2px solid #f59e0b",background:editMode?"#f59e0b":"transparent",color:editMode?"#161826":"#f59e0b",cursor:"pointer",fontSize:10,fontWeight:700,fontFamily:"'Inter',sans-serif"}}>{editMode?"✓ Готово":"✏️ Редактировать"}</button>}
+    {!isGM&&<span style={{fontSize:8,color:"#b2b6ca",fontStyle:"italic"}}>режим просмотра</span>}
+    <button onClick={onClose} style={{background:"none",border:"1px solid #34374a",borderRadius:5,padding:"4px 12px",color:"#e9e9ed",cursor:"pointer",fontSize:10}}>✕ Закрыть</button>
   </div>
 </div>
 
@@ -67,19 +67,19 @@ return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.95)",zInde
   {img1?<div style={{position:"relative"}}>
     <img src={img1} style={{width:"100%",maxHeight:180,objectFit:"cover",display:"block"}} alt="banner"/>
     {isGM&&editMode&&<label style={{position:"absolute",bottom:6,right:6,background:"rgba(0,0,0,0.8)",border:"1px solid #f59e0b",borderRadius:5,padding:"3px 8px",color:"#f59e0b",cursor:"pointer",fontSize:8}}>🖼️ Сменить<input type="file" accept="image/*" style={{display:"none"}} onChange={function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){setDonateImg("img1",ev.target.result)};r.readAsDataURL(f)}}/></label>}
-  </div>:isGM&&editMode?<label style={{display:"block",padding:"24px",background:"#1a1008",textAlign:"center",color:"#f59e0b",cursor:"pointer",fontSize:10}}>🖼️ Загрузить баннер<input type="file" accept="image/*" style={{display:"none"}} onChange={function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){setDonateImg("img1",ev.target.result)};r.readAsDataURL(f)}}/></label>:<div style={{background:"linear-gradient(135deg,#1a1008,#2d1f00)",padding:"14px",textAlign:"center"}}><div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:14,color:"#f59e0b",marginBottom:4}}>Цены для настоящих королей Мидланда!</div><div style={{fontSize:9,color:"#d97706"}}>Наши донаты — ваш ключ к абсолютной власти!</div></div>}
+  </div>:isGM&&editMode?<label style={{display:"block",padding:"24px",background:"#161826",textAlign:"center",color:"#f59e0b",cursor:"pointer",fontSize:10}}>🖼️ Загрузить баннер<input type="file" accept="image/*" style={{display:"none"}} onChange={function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){setDonateImg("img1",ev.target.result)};r.readAsDataURL(f)}}/></label>:<div style={{background:"linear-gradient(135deg,#161826,#2d1f00)",padding:"14px",textAlign:"center"}}><div style={{fontFamily:"'Inter',sans-serif",fontWeight:900,fontSize:14,color:"#f59e0b",marginBottom:4}}>Цены для настоящих королей Мидланда!</div><div style={{fontSize:9,color:"#d97706"}}>Наши донаты — ваш ключ к абсолютной власти!</div></div>}
 </div>
 
 {/* Packs list */}
 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
-  <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:11,color:"#f59e0b"}}>🎁 Пакеты доната</div>
+  <div style={{fontFamily:"'Inter',sans-serif",fontWeight:700,fontSize:11,color:"#f59e0b"}}>🎁 Пакеты доната</div>
   {isGM&&editMode&&<button onClick={addPack} style={{padding:"3px 10px",borderRadius:5,border:"1px solid #f59e0b40",background:"#2d1f00",color:"#f59e0b",cursor:"pointer",fontSize:9,fontWeight:700}}>+ Добавить</button>}
 </div>
 
 <div style={{display:"flex",flexDirection:"column",gap:6,marginBottom:14}}>
 {packs.map(function(p){
   var isEditing=editPack===p.id;
-  return(<div key={p.id} style={{background:"linear-gradient(135deg,#1a1008,#221500)",border:"1px solid "+(isEditing?"#f59e0b":"#f59e0b20"),borderRadius:10,overflow:"hidden"}}>
+  return(<div key={p.id} style={{background:"linear-gradient(135deg,#161826,#221500)",border:"1px solid "+(isEditing?"#f59e0b":"#f59e0b20"),borderRadius:10,overflow:"hidden"}}>
     {isEditing?
     /* Edit form */
     <div style={{padding:"10px 12px",display:"flex",flexDirection:"column",gap:6}}>
@@ -93,9 +93,9 @@ return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.95)",zInde
         <textarea style={Object.assign({},S2.inp,{minHeight:70,resize:"vertical",lineHeight:1.6})} value={eItems} onChange={function(e){sEItems(e.target.value)}} placeholder={"Пункт 1\nПункт 2\nПункт 3"}/>
       </div>
       <div style={{display:"flex",gap:5}}>
-        <button onClick={saveEdit} style={{flex:1,padding:"5px",borderRadius:5,border:"none",background:"#f59e0b",color:"#ece5d8",fontWeight:700,fontSize:9,cursor:"pointer"}}>💾 Сохранить</button>
-        <button onClick={function(){sEditPack(null)}} style={{padding:"5px 10px",borderRadius:5,border:"1px solid #4b3800",background:"#1a1008",color:"#8d8270",fontSize:9,cursor:"pointer"}}>Отмена</button>
-        <button onClick={function(){if(window.confirm("Удалить "+p.name+"?"))deletePack(p.id)}} style={{padding:"5px 8px",borderRadius:5,border:"1px solid #ef444440",background:"#1a1008",color:"#ef4444",fontSize:9,cursor:"pointer"}}>🗑️</button>
+        <button onClick={saveEdit} style={{flex:1,padding:"5px",borderRadius:5,border:"none",background:"#f59e0b",color:"#e9e9ed",fontWeight:700,fontSize:9,cursor:"pointer"}}>💾 Сохранить</button>
+        <button onClick={function(){sEditPack(null)}} style={{padding:"5px 10px",borderRadius:5,border:"1px solid #4b3800",background:"#161826",color:"#75798c",fontSize:9,cursor:"pointer"}}>Отмена</button>
+        <button onClick={function(){if(window.confirm("Удалить "+p.name+"?"))deletePack(p.id)}} style={{padding:"5px 8px",borderRadius:5,border:"1px solid #ef444440",background:"#161826",color:"#ef4444",fontSize:9,cursor:"pointer"}}>🗑️</button>
       </div>
     </div>:
     /* View mode */
@@ -103,8 +103,8 @@ return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.95)",zInde
       <div style={{fontSize:20,flexShrink:0,marginTop:1}}>{p.icon}</div>
       <div style={{flex:1}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
-          <span style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:10,color:"#f0d9a8"}}>{p.name}</span>
-          <span style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:10,color:"#f59e0b",background:"#2d1f00",borderRadius:4,padding:"1px 6px",whiteSpace:"nowrap",flexShrink:0,marginLeft:6}}>{p.price}</span>
+          <span style={{fontFamily:"'Inter',sans-serif",fontWeight:700,fontSize:10,color:"#f0d9a8"}}>{p.name}</span>
+          <span style={{fontFamily:"'Inter',sans-serif",fontWeight:900,fontSize:10,color:"#f59e0b",background:"#2d1f00",borderRadius:4,padding:"1px 6px",whiteSpace:"nowrap",flexShrink:0,marginLeft:6}}>{p.price}</span>
         </div>
         {p.items.map(function(it,j){return<div key={j} style={{fontSize:8,color:"#d97706",lineHeight:1.6}}>• {it}</div>})}
       </div>
@@ -118,28 +118,28 @@ return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.95)",zInde
 {img2?<div style={{position:"relative",marginBottom:14}}>
   <img src={img2} style={{width:"100%",maxHeight:200,objectFit:"cover",borderRadius:10}} alt="companions"/>
   {isGM&&editMode&&<label style={{position:"absolute",bottom:6,right:6,background:"rgba(0,0,0,0.8)",border:"1px solid #f59e0b",borderRadius:5,padding:"3px 8px",color:"#f59e0b",cursor:"pointer",fontSize:8}}>🖼️ Сменить<input type="file" accept="image/*" style={{display:"none"}} onChange={function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){setDonateImg("img2",ev.target.result)};r.readAsDataURL(f)}}/></label>}
-</div>:isGM&&editMode?<label style={{display:"block",marginBottom:14,padding:"20px",borderRadius:10,border:"2px dashed #4b3800",color:"#f59e0b",cursor:"pointer",fontSize:10,textAlign:"center",background:"#1a1008"}}>🖼️ Загрузить картинку<input type="file" accept="image/*" style={{display:"none"}} onChange={function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){setDonateImg("img2",ev.target.result)};r.readAsDataURL(f)}}/></label>:null}
+</div>:isGM&&editMode?<label style={{display:"block",marginBottom:14,padding:"20px",borderRadius:10,border:"2px dashed #4b3800",color:"#f59e0b",cursor:"pointer",fontSize:10,textAlign:"center",background:"#161826"}}>🖼️ Загрузить картинку<input type="file" accept="image/*" style={{display:"none"}} onChange={function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){setDonateImg("img2",ev.target.result)};r.readAsDataURL(f)}}/></label>:null}
 
 {/* QR */}
-<div style={{background:"#1a1008",border:"1px solid #4b3800",borderRadius:12,padding:"14px",marginBottom:14,textAlign:"center"}}>
-  <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:10,color:"#f59e0b",marginBottom:10}}>💳 Оплата</div>
+<div style={{background:"#161826",border:"1px solid #4b3800",borderRadius:12,padding:"14px",marginBottom:14,textAlign:"center"}}>
+  <div style={{fontFamily:"'Inter',sans-serif",fontWeight:700,fontSize:10,color:"#f59e0b",marginBottom:10}}>💳 Оплата</div>
   {qrImg?<div style={{position:"relative",display:"inline-block"}}>
-    <img src={qrImg} style={{width:180,height:180,borderRadius:8,objectFit:"contain",background:"#262219",padding:6,display:"block"}} alt="QR"/>
+    <img src={qrImg} style={{width:180,height:180,borderRadius:8,objectFit:"contain",background:"#232532",padding:6,display:"block"}} alt="QR"/>
     {isGM&&editMode&&<label style={{position:"absolute",bottom:4,right:4,background:"rgba(0,0,0,0.85)",border:"1px solid #f59e0b",borderRadius:5,padding:"3px 8px",color:"#f59e0b",cursor:"pointer",fontSize:8}}>🔄 QR<input type="file" accept="image/*" style={{display:"none"}} onChange={function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){setDonateImg("qr",ev.target.result)};r.readAsDataURL(f)}}/></label>}
   </div>:
   <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:8}}>
     <div style={{width:140,height:140,background:"#111",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",border:"2px dashed #4b3800"}}>
-      {isGM&&editMode?<label style={{cursor:"pointer",textAlign:"center",padding:10}}><div style={{fontSize:28}}>📷</div><div style={{fontSize:8,color:"#f59e0b",marginTop:4}}>Загрузить QR-код</div><input type="file" accept="image/*" style={{display:"none"}} onChange={function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){setDonateImg("qr",ev.target.result)};r.readAsDataURL(f)}}/></label>:<div style={{textAlign:"center"}}><div style={{fontSize:32}}>📱</div><div style={{fontSize:8,color:"#b8ad97",marginTop:4}}>QR появится здесь</div></div>}
+      {isGM&&editMode?<label style={{cursor:"pointer",textAlign:"center",padding:10}}><div style={{fontSize:28}}>📷</div><div style={{fontSize:8,color:"#f59e0b",marginTop:4}}>Загрузить QR-код</div><input type="file" accept="image/*" style={{display:"none"}} onChange={function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){setDonateImg("qr",ev.target.result)};r.readAsDataURL(f)}}/></label>:<div style={{textAlign:"center"}}><div style={{fontSize:32}}>📱</div><div style={{fontSize:8,color:"#b2b6ca",marginTop:4}}>QR появится здесь</div></div>}
     </div>
   </div>}
 </div>
 
 {/* Conditions */}
-<div style={{background:"#0d0d0d",border:"1px solid #ece5d8",borderRadius:10,padding:"12px 14px",marginBottom:8}}>
-  <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:9,color:"#9a8f7c",marginBottom:8}}>📜 Условия использования</div>
-  {CONDITIONS.map(function(c,i){return<div key={i} style={{fontSize:8,color:"#b8ad97",lineHeight:1.7}}>⚠️ {c}</div>})}
+<div style={{background:"#0d0d0d",border:"1px solid #e9e9ed",borderRadius:10,padding:"12px 14px",marginBottom:8}}>
+  <div style={{fontFamily:"'Inter',sans-serif",fontWeight:700,fontSize:9,color:"#9397ab",marginBottom:8}}>📜 Условия использования</div>
+  {CONDITIONS.map(function(c,i){return<div key={i} style={{fontSize:8,color:"#b2b6ca",lineHeight:1.7}}>⚠️ {c}</div>})}
 </div>
-<div style={{textAlign:"center",fontSize:8,color:"#ece5d8",marginTop:8}}>Nox Aeterna © Здоровье не продаётся. Хотя...</div>
+<div style={{textAlign:"center",fontSize:8,color:"#e9e9ed",marginTop:8}}>Nox Aeterna © Здоровье не продаётся. Хотя...</div>
 </div>
 </div>)}
 

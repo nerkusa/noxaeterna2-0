@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { RACES, RACE_DESC } from '../../data/races';
 import { SD, SKD } from '../../data/stats';
 
-const backBtn = { padding: '5px 12px', borderRadius: 6, border: '2px solid #322d24', background: '#1d1a14', color: '#ece5d8', fontWeight: 700, fontSize: 11, cursor: 'pointer' };
-const inp = { width: '100%', padding: '6px 8px', border: '2px solid #322d24', borderRadius: 6, fontSize: 12, fontFamily: "'Nunito',sans-serif", background: '#262219', color: '#ece5d8', outline: 'none' };
-const lbl = { display: 'block', fontSize: 8, fontWeight: 700, color: '#a89a82', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 2 };
+const backBtn = { padding: '5px 12px', borderRadius: 6, border: '2px solid #34374a', background: '#1b1d29', color: '#e9e9ed', fontWeight: 700, fontSize: 11, cursor: 'pointer' };
+const inp = { width: '100%', padding: '6px 8px', border: '2px solid #34374a', borderRadius: 6, fontSize: 12, fontFamily: "'Inter',sans-serif", background: '#232532', color: '#e9e9ed', outline: 'none' };
+const lbl = { display: 'block', fontSize: 8, fontWeight: 700, color: '#9397ab', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 2 };
 
 function genId() { return 'r_' + Date.now().toString(36) + Math.floor(Math.random() * 1000).toString(36); }
 
@@ -57,21 +57,21 @@ export default function RaceEditor(pr) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
       <button onClick={pr.onBack} style={Object.assign({}, backBtn, { alignSelf: 'flex-start' })}>← Назад</button>
       <div style={{ textAlign: 'center', padding: '2px 0' }}>
-        <div style={{ fontFamily: "'Cinzel',serif", fontWeight: 900, fontSize: 16, color: '#34d399' }}>🧬 Расы</div>
-        <div style={{ fontSize: 9, color: '#a89a82' }}>Меняй названия, бонусы статов, добавляй и удаляй расы</div>
+        <div style={{ fontFamily: "'Inter',sans-serif", fontWeight: 900, fontSize: 16, color: '#34d399' }}>🧬 Расы</div>
+        <div style={{ fontSize: 9, color: '#9397ab' }}>Меняй названия, бонусы статов, добавляй и удаляй расы</div>
       </div>
-      <button onClick={addRace} style={{ padding: 10, borderRadius: 9, border: '2px dashed #10b98160', background: '#0e2018', color: '#34d399', fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>➕ Добавить расу</button>
+      <button onClick={addRace} style={{ padding: 10, borderRadius: 9, border: '2px dashed #10b98160', background: '#0e2018', color: '#34d399', fontFamily: "'Inter',sans-serif", fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>➕ Добавить расу</button>
 
       {races.map(function (r) {
         const isNone = r.id === 'none';
         const open = openId === r.id;
         const mods = Object.entries(r.st || {});
         return (
-          <div key={r.id} style={{ border: '2px solid #322d24', borderRadius: 9, background: '#1d1a14', overflow: 'hidden' }}>
+          <div key={r.id} style={{ border: '2px solid #34374a', borderRadius: 9, background: '#1b1d29', overflow: 'hidden' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 9px' }}>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: 12, color: '#ece5d8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}</div>
-                <div style={{ fontSize: 8, color: '#a89a82' }}>{mods.length ? mods.map(m => m[0] + ' ' + (m[1] > 0 ? '+' + m[1] : m[1])).join(' · ') : 'без бонусов'}</div>
+                <div style={{ fontFamily: "'Inter',sans-serif", fontWeight: 700, fontSize: 12, color: '#e9e9ed', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}</div>
+                <div style={{ fontSize: 8, color: '#9397ab' }}>{mods.length ? mods.map(m => m[0] + ' ' + (m[1] > 0 ? '+' + m[1] : m[1])).join(' · ') : 'без бонусов'}</div>
               </div>
               {!isNone && <button onClick={function () { delRace(r.id); }} style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: 13, cursor: 'pointer' }}>🗑</button>}
               <button onClick={function () { setOpenId(open ? null : r.id); }} style={{ padding: '4px 9px', borderRadius: 6, border: '1px solid #10b98140', background: '#0e2018', color: '#34d399', fontWeight: 700, fontSize: 10, cursor: 'pointer' }}>{open ? '✕' : '✏️'}</button>
@@ -88,14 +88,14 @@ export default function RaceEditor(pr) {
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(92px,1fr))', gap: 4 }}>
                     {SD.map(function (s) {
                       const v = (r.st || {})[s.key] || 0;
-                      const clr = v > 0 ? '#34d399' : v < 0 ? '#f87171' : '#8d8270';
+                      const clr = v > 0 ? '#34d399' : v < 0 ? '#f87171' : '#75798c';
                       return (
                         <div key={s.key} style={{ background: s.color + '12', border: '1px solid ' + s.color + '22', borderRadius: 7, padding: '3px 2px', textAlign: 'center' }}>
                           <div style={{ fontSize: 8, fontWeight: 700, color: s.color }}>{s.emoji + ' ' + s.key}</div>
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, marginTop: 1 }}>
-                            <button onClick={function () { setStat(r.id, s.key, -1); }} style={{ width: 18, height: 18, borderRadius: 4, border: '1px solid #322d24', background: '#262219', color: '#a89a82', fontSize: 10, cursor: 'pointer', padding: 0 }}>−</button>
-                            <span style={{ fontFamily: "'Cinzel',serif", fontWeight: 900, fontSize: 13, minWidth: 18, color: clr }}>{v > 0 ? '+' + v : v}</span>
-                            <button onClick={function () { setStat(r.id, s.key, 1); }} style={{ width: 18, height: 18, borderRadius: 4, border: '1px solid #322d24', background: '#262219', color: '#a89a82', fontSize: 10, cursor: 'pointer', padding: 0 }}>+</button>
+                            <button onClick={function () { setStat(r.id, s.key, -1); }} style={{ width: 18, height: 18, borderRadius: 4, border: '1px solid #34374a', background: '#232532', color: '#9397ab', fontSize: 10, cursor: 'pointer', padding: 0 }}>−</button>
+                            <span style={{ fontFamily: "'Inter',sans-serif", fontWeight: 900, fontSize: 13, minWidth: 18, color: clr }}>{v > 0 ? '+' + v : v}</span>
+                            <button onClick={function () { setStat(r.id, s.key, 1); }} style={{ width: 18, height: 18, borderRadius: 4, border: '1px solid #34374a', background: '#232532', color: '#9397ab', fontSize: 10, cursor: 'pointer', padding: 0 }}>+</button>
                           </div>
                         </div>
                       );
@@ -109,7 +109,7 @@ export default function RaceEditor(pr) {
                   </div>
                   {!showSk && (function () {
                     const sm2 = Object.entries(r.sk || {});
-                    return <div style={{ fontSize: 9, color: '#a89a82' }}>{sm2.length ? sm2.map(function (m) { return m[0] + ' +' + m[1]; }).join(', ') : 'без бонусов навыков'}</div>;
+                    return <div style={{ fontSize: 9, color: '#9397ab' }}>{sm2.length ? sm2.map(function (m) { return m[0] + ' +' + m[1]; }).join(', ') : 'без бонусов навыков'}</div>;
                   })()}
                   {showSk && SD.map(function (s) {
                     const sks = SKD[s.key]; if (!sks) return null;
@@ -120,10 +120,10 @@ export default function RaceEditor(pr) {
                           const v = (r.sk || {})[sk.name] || 0;
                           return (
                             <div key={sk.name} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '1px 2px' }}>
-                              <span style={{ flex: 1, fontSize: 9, color: v ? '#ece5d8' : '#a89a82' }}>{sk.name}{sk.x2 && <span style={{ color: '#ef4444', fontSize: 7 }}> ×2</span>}</span>
-                              <button onClick={function () { setSkill(r.id, sk.name, -1); }} style={{ width: 18, height: 18, borderRadius: 4, border: '1px solid #322d24', background: '#262219', color: '#a89a82', fontSize: 10, cursor: 'pointer', padding: 0 }}>−</button>
-                              <span style={{ fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: 12, minWidth: 18, textAlign: 'center', color: v > 0 ? '#34d399' : v < 0 ? '#f87171' : '#8d8270' }}>{v > 0 ? '+' + v : v}</span>
-                              <button onClick={function () { setSkill(r.id, sk.name, 1); }} style={{ width: 18, height: 18, borderRadius: 4, border: '1px solid #322d24', background: '#262219', color: '#a89a82', fontSize: 10, cursor: 'pointer', padding: 0 }}>+</button>
+                              <span style={{ flex: 1, fontSize: 9, color: v ? '#e9e9ed' : '#9397ab' }}>{sk.name}{sk.x2 && <span style={{ color: '#ef4444', fontSize: 7 }}> ×2</span>}</span>
+                              <button onClick={function () { setSkill(r.id, sk.name, -1); }} style={{ width: 18, height: 18, borderRadius: 4, border: '1px solid #34374a', background: '#232532', color: '#9397ab', fontSize: 10, cursor: 'pointer', padding: 0 }}>−</button>
+                              <span style={{ fontFamily: "'Inter',sans-serif", fontWeight: 700, fontSize: 12, minWidth: 18, textAlign: 'center', color: v > 0 ? '#34d399' : v < 0 ? '#f87171' : '#75798c' }}>{v > 0 ? '+' + v : v}</span>
+                              <button onClick={function () { setSkill(r.id, sk.name, 1); }} style={{ width: 18, height: 18, borderRadius: 4, border: '1px solid #34374a', background: '#232532', color: '#9397ab', fontSize: 10, cursor: 'pointer', padding: 0 }}>+</button>
                             </div>
                           );
                         })}
@@ -144,7 +144,7 @@ export default function RaceEditor(pr) {
           </div>
         );
       })}
-      <div style={{ fontSize: 9, color: '#a89a82', textAlign: 'center', padding: '4px 8px', fontStyle: 'italic' }}>
+      <div style={{ fontSize: 9, color: '#9397ab', textAlign: 'center', padding: '4px 8px', fontStyle: 'italic' }}>
         Изменения сразу видны игрокам в выборе расы. «— Нет —» удалить нельзя.
       </div>
     </div>

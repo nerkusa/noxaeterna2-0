@@ -3,8 +3,8 @@ import { r1 } from '../../utils/dice';
 
 const DICE = [4, 6, 8, 10, 12, 20, 100];
 const CLR = '#f0b352';
-const inp = { padding: '5px 7px', border: '2px solid #322d24', borderRadius: 6, fontSize: 11, fontFamily: "'Nunito',sans-serif", background: '#262219', color: '#ece5d8', outline: 'none' };
-const lbl = { display: 'block', fontSize: 8, fontWeight: 700, color: '#a89a82', textTransform: 'uppercase', letterSpacing: 0.4, marginBottom: 2 };
+const inp = { padding: '5px 7px', border: '2px solid #34374a', borderRadius: 6, fontSize: 11, fontFamily: "'Inter',sans-serif", background: '#232532', color: '#e9e9ed', outline: 'none' };
+const lbl = { display: 'block', fontSize: 8, fontWeight: 700, color: '#9397ab', textTransform: 'uppercase', letterSpacing: 0.4, marginBottom: 2 };
 
 export default function GMRoll(pr) {
   const addLog = pr.addLog;
@@ -32,7 +32,7 @@ export default function GMRoll(pr) {
   return (
     <div style={{ border: '2px solid ' + CLR + '40', borderRadius: 9, background: '#231b08', overflow: 'hidden' }}>
       <button onClick={function () { setOpen(!open); }} style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 11px', border: 'none', background: 'none', cursor: 'pointer' }}>
-        <span style={{ fontFamily: "'Cinzel',serif", fontWeight: 700, fontSize: 13, color: CLR }}>🎲 Свой бросок ГМ</span>
+        <span style={{ fontFamily: "'Inter',sans-serif", fontWeight: 700, fontSize: 13, color: CLR }}>🎲 Свой бросок ГМ</span>
         <span style={{ fontSize: 9, color: CLR, transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>▼</span>
       </button>
       {open && (
@@ -44,7 +44,7 @@ export default function GMRoll(pr) {
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
                 {DICE.map(function (d) {
                   const on = die === d;
-                  return <button key={d} onClick={function () { setDie(d); }} style={{ padding: '4px 8px', borderRadius: 6, border: '2px solid ' + (on ? CLR : '#322d24'), background: on ? CLR + '22' : '#262219', color: on ? CLR : '#b3a890', fontWeight: 700, fontSize: 10, cursor: 'pointer' }}>{'d' + d}</button>;
+                  return <button key={d} onClick={function () { setDie(d); }} style={{ padding: '4px 8px', borderRadius: 6, border: '2px solid ' + (on ? CLR : '#34374a'), background: on ? CLR + '22' : '#232532', color: on ? CLR : '#9397ab', fontWeight: 700, fontSize: 10, cursor: 'pointer' }}>{'d' + d}</button>;
                 })}
               </div>
             </div>
@@ -53,12 +53,12 @@ export default function GMRoll(pr) {
             <div style={{ flex: 1 }}><label style={lbl}>+ Характеристика (число)</label><input type="number" value={stat} onChange={function (e) { setStat(e.target.value); }} style={Object.assign({}, inp, { width: '100%' })} /></div>
             <div style={{ flex: 1 }}><label style={lbl}>+ Навык (число)</label><input type="number" value={skill} onChange={function (e) { setSkill(e.target.value); }} style={Object.assign({}, inp, { width: '100%' })} /></div>
           </div>
-          <button onClick={roll} style={{ padding: 10, borderRadius: 8, border: 'none', background: CLR, color: '#231b08', fontFamily: "'Cinzel',serif", fontWeight: 900, fontSize: 13, cursor: 'pointer' }}>🎲 Бросить {qty + 'd' + die}{(parseInt(stat) || 0) ? ' +' + (parseInt(stat) || 0) : ''}{(parseInt(skill) || 0) ? ' +' + (parseInt(skill) || 0) : ''}</button>
+          <button onClick={roll} style={{ padding: 10, borderRadius: 8, border: 'none', background: CLR, color: '#231b08', fontFamily: "'Inter',sans-serif", fontWeight: 900, fontSize: 13, cursor: 'pointer' }}>🎲 Бросить {qty + 'd' + die}{(parseInt(stat) || 0) ? ' +' + (parseInt(stat) || 0) : ''}{(parseInt(skill) || 0) ? ' +' + (parseInt(skill) || 0) : ''}</button>
           {res && (
-            <div style={{ background: '#1d1a14', border: '1px solid ' + CLR + '30', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
+            <div style={{ background: '#1b1d29', border: '1px solid ' + CLR + '30', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
               {res.act && <div style={{ fontSize: 10, color: CLR, fontWeight: 700, marginBottom: 2 }}>{res.act}</div>}
-              <div style={{ fontSize: 9, color: '#9a8f7c', fontFamily: 'monospace', marginBottom: 3 }}>{res.detail}</div>
-              <div style={{ fontFamily: "'Cinzel',serif", fontWeight: 900, fontSize: 30, color: '#ece5d8' }}>{res.total}</div>
+              <div style={{ fontSize: 9, color: '#9397ab', fontFamily: 'monospace', marginBottom: 3 }}>{res.detail}</div>
+              <div style={{ fontFamily: "'Inter',sans-serif", fontWeight: 900, fontSize: 30, color: '#e9e9ed' }}>{res.total}</div>
             </div>
           )}
         </div>

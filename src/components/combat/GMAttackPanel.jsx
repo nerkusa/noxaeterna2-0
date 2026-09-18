@@ -63,50 +63,50 @@ function GMAttackPanel(pr){
   function skipDmg(){remove(ref(db,"rooms/"+pr.room+"/pendingAttacks/"+id));}
 
   return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.72)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:997,animation:"fadeIn 0.2s"}}>
-    <div style={{background:"#221e17",border:"3px solid "+(waiting?"#f59e0b":dodged?"#10b981":shieldPhaseGM?"#38bdf8":"#ef4444"),borderRadius:16,padding:"18px 22px",textAlign:"center",minWidth:270,maxWidth:350,boxShadow:"0 20px 60px rgba(0,0,0,0.5)",animation:"popIn 0.3s"}}>
-      <div style={{display:"flex",justifyContent:"flex-end",marginBottom:2}}><button onClick={skipDmg} style={{background:"none",border:"none",fontSize:18,cursor:"pointer",color:"#a89a82",lineHeight:1}}>✕</button></div>
-      {active.length>1&&<div style={{fontSize:9,color:"#a89a82",marginBottom:4}}>{"Сцена 1 из "+active.length}</div>}
+    <div style={{background:"#161826",border:"3px solid "+(waiting?"#f59e0b":dodged?"#10b981":shieldPhaseGM?"#38bdf8":"#ef4444"),borderRadius:16,padding:"18px 22px",textAlign:"center",minWidth:270,maxWidth:350,boxShadow:"0 20px 60px rgba(0,0,0,0.5)",animation:"popIn 0.3s"}}>
+      <div style={{display:"flex",justifyContent:"flex-end",marginBottom:2}}><button onClick={skipDmg} style={{background:"none",border:"none",fontSize:18,cursor:"pointer",color:"#9397ab",lineHeight:1}}>✕</button></div>
+      {active.length>1&&<div style={{fontSize:9,color:"#9397ab",marginBottom:4}}>{"Сцена 1 из "+active.length}</div>}
       <div style={{fontSize:24,marginBottom:4}}>{waiting?"⚔️":dodged?"🛡️":shieldPhaseGM?"⏳":"💥"}</div>
-      <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:15,color:"#dc2626",marginBottom:8}}>{shieldPhaseGM?(atk.attackerName+" → "+atk.targetName+" — щит?"):(atk.attackerName+" атакует "+atk.targetName+"!")}</div>
+      <div style={{fontFamily:"'Inter',sans-serif",fontWeight:900,fontSize:15,color:"#dc2626",marginBottom:8}}>{shieldPhaseGM?(atk.attackerName+" → "+atk.targetName+" — щит?"):(atk.attackerName+" атакует "+atk.targetName+"!")}</div>
 
       {/* Бросок атаки с деталями */}
-      <div style={{background:"#262219",border:"1px solid #322d24",borderRadius:10,padding:"8px 12px",marginBottom:10}}>
-        <div style={{fontSize:8,color:"#9a8f7c",marginBottom:4}}>Бросок на попадание</div>
+      <div style={{background:"#232532",border:"1px solid #34374a",borderRadius:10,padding:"8px 12px",marginBottom:10}}>
+        <div style={{fontSize:8,color:"#9397ab",marginBottom:4}}>Бросок на попадание</div>
         <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:4,flexWrap:"wrap",marginBottom:6}}>
-          <span style={{fontFamily:"'Cinzel',serif",fontSize:20,fontWeight:900,color:atkD===10?"#d97706":atkD===1?"#dc2626":"#3b82f6"}}>{"🎲"+atkD}</span>
-          <span style={{color:"#a89a82"}}>+</span>
-          <span style={{background:"#2c2820",borderRadius:5,padding:"2px 6px",textAlign:"center"}}>
-            <span style={{color:"#a89a82",fontSize:7,display:"block"}}>REF</span>
-            <span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700}}>{atkREF}</span>
+          <span style={{fontFamily:"'Inter',sans-serif",fontSize:20,fontWeight:900,color:atkD===10?"#d97706":atkD===1?"#dc2626":"#3b82f6"}}>{"🎲"+atkD}</span>
+          <span style={{color:"#9397ab"}}>+</span>
+          <span style={{background:"#2b2e40",borderRadius:5,padding:"2px 6px",textAlign:"center"}}>
+            <span style={{color:"#9397ab",fontSize:7,display:"block"}}>REF</span>
+            <span style={{fontFamily:"'Inter',sans-serif",fontSize:13,fontWeight:700}}>{atkREF}</span>
           </span>
-          <span style={{color:"#a89a82"}}>+</span>
-          <span style={{background:"#2c2820",borderRadius:5,padding:"2px 6px",textAlign:"center"}}>
-            <span style={{color:"#a89a82",fontSize:7,display:"block"}}>{atkSkillName}</span>
-            <span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700}}>{atkSkill}</span>
+          <span style={{color:"#9397ab"}}>+</span>
+          <span style={{background:"#2b2e40",borderRadius:5,padding:"2px 6px",textAlign:"center"}}>
+            <span style={{color:"#9397ab",fontSize:7,display:"block"}}>{atkSkillName}</span>
+            <span style={{fontFamily:"'Inter',sans-serif",fontSize:13,fontWeight:700}}>{atkSkill}</span>
           </span>
-          {atkBonus!==0&&<span style={{color:"#a89a82"}}>+</span>}
-          {atkBonus!==0&&<span style={{background:"#2c2820",borderRadius:5,padding:"2px 6px",textAlign:"center"}}>
-            <span style={{color:"#a89a82",fontSize:7,display:"block"}}>Бнс</span>
-            <span style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700}}>{atkBonus}</span>
+          {atkBonus!==0&&<span style={{color:"#9397ab"}}>+</span>}
+          {atkBonus!==0&&<span style={{background:"#2b2e40",borderRadius:5,padding:"2px 6px",textAlign:"center"}}>
+            <span style={{color:"#9397ab",fontSize:7,display:"block"}}>Бнс</span>
+            <span style={{fontFamily:"'Inter',sans-serif",fontSize:13,fontWeight:700}}>{atkBonus}</span>
           </span>}
         </div>
-        <div style={{fontFamily:"'Cinzel',serif",fontSize:32,fontWeight:900,color:"#dc2626"}}>{"= "+atk.hitRoll}</div>
+        <div style={{fontFamily:"'Inter',sans-serif",fontSize:32,fontWeight:900,color:"#dc2626"}}>{"= "+atk.hitRoll}</div>
         {atk.atkCrit&&<div style={{fontSize:11,color:"#d97706",fontWeight:700}}>🌟 КРИТ ×1.5</div>}{atk.atkFumble&&<div style={{fontSize:11,color:"#dc2626",fontWeight:700}}>💀 ПРОВАЛ</div>}
-        <div style={{fontSize:9,color:"#a89a82",marginTop:2}}>{atk.weaponName+" · "+atk.dmgDice+" · "+atk.dmgType}</div>
+        <div style={{fontSize:9,color:"#9397ab",marginTop:2}}>{atk.weaponName+" · "+atk.dmgDice+" · "+atk.dmgType}</div>
       </div>
 
       {/* Уклонение — ждём или показываем */}
-      <div style={{background:"#262219",border:"1px solid "+(waiting?"#3a3429":shieldPhaseGM?"#38bdf840":"#10b98140"),borderRadius:10,padding:"8px 12px",marginBottom:10}}>
-        <div style={{fontSize:8,color:"#9a8f7c",marginBottom:4}}>Уклонение {atk.targetName}</div>
+      <div style={{background:"#232532",border:"1px solid "+(waiting?"#34374a":shieldPhaseGM?"#38bdf840":"#10b98140"),borderRadius:10,padding:"8px 12px",marginBottom:10}}>
+        <div style={{fontSize:8,color:"#9397ab",marginBottom:4}}>Уклонение {atk.targetName}</div>
         {waiting
           ?<div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,padding:"6px 0"}}>
             <div style={{width:8,height:8,borderRadius:"50%",background:"#f59e0b",animation:"fadeIn 0.5s infinite alternate"}}/>
-            <span style={{fontSize:12,color:"#8d8270",fontStyle:"italic"}}>ждём броска игрока...</span>
+            <span style={{fontSize:12,color:"#75798c",fontStyle:"italic"}}>ждём броска игрока...</span>
           </div>
           :<div>
-            <div style={{fontSize:9,color:"#9a8f7c",marginBottom:4}}>{dodgeDetail}</div>
-            <div style={{fontFamily:"'Cinzel',serif",fontSize:32,fontWeight:900,color:dodged?"#10b981":"#ef4444"}}>{atk.dodgeRoll||0}</div>
-            <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,color:dodged?"#34d399":shieldPhaseGM?"#38bdf8":"#f87171",marginTop:4}}>
+            <div style={{fontSize:9,color:"#9397ab",marginBottom:4}}>{dodgeDetail}</div>
+            <div style={{fontFamily:"'Inter',sans-serif",fontSize:32,fontWeight:900,color:dodged?"#10b981":"#ef4444"}}>{atk.dodgeRoll||0}</div>
+            <div style={{fontFamily:"'Inter',sans-serif",fontWeight:700,fontSize:13,color:dodged?"#34d399":shieldPhaseGM?"#38bdf8":"#f87171",marginTop:4}}>
               {dodged?"✅ Уклонился!":shieldPhaseGM?"❌ Попало! Игрок выбирает щит...": "❌ Попало!"}
             </div>
             {shieldPhaseGM&&<div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:6,marginTop:4,padding:"4px 0",background:"#0e2236",borderRadius:6}}><div style={{width:6,height:6,borderRadius:"50%",background:"#38bdf8"}}/><span style={{fontSize:10,color:"#38bdf8",fontStyle:"italic"}}>ждём решения...</span></div>}
@@ -115,10 +115,10 @@ function GMAttackPanel(pr){
       </div>
 
       {/* Кнопки */}
-      {(waiting||shieldPhaseGM)&&<div style={{fontSize:9,color:"#a89a82",fontStyle:"italic"}}>{shieldPhaseGM?"⏳ Игрок выбирает защиту...": "Ожидаем действия игрока..."}</div>}
+      {(waiting||shieldPhaseGM)&&<div style={{fontSize:9,color:"#9397ab",fontStyle:"italic"}}>{shieldPhaseGM?"⏳ Игрок выбирает защиту...": "Ожидаем действия игрока..."}</div>}
       {!waiting&&!shieldPhaseGM&&(dodged
-        ?<button onClick={skipDmg} style={{width:"100%",padding:8,borderRadius:8,border:"none",background:"#10b981",color:"#fff",fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:13,cursor:"pointer"}}>✅ Закрыть</button>
-        :<button onClick={doRollDmg} style={{width:"100%",padding:10,borderRadius:8,border:"none",background:"#ef4444",color:"#fff",fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:14,cursor:"pointer"}}>💥 Бросить урон + зону!</button>
+        ?<button onClick={skipDmg} style={{width:"100%",padding:8,borderRadius:8,border:"none",background:"#10b981",color:"#fff",fontFamily:"'Inter',sans-serif",fontWeight:900,fontSize:13,cursor:"pointer"}}>✅ Закрыть</button>
+        :<button onClick={doRollDmg} style={{width:"100%",padding:10,borderRadius:8,border:"none",background:"#ef4444",color:"#fff",fontFamily:"'Inter',sans-serif",fontWeight:900,fontSize:14,cursor:"pointer"}}>💥 Бросить урон + зону!</button>
       )}
     </div>
   </div>)}
