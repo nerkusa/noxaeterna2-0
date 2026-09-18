@@ -51,6 +51,9 @@ function connect() {
     } else if (msg.t === 'get' && msg.rid != null) {
       var w2 = waiters.get(msg.rid);
       if (w2) { waiters.delete(msg.rid); w2.resolve(makeSnap(msg.value)); }
+    } else if (msg.t === 'auth' && msg.rid != null) {
+      var w3 = waiters.get(msg.rid);
+      if (w3) { waiters.delete(msg.rid); w3.resolve({ ok: !!msg.ok, error: msg.error || null, login: msg.login, role: msg.role }); }
     }
   };
 }
@@ -117,6 +120,22 @@ function push(r) {
   return { path: joinPath(r.path, id) };
 }
 
+function authLogin(login, password) {
+  return new Promise(function (resolve) {
+    var rid = 'r' + (ridSeq++);
+    waiters.set(rid, { resolve: resolve });
+    send({ t: 'login', login: login, password: password, rid: rid });
+  });
+}
+
+function authRegister(login, password) {
+  return new Promise(function (resolve) {
+    var rid = 'r' + (ridSeq++);
+    waiters.set(rid, { resolve: resolve });
+    send({ t: 'register', login: login, password: password, rid: rid });
+  });
+}
+
 var db = {};
 
-export { db, ref, set, get, onValue, update, remove, push };
+export { db, ref, set, get, onValue, update, remove, push, authLogin, authRegister };
