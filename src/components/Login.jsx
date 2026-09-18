@@ -31,7 +31,8 @@ function doRegister(){
   });
 }
 function onKeyDown(e){if(e.key==="Enter"){md==="login"?doLogin():doRegister()}}
-return(<div style={{fontFamily:"'Inter',sans-serif",color:"#e9e9ed",background:"linear-gradient(180deg,#161826,#0e0f18)",minHeight:"100vh",maxWidth:520,margin:"0 auto",display:"flex",flexDirection:"column",justifyContent:"center",padding:"20px 16px"}}><style>{CSS}</style>
+return(<div style={{fontFamily:"'Inter',sans-serif",color:"#e9e9ed",background:"linear-gradient(180deg,#161826,#0e0f18)",minHeight:"100vh",width:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"20px 16px"}}><style>{CSS}</style>
+<div style={{width:"100%",maxWidth:360}}>
 <div style={{textAlign:"center",marginBottom:24}}><div style={{fontSize:28,fontFamily:"'Inter',sans-serif",fontWeight:900,color:"#e9e9ed"}}>✦ Nox Aeterna 2.0</div><div style={{fontSize:14,fontFamily:"'Inter',sans-serif",color:"#9397ab",marginTop:4}}>Fantasy Companion</div></div>
 <div style={{display:"flex",flexDirection:"column",gap:10,background:"#232532",border:"2px solid #34374a",borderRadius:14,padding:"20px 16px"}}>
 <div style={{fontFamily:"'Inter',sans-serif",fontWeight:900,fontSize:17,textAlign:"center"}}>{md==="login"?"🔑 Вход":"📝 Регистрация"}</div>
@@ -41,6 +42,7 @@ return(<div style={{fontFamily:"'Inter',sans-serif",color:"#e9e9ed",background:"
 {er&&<div style={{color:"#ef4444",fontSize:11,textAlign:"center"}}>{er}</div>}
 <button onClick={md==="login"?doLogin:doRegister} disabled={ld} style={btn("#9184d9")}>{ld?"⏳...":(md==="login"?"Войти":"Зарегистрироваться")}</button>
 <button onClick={function(){sM(md==="login"?"register":"login");sE("")}} style={{background:"none",border:"none",color:"#9397ab",cursor:"pointer",fontSize:12}}>{md==="login"?"Нет аккаунта? Зарегистрироваться":"← Уже есть аккаунт? Войти"}</button>
+</div>
 </div>
 </div>)}
 
