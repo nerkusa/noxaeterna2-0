@@ -63,7 +63,7 @@ return(<div style={{display:"flex",flexDirection:"column",gap:8}}>
 </div>
 
 {/* Броня игрока */}
-<ArmorSection char={c} save={sv} finalStats={fs} shop={pr.shop} characters={pr.characters} room={pr.room} addLog={pr.addLog} onRoll={oR}/>
+<ArmorSection char={c} save={sv} finalStats={fs} finalSkills={es} shop={pr.shop} characters={pr.characters} room={pr.room} addLog={pr.addLog} onRoll={oR}/>
 
 {/* NPC цели — видны всем игрокам */}
 {spawnedArr.length>0&&<div style={{border:"2px solid #ef444428",borderRadius:9,padding:"6px 8px",background:"#2a1414"}}>
@@ -85,6 +85,24 @@ return <button key={nid} onClick={function(){sTgt(isSel?null:nid)}} style={{padd
 </div>}
 </div>}
 
+{/* Ход: объявить действие / передать ход */}
+{(function(){
+  var init=pr.initiative;var myTurn=!!(init&&Array.isArray(init.list)&&init.list.length&&init.list[init.turn||0]&&init.list[init.turn||0].id===c._fbId);
+  function announce(a){pr.addLog({who:c.name||"???",type:"stance",label:"🎬 "+(c.name||"???")+" объявляет: "+a,detail:"",total:0})}
+  function passTurn(){
+    if(!init||!Array.isArray(init.list)||!init.list.length){announce("Передать ход");return}
+    var next=((init.turn||0)+1)%init.list.length;var round=(init.round||1)+(next===0?1:0);
+    if(pr.saveInitiative)pr.saveInitiative(Object.assign({},init,{turn:next,round:round}));
+    pr.addLog({who:c.name||"???",type:"stance",label:"➡️ "+(c.name||"???")+" передаёт ход",detail:"",total:0});
+  }
+  return(<div style={{background:"#1b1d29",border:"2px solid #34374a",borderRadius:9,padding:"7px 8px"}}>
+    <label style={S.lb}>🎬 Ход</label>
+    <div style={{display:"flex",gap:3,flexWrap:"wrap",marginTop:3}}>
+      {["Атака","Защита","Реакция","Предмет"].map(function(a){return <button key={a} onClick={function(){announce(a)}} style={{flex:"1 1 21%",padding:"6px 2px",borderRadius:7,border:"1px solid #34374a",background:"#232532",cursor:"pointer",fontWeight:700,fontSize:9,color:"#e9e9ed"}}>{a}</button>})}
+      <button onClick={passTurn} disabled={!!init&&!myTurn} title={init&&!myTurn?"Сейчас не твой ход":"Передать ход следующему"} style={{flex:"1 1 21%",padding:"6px 2px",borderRadius:7,border:"1px solid #f59e0b40",background:init&&!myTurn?"#1b1d29":"#231b08",cursor:init&&!myTurn?"not-allowed":"pointer",fontWeight:700,fontSize:9,color:init&&!myTurn?"#75798c":"#f0b352",opacity:init&&!myTurn?0.6:1}}>Передать ход</button>
+    </div>
+  </div>);
+})()}
 
 {/* Способности профессий — Воин и Чувствительный */}
 {(function(){
@@ -186,8 +204,8 @@ return <button key={nid} onClick={function(){sTgt(isSel?null:nid)}} style={{padd
 
 {/* Оружие */}
 <div style={{background:"#232532",border:"2px solid #f59e0b18",borderRadius:9,padding:"7px 8px"}}>
-<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}><label style={S.lb}>⚔️ Оружие</label><div style={{display:"flex",gap:4}}><button onClick={function(){if((c.weapons||[]).some(function(x){return x.type==="Brawl"&&x.name==="Кулаки"})){alert("Кулаки уже добавлены");return}sv(Object.assign({},c,{weapons:(c.weapons||[]).concat([{id:uid(),name:"Кулаки",type:"Brawl",dmgType:"Д",bonus:0,dmgDice:"1d6",hands:1}])}))}} title="Добавить рукопашную атаку (1d6, BODY+Brawl)" style={{fontSize:9,background:"#2a1414",border:"1px solid #ef444440",borderRadius:5,padding:"2px 8px",cursor:"pointer",color:"#f87171",fontWeight:700}}>👊 Кулаки</button><button onClick={function(){sSA(!sa)}} style={{fontSize:9,background:"#0e1a2b",border:"1px solid #3b82f640",borderRadius:5,padding:"2px 8px",cursor:"pointer",color:"#60a5fa",fontWeight:700}}>{sa?"✕ Закрыть":"➕ Своё оружие"}</button></div></div>
-<ShopPicker color="#3b82f6" items={(pr.shop||[]).filter(function(i){return i.cat==="weapon"})} subOf={function(it){return it.wtype}} suborder={["Battle","Simple","Guns","Archery","Thrown","Brawl"]} sublabels={{Battle:"⚔️ Боевое оружие",Simple:"🗡️ Простое оружие",Guns:"🔫 Огнестрел",Archery:"🏹 Лук",Thrown:"🪃 Метательное",Brawl:"👊 Рукопашное"}} sub={function(it){var h=it.hands===2?"двуруч.":it.hands===1.5?"полуторн.":"одноруч.";return it.wtype+" · "+it.dmgDice+(it.bonus?"+"+it.bonus:"")+" · "+it.dmgType+" · "+h}} onPick={function(it){var newW={id:uid(),name:it.name,type:it.wtype,dmgType:it.dmgType,bonus:it.bonus||0,dmgDice:it.dmgDice,hands:it.hands};if(it.hands===1.5){newW.dmgDice2h=it.dmgDice2h;newW.bonus2h=it.bonus2h||0;}if(it.dmgType==="П"||it.wtype==="Archery"){newW.clip=it.clip||1;newW.ammo=it.clip||1;}sv(Object.assign({},c,{weapons:(c.weapons||[]).concat([newW])}))}}/>
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}><label style={S.lb}>⚔️ Оружие</label><div style={{display:"flex",gap:4}}><button onClick={function(){if((c.weapons||[]).some(function(x){return x.type==="Brawl"&&x.name==="Кулаки"})){alert("Кулаки уже добавлены");return}sv(Object.assign({},c,{weapons:(c.weapons||[]).concat([{id:uid(),name:"Кулаки",type:"Brawl",dmgType:"Д",bonus:0,dmgDice:"1d6",hands:1}])}))}} title="Добавить рукопашную атаку (1d6, BODY+Brawl)" style={{fontSize:9,background:"#2a1414",border:"1px solid #ef444440",borderRadius:5,padding:"2px 8px",cursor:"pointer",color:"#f87171",fontWeight:700}}>👊 Кулаки</button><button onClick={function(){sSA(!sa)}} title="Добавить своё оружие вручную" style={{width:22,height:22,fontSize:13,background:"#0e1a2b",border:"1px solid #3b82f640",borderRadius:5,cursor:"pointer",color:"#60a5fa",fontWeight:700,lineHeight:1}}>{sa?"✕":"✎"}</button></div></div>
+<ShopPicker color="#3b82f6" label="➕ Добавить оружие" items={(pr.shop||[]).filter(function(i){return i.cat==="weapon"})} subOf={function(it){return it.wtype}} suborder={["Battle","Simple","Guns","Archery","Thrown","Brawl"]} sublabels={{Battle:"⚔️ Боевое оружие",Simple:"🗡️ Простое оружие",Guns:"🔫 Огнестрел",Archery:"🏹 Лук",Thrown:"🪃 Метательное",Brawl:"👊 Рукопашное"}} sub={function(it){var h=it.hands===2?"двуруч.":it.hands===1.5?"полуторн.":"одноруч.";return it.wtype+" · "+it.dmgDice+(it.bonus?"+"+it.bonus:"")+" · "+it.dmgType+" · "+h}} onPick={function(it){var newW={id:uid(),name:it.name,type:it.wtype,dmgType:it.dmgType,bonus:it.bonus||0,dmgDice:it.dmgDice,hands:it.hands};if(it.hands===1.5){newW.dmgDice2h=it.dmgDice2h;newW.bonus2h=it.bonus2h||0;}if(it.dmgType==="П"||it.wtype==="Archery"){newW.clip=it.clip||1;newW.ammo=it.clip||1;}sv(Object.assign({},c,{weapons:(c.weapons||[]).concat([newW])}))}}/>
 {sa&&<div style={{background:"#232532",border:"1px solid #34374a",borderRadius:8,padding:6,marginBottom:4,display:"flex",flexDirection:"column",gap:3}}>
 <input style={S.inp} value={wn} onChange={function(e){sWN(e.target.value)}} placeholder="Название"/>
 <div style={{display:"flex",gap:3}}>

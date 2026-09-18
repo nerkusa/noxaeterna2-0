@@ -32,7 +32,7 @@ return(<div style={{flex:1,display:"flex",minHeight:0}}><RollPopup roll={rP} onC
 <div style={{flex:1,minHeight:0,display:"flex",flexDirection:"column",padding:tab==="chat"?12:16,overflowY:tab==="chat"?"hidden":"auto"}}>
 {tab==="chat"&&<ChatTab chat={pr.chat} logs={pr.logs} sendChat={pr.sendChat} addLog={pr.addLog} char={isGMv?null:c} characters={pr.characters} who={isGMv?"Мастер":(c.name||"???")} coopTarget={coopTarget} onCoopConsumed={function(){sCoopTarget(null)}}/>}
 {tab==="character"&&<CharTab char={c} save={pr.save} onRoll={sRP} isGM={pr.isGM} addLog={pr.addLog} changeAccount={pr.changeAccount}/>}
-{tab==="combat"&&<CombatTab char={c} save={pr.save} logs={pr.logs} addLog={pr.addLog} onRoll={sRP} spawned={pr.spawned} saveSpawned={pr.saveSpawned} characters={pr.characters} isGM={pr.isGM} onDmgEvent={sDmgEv} onNpcDeath={sNpcDeathEv} savePendingAttack={pr.savePendingAttack} room={pr.room} saveNpcHit={pr.saveNpcHit} shop={pr.shop} initiative={pr.initiative}/>}
+{tab==="combat"&&<CombatTab char={c} save={pr.save} logs={pr.logs} addLog={pr.addLog} onRoll={sRP} spawned={pr.spawned} saveSpawned={pr.saveSpawned} characters={pr.characters} isGM={pr.isGM} onDmgEvent={sDmgEv} onNpcDeath={sNpcDeathEv} savePendingAttack={pr.savePendingAttack} room={pr.room} saveNpcHit={pr.saveNpcHit} shop={pr.shop} initiative={pr.initiative} saveInitiative={pr.saveInitiative}/>}
 {tab==="inventory"&&<InvTab char={c} save={pr.save} shop={pr.shop}/>}
 {tab==="library"&&<LibTab lore={pr.lore} mapData={pr.mapData} saveMap={pr.saveMap} characters={pr.characters} isGM={pr.isGM} charId={c._fbId}/>}
 {tab==="guide"&&<CheatTab/>}

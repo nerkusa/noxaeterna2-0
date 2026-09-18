@@ -28,12 +28,13 @@ export const SHIELD_T = [
 
 // подкатегории для группировки
 const SUBLABEL = {
-  armor: { light: '🟢 Лёгкая броня', medium: '🟡 Средняя броня', heavy: '🔴 Тяжёлая броня' },
+  armor: { head: '🧠 Голова', body: '🫀 Тело' },
   weapon: { Battle: '⚔️ Боевое оружие', Simple: '🗡️ Простое оружие', Guns: '🔫 Огнестрел', Archery: '🏹 Лук', Thrown: '🪃 Метательное', Brawl: '👊 Рукопашное' },
   shield: { light: '🟢 Лёгкий щит', medium: '🟡 Средний щит', tower: '🔵 Башенный щит' },
 };
-const SUBORDER = { armor: ['light', 'medium', 'heavy'], weapon: ['Battle', 'Simple', 'Guns', 'Archery', 'Thrown', 'Brawl'], shield: ['light', 'medium', 'tower'] };
-function subOf(it) { if (it.cat === 'armor' || it.cat === 'shield') return it.type; if (it.cat === 'weapon') return it.wtype; return null; }
+const SUBORDER = { armor: ['head', 'body'], weapon: ['Battle', 'Simple', 'Guns', 'Archery', 'Thrown', 'Brawl'], shield: ['light', 'medium', 'tower'] };
+const SLOT_LABEL = { head: 'Голова', body: 'Тело' };
+function subOf(it) { if (it.cat === 'armor') return it.slot || 'body'; if (it.cat === 'shield') return it.type; if (it.cat === 'weapon') return it.wtype; return null; }
 
 function field(label, node) { return <div style={{ flex: 1 }}><label style={lbl}>{label}</label>{node}</div>; }
 
@@ -48,7 +49,7 @@ export default function ShopEditor(pr) {
   const del = function (id) { if (window.confirm('Удалить вещь из магазина?')) persist(shop.filter(function (i) { return i.id !== id; })); };
   const add = function () {
     const base = {
-      armor: { cat: 'armor', name: 'Новая броня', type: 'light', hp: 10, price: '' },
+      armor: { cat: 'armor', name: 'Новая броня', type: 'light', slot: 'body', hp: 10, price: '' },
       weapon: { cat: 'weapon', name: 'Новое оружие', wtype: 'Battle', dmgDice: '1d6', dmgType: 'Р', hands: 1, bonus: 0, dmgDice2h: '2d6', bonus2h: 0, price: '' },
       shield: { cat: 'shield', name: 'Новый щит', type: 'light', hp: 15, price: '' },
       item: { cat: 'item', name: 'Новый предмет', desc: '', price: '' },
@@ -64,7 +65,7 @@ export default function ShopEditor(pr) {
   const catColor = (CATS.find(function (c) { return c.id === cat; }) || CATS[0]).color;
 
   function summary(it) {
-    if (it.cat === 'armor') { const a = ARMOR_T.find(function (x) { return x.id === it.type; }); return (a ? a.name : it.type) + ' · ' + it.hp + ' HP'; }
+    if (it.cat === 'armor') { const a = ARMOR_T.find(function (x) { return x.id === it.type; }); return (SLOT_LABEL[it.slot || 'body']) + ' · ' + (a ? a.name : it.type) + ' · ' + it.hp + ' HP'; }
     if (it.cat === 'shield') { const s = SHIELD_T.find(function (x) { return x.id === it.type; }); return (s ? s.name + ' ' + (s.absorb * 100) + '%' : it.type) + ' · ' + it.hp + ' HP'; }
     if (it.cat === 'weapon') { const h = it.hands === 2 ? 'двуруч.' : it.hands === 1.5 ? 'полуторн.' : 'одноруч.'; return it.wtype + ' · ' + it.dmgDice + (it.bonus ? '+' + it.bonus : '') + ' · ' + it.dmgType + ' · ' + h; }
     if (it.cat === 'tool') { return '🔧 Починка ' + (it.dice || '1d4') + (it.desc ? ' · ' + it.desc : ''); }
@@ -78,7 +79,10 @@ export default function ShopEditor(pr) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 6 }}>
           {field('Название', <input value={it.name} onChange={function (e) { upd(it.id, { name: e.target.value }); }} style={inp} />)}
           <div style={{ display: 'flex', gap: 6 }}>
+            {field('Слот', <select value={it.slot || 'body'} onChange={function (e) { upd(it.id, { slot: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}><option value="head">Голова</option><option value="body">Тело</option></select>)}
             {field('Тип', <select value={it.type} onChange={function (e) { upd(it.id, { type: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}>{ARMOR_T.filter(function (a) { return a.id !== 'none'; }).map(function (a) { return <option key={a.id} value={a.id}>{a.name + ' (Body≥' + a.bodyReq + ')'}</option>; })}</select>)}
+          </div>
+          <div style={{ display: 'flex', gap: 6 }}>
             {field('HP брони', <input type="number" value={it.hp} onChange={function (e) { upd(it.id, { hp: parseInt(e.target.value) || 1 }); }} style={inp} />)}
             {field('Цена', <input value={it.price} onChange={function (e) { upd(it.id, { price: e.target.value }); }} placeholder="напр. 200" style={inp} />)}
           </div>
