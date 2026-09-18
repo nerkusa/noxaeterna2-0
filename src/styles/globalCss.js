@@ -67,6 +67,21 @@ body{margin:0;font-family:'Inter',sans-serif}
   display:inline-flex;align-items:center;font-size:11px;font-weight:600;
   padding:3px 10px;border-radius:999px;letter-spacing:.02em;
 }
+
+/* ── Сайдбар характеристик: широкий с полными названиями, на узких
+   экранах сжимается в компактную полоску (только код/значение/кубик) ── */
+.n-sidebar{width:260px}
+@media (max-width:680px){
+  .n-sidebar{width:118px}
+  .n-sidebar-hide-compact{display:none !important}
+}
+
+/* ── Чат ── */
+.n-msg{max-width:82%;padding:9px 12px;border-radius:14px;font-size:13px;line-height:1.5}
+.n-msg-other{align-self:flex-start;background:var(--color-surface);border-radius:14px 14px 14px 3px}
+.n-msg-self{align-self:flex-end;background:rgba(145,132,217,.16);border-radius:14px 14px 3px 14px}
+.n-msg-who{display:block;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--color-text-muted);margin-bottom:4px}
+.n-roll-card{align-self:flex-start;max-width:82%;padding:9px 12px;border:1px solid var(--color-divider);border-radius:12px;background:var(--color-surface)}
 `;
 
 export { CSS };
