@@ -71,6 +71,10 @@ body{margin:0;font-family:'Inter',sans-serif}
   padding:3px 10px;border-radius:999px;letter-spacing:.02em;
 }
 
+/* ── Вкладка «Бой»: 2-колоночная сетка блоков на широких экранах ── */
+.n-combat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+@media (max-width:820px){.n-combat-grid{grid-template-columns:1fr}}
+
 /* ── Сайдбар характеристик: широкий с полными названиями, на узких
    экранах сжимается в компактную полоску (только код/значение/кубик) ── */
 .n-sidebar{width:260px}
