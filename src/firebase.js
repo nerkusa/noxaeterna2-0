@@ -2,7 +2,10 @@
    Держит тот же API — ref/set/get/onValue/update/remove/push — так что
    остальной код приложения не меняется. */
 
-var WS_URL = (typeof process !== 'undefined' && process.env && process.env.REACT_APP_WS_URL) || 'ws://localhost:8787';
+/* process.env.REACT_APP_WS_URL подставляется webpack'ом при сборке
+   (CRA/DefinePlugin) — сам по себе идентификатор `process` в браузере
+   не существует, поэтому проверять typeof process здесь нельзя. */
+var WS_URL = process.env.REACT_APP_WS_URL || 'ws://localhost:8787';
 
 var socket = null;
 var connected = false;
