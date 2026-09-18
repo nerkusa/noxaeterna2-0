@@ -72,6 +72,7 @@ function doRoll(){
   var bonus=parseInt(rollBonus)||0;
   var R=rollHit();var d=R.d;var t=d+statVal+skillVal+bonus;
   var myDetail="d10("+d+") + "+rollStat+"("+statVal+")"+(skillObj?" + "+skLabel(skillObj.name)+"("+skillVal+")":"")+(bonus?" + бонус("+bonus+")":"")+(R.crit?" 🌟КРИТ":R.fumble?" 💀ПРОВАЛ":"");
+  var myParts=[{label:rollStat,value:statVal}].concat(skillObj?[{label:skLabel(skillObj.name),value:skillVal}]:[]).concat(bonus?[{label:"Бонус",value:bonus}]:[]);
 
   if(partner){
     var pStatObj=SD.find(function(s){return s.key===rollStat2});
@@ -80,15 +81,20 @@ function doRoll(){
     var pSkillVal=(rollSkill2&&pes)?(pes[rollSkill2]||0):0;
     var R2=rollHit();var d2=R2.d;var t2=d2+pStatVal+pSkillVal;
     var pDetail="d10("+d2+") + "+rollStat2+"("+pStatVal+")"+(pSkillObj?" + "+skLabel(pSkillObj.name)+"("+pSkillVal+")":"")+(R2.crit?" 🌟КРИТ":R2.fumble?" 💀ПРОВАЛ":"");
-    var label=(skillObj?skLabel(skillObj.name):statObj.full)+" + "+(pSkillObj?skLabel(pSkillObj.name):pStatObj.full)+" · "+who+" & "+(partner.name||"?");
+    var pParts=[{label:rollStat2,value:pStatVal}].concat(pSkillObj?[{label:skLabel(pSkillObj.name),value:pSkillVal}]:[]);
+    var coopLabel=(skillObj?skLabel(skillObj.name):statObj.full)+" + "+(pSkillObj?skLabel(pSkillObj.name):pStatObj.full);
+    var logLabel="🤝 Совместное действие · "+coopLabel+" · "+who+" & "+(partner.name||"?");
     var detail=(actDesc.trim()?actDesc.trim()+"\n":"")+who+": "+myDetail+"\n"+(partner.name||"?")+": "+pDetail;
-    if(pr.addLog)pr.addLog({who:who,type:"skill",label:label,detail:detail,total:t+t2});
+    if(pr.addLog)pr.addLog({who:who,type:"skill",label:logLabel,detail:detail,total:t+t2});
+    if(pr.onCoopRoll)pr.onCoopRoll({label:coopLabel,desc:actDesc.trim()||undefined,a:{name:who,d10:d,crit:R.crit,fumble:R.fumble,parts:myParts,total:t},b:{name:partner.name||"?",d10:d2,crit:R2.crit,fumble:R2.fumble,parts:pParts,total:t2}});
     sPartnerId("");sActDesc("");
     return;
   }
 
   var label=(skillObj?skLabel(skillObj.name):statObj.full)+" · "+who;
-  if(pr.addLog)pr.addLog({who:who,type:"skill",label:label,detail:myDetail,total:t});
+  if(pr.addLog)pr.addLog({who:who,type:"skill",label:label,detail:(actDesc.trim()?actDesc.trim()+"\n":"")+myDetail,total:t});
+  if(pr.onRoll)pr.onRoll({label:label,d10:d,crit:R.crit,fumble:R.fumble,parts:myParts,total:t,subtext:actDesc.trim()||undefined});
+  sActDesc("");
 }
 
 return(<div style={{display:"flex",flexDirection:"column",height:"100%",minHeight:0}}>
@@ -164,10 +170,10 @@ return(<div style={{display:"flex",flexDirection:"column",height:"100%",minHeigh
   </div>
 </div>}
 
-{partner&&<div className="n-field">
+<div className="n-field">
   <label>Описание действия (необязательно)</label>
-  <input className="n-input" value={actDesc} onChange={function(e){sActDesc(e.target.value)}} placeholder="Например: вместе стабилизируем раненого" style={{padding:"6px 8px",minHeight:34}}/>
-</div>}
+  <input className="n-input" value={actDesc} onChange={function(e){sActDesc(e.target.value)}} placeholder={partner?"Например: вместе стабилизируем раненого":"Например: пытаюсь взломать замок"} style={{padding:"6px 8px",minHeight:34}}/>
+</div>
 
 <button onClick={doRoll} className="n-btn n-btn-primary" style={{minHeight:34,alignSelf:"flex-start"}}><IconD10 size={14}/> Бросить</button>
 </div>}
