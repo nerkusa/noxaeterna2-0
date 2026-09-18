@@ -49,7 +49,7 @@ return(<aside className="n-sidebar" style={{flexShrink:0,borderRight:"1px solid 
   <div style={{height:6,borderRadius:3,background:"var(--color-sunken)",overflow:"hidden"}}><div style={{width:wP+"%",height:"100%",background:"linear-gradient(90deg,var(--color-accent),var(--color-accent-2))"}}/></div>
 </div>
 <div>
-  <div style={{display:"flex",justifyContent:"space-between",fontSize:10,fontWeight:600,letterSpacing:.06,textTransform:"uppercase",color:"var(--color-text-muted)",marginBottom:3}}><span>Опыт</span><span style={{color:xpp.ready?"#34d399":"var(--color-text)",textTransform:"none",fontWeight:700}}>{xpp.got+"/"+xpp.need+" до ур."+(xpp.level+1)}</span></div>
+  <div style={{display:"flex",justifyContent:"space-between",flexWrap:"wrap",rowGap:1,fontSize:10,fontWeight:600,letterSpacing:.06,textTransform:"uppercase",color:"var(--color-text-muted)",marginBottom:3}}><span>Опыт</span><span style={{whiteSpace:"nowrap",color:xpp.ready?"#34d399":"var(--color-text)",textTransform:"none",fontWeight:700}}>{xpp.got+"/"+xpp.need+" до ур."+(xpp.level+1)}</span></div>
   <div style={{height:6,borderRadius:3,background:"var(--color-sunken)",overflow:"hidden"}}><div style={{width:xpp.pct+"%",height:"100%",background:xpp.ready?"linear-gradient(90deg,#10b981,#34d399)":"linear-gradient(90deg,#f59e0b,#fbbf24)"}}/></div>
   {xpp.ready&&<div style={{fontSize:9,color:"#34d399",fontWeight:700,marginTop:2}}>Хватает опыта на новый уровень — попроси ГМ повысить</div>}
 </div>
