@@ -87,10 +87,10 @@ return(<div key={st.key} style={{marginBottom:1}}>
 </div>)})}
 </div>
 
-<div style={{padding:"10px 14px 14px",borderTop:"1px solid var(--color-divider)",display:"flex",gap:8}}>
-{!c.locked&&!isGM&&<button onClick={function(){sU({name:c.name,raceId:c.raceId,humanBonusStat:c.humanBonusStat,stats:Object.assign({},c.stats),skills:Object.assign({},c.skills)});var r=rndStats(c.profId,c.raceId);sv(Object.assign({},c,r,{curHp:null,curWill:null}))}} className="n-btn n-btn-secondary" style={{flex:1,color:"#f0b352",borderColor:"#f59e0b40"}}>Рандом</button>}
-{!c.locked&&!isGM&&undo&&<button onClick={function(){sv(Object.assign({},c,undo,{curHp:null,curWill:null}));sU(null)}} className="n-btn n-btn-secondary" style={{color:"var(--color-accent)"}}>Отменить</button>}
-{!c.locked&&!isGM&&<button onClick={function(){if(!window.confirm("Принять распределение характеристик и навыков? Дальше менять их сможет только ГМ."))return;sv(Object.assign({},c,{locked:true}))}} className="n-btn n-btn-primary" style={{flex:1}}>✓ Принять</button>}
+<div style={{padding:"10px 14px 14px",borderTop:"1px solid var(--color-divider)",display:"flex",flexWrap:"wrap",gap:8}}>
+{!c.locked&&!isGM&&<button onClick={function(){sU({name:c.name,raceId:c.raceId,humanBonusStat:c.humanBonusStat,stats:Object.assign({},c.stats),skills:Object.assign({},c.skills)});var r=rndStats(c.profId,c.raceId);sv(Object.assign({},c,r,{curHp:null,curWill:null}))}} className="n-btn n-btn-secondary" style={{flex:"1 1 auto",color:"#f0b352",borderColor:"#f59e0b40"}}>Рандом</button>}
+{!c.locked&&!isGM&&undo&&<button onClick={function(){sv(Object.assign({},c,undo,{curHp:null,curWill:null}));sU(null)}} className="n-btn n-btn-secondary" style={{flex:"1 1 auto",color:"var(--color-accent)"}}>Отменить</button>}
+{!c.locked&&!isGM&&<button onClick={function(){if(!window.confirm("Принять распределение характеристик и навыков? Дальше менять их сможет только ГМ."))return;sv(Object.assign({},c,{locked:true}))}} className="n-btn n-btn-primary" style={{flex:"1 1 auto"}}>✓ Принять</button>}
 {c.locked&&!isGM&&<span style={{flex:1,textAlign:"center",fontSize:11,color:"var(--color-text-muted)",alignSelf:"center"}}>Распределение закреплено</span>}
 {isGM&&<span style={{flex:1,textAlign:"center",fontSize:11,color:c.locked?"#34d399":"#f0b352"}}>{c.locked?"✓ Принят игроком":"Черновик — ещё не принят"}</span>}
 </div>
