@@ -38,6 +38,11 @@ var items=[];
 (pr.logs||[]).forEach(function(l){items.push({kind:"roll",ts:l.ts||0,who:l.who,label:l.label,detail:l.detail,total:l.total})});
 items.sort(function(a,b){return a.ts-b.ts});
 
+function fmtYkt(ts){
+  try{return new Intl.DateTimeFormat('ru-RU',{timeZone:'Asia/Yakutsk',hour:'2-digit',minute:'2-digit'}).format(new Date(ts))+" YKT"}
+  catch(e){return ""}
+}
+
 function Avatar(ap){
   var ch=(pr.characters||[]).find(function(c){return c.name===ap.name});
   var isGM=ap.name==="Мастер";
@@ -93,7 +98,7 @@ return(<div style={{display:"flex",flexDirection:"column",height:"100%",minHeigh
   if(it.kind==="roll")return(<div key={i} style={{display:"flex",gap:8,alignSelf:"flex-start",maxWidth:"88%",alignItems:"flex-end"}}>
     <Avatar name={it.who}/>
     <div className="n-roll-card" style={{flex:1,minWidth:0}}>
-      <div style={{display:"flex",alignItems:"center",gap:6,fontSize:11,fontWeight:600,color:"var(--color-accent)",marginBottom:4}}><IconD10 size={13}/> {it.label}{it.who&&<span style={{color:"var(--color-text-muted)",fontWeight:400}}>{" · "+it.who}</span>}</div>
+      <div style={{display:"flex",alignItems:"center",gap:6,fontSize:11,fontWeight:600,color:"var(--color-accent)",marginBottom:4}}><IconD10 size={13}/> {it.label}{it.who&&<span style={{color:"var(--color-text-muted)",fontWeight:400}}>{" · "+it.who}</span>}<span style={{marginLeft:"auto",fontSize:9,color:"var(--color-text-muted)",fontWeight:400}}>{fmtYkt(it.ts)}</span></div>
       {it.detail&&<div style={{fontSize:11,color:"var(--color-text-muted)",fontFamily:"monospace",whiteSpace:"pre-line",marginBottom:it.total?2:0}}>{it.detail}</div>}
       {(it.total!==undefined&&it.total!==0)&&<div style={{fontSize:20,fontWeight:700}}>{it.total}</div>}
     </div>
@@ -104,6 +109,7 @@ return(<div style={{display:"flex",flexDirection:"column",height:"100%",minHeigh
     <div className={"n-msg "+(self?"n-msg-self":"n-msg-other")} style={{maxWidth:"100%"}}>
       {!self&&<span className="n-msg-who">{it.who}</span>}
       <span>{it.text}</span>
+      <div style={{fontSize:9,color:"var(--color-text-muted)",marginTop:3,textAlign:self?"right":"left"}}>{fmtYkt(it.ts)}</div>
     </div>
   </div>);
 })}
