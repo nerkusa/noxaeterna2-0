@@ -9,8 +9,6 @@ var _p=useState(""),ps=_p[0],sP=_p[1];
 var _p2=useState(""),ps2=_p2[0],sP2=_p2[1];
 var _e=useState(""),er=_e[0],sE=_e[1];
 var _l=useState(false),ld=_l[0],sL=_l[1];
-var li={width:"100%",padding:"10px 12px",border:"2px solid #34374a",borderRadius:8,fontSize:14,fontFamily:"'Inter',sans-serif",background:"#1b1d29",color:"#e9e9ed",outline:"none",textAlign:"center"};
-var btn=function(c){return{width:"100%",padding:14,borderRadius:12,border:"2px solid "+c+"40",background:c+"10",fontFamily:"'Inter',sans-serif",fontWeight:700,fontSize:15,color:c,cursor:"pointer"}};
 function doLogin(){
   if(!lg.trim()||!ps){sE("Заполни логин и пароль");return}
   sE("");sL(true);
@@ -31,18 +29,38 @@ function doRegister(){
   });
 }
 function onKeyDown(e){if(e.key==="Enter"){md==="login"?doLogin():doRegister()}}
-return(<div style={{fontFamily:"'Inter',sans-serif",color:"#e9e9ed",background:"linear-gradient(180deg,#161826,#0e0f18)",minHeight:"100vh",width:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"20px 16px"}}><style>{CSS}</style>
-<div style={{width:"100%",maxWidth:360}}>
-<div style={{textAlign:"center",marginBottom:24}}><div style={{fontSize:28,fontFamily:"'Inter',sans-serif",fontWeight:900,color:"#e9e9ed"}}>✦ Nox Aeterna 2.0</div><div style={{fontSize:14,fontFamily:"'Inter',sans-serif",color:"#9397ab",marginTop:4}}>Fantasy Companion</div></div>
-<div style={{display:"flex",flexDirection:"column",gap:10,background:"#232532",border:"2px solid #34374a",borderRadius:14,padding:"20px 16px"}}>
-<div style={{fontFamily:"'Inter',sans-serif",fontWeight:900,fontSize:17,textAlign:"center"}}>{md==="login"?"🔑 Вход":"📝 Регистрация"}</div>
-<input style={li} value={lg} onChange={function(e){sLg(e.target.value)}} onKeyDown={onKeyDown} placeholder="Логин" autoCapitalize="none" autoCorrect="off"/>
-<input style={li} type="password" value={ps} onChange={function(e){sP(e.target.value)}} onKeyDown={onKeyDown} placeholder="Пароль"/>
-{md==="register"&&<input style={li} type="password" value={ps2} onChange={function(e){sP2(e.target.value)}} onKeyDown={onKeyDown} placeholder="Повтори пароль"/>}
-{er&&<div style={{color:"#ef4444",fontSize:11,textAlign:"center"}}>{er}</div>}
-<button onClick={md==="login"?doLogin:doRegister} disabled={ld} style={btn("#9184d9")}>{ld?"⏳...":(md==="login"?"Войти":"Зарегистрироваться")}</button>
-<button onClick={function(){sM(md==="login"?"register":"login");sE("")}} style={{background:"none",border:"none",color:"#9397ab",cursor:"pointer",fontSize:12}}>{md==="login"?"Нет аккаунта? Зарегистрироваться":"← Уже есть аккаунт? Войти"}</button>
+return(<div style={{fontFamily:"'Inter',sans-serif",color:"var(--color-text)",background:"radial-gradient(circle at 50% 20%,#1c1f34,var(--color-bg) 60%)",minHeight:"100vh",width:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px 16px"}}>
+<style>{CSS}</style>
+<div style={{width:"100%",maxWidth:380}}>
+
+<div className="n-card" style={{boxShadow:"var(--shadow-lg)",padding:28}}>
+  <div style={{fontSize:11,fontWeight:700,letterSpacing:"0.14em",textTransform:"uppercase",color:"var(--color-accent)"}}>Nox Aeterna</div>
+  <h1 style={{margin:"10px 0 6px",fontSize:26,fontWeight:600,letterSpacing:"-0.015em",lineHeight:1.15}}>{md==="login"?"С возвращением":"Создать аккаунт"}</h1>
+  <p style={{margin:"0 0 22px",fontSize:13,lineHeight:1.55,color:"var(--color-text-muted)"}}>{md==="login"?"Игра идёт между сессиями — заходи и продолжай с того же места.":"Один логин — один персонаж, который сохраняется между заходами."}</p>
+
+  <div className="n-field" style={{marginBottom:14}}>
+    <label>Логин</label>
+    <input className="n-input" value={lg} onChange={function(e){sLg(e.target.value)}} onKeyDown={onKeyDown} placeholder="kayran" autoCapitalize="none" autoCorrect="off"/>
+  </div>
+  <div className="n-field" style={{marginBottom:md==="register"?14:20}}>
+    <label>Пароль</label>
+    <input className="n-input" type="password" value={ps} onChange={function(e){sP(e.target.value)}} onKeyDown={onKeyDown} placeholder="••••••••"/>
+  </div>
+  {md==="register"&&<div className="n-field" style={{marginBottom:20}}>
+    <label>Повтори пароль</label>
+    <input className="n-input" type="password" value={ps2} onChange={function(e){sP2(e.target.value)}} onKeyDown={onKeyDown} placeholder="••••••••"/>
+  </div>}
+
+  {er&&<div style={{color:"#ef4444",fontSize:12,marginBottom:14}}>{er}</div>}
+
+  <button onClick={md==="login"?doLogin:doRegister} disabled={ld} className="n-btn n-btn-primary n-btn-block" style={{minHeight:44,fontSize:15}}>{ld?"⏳ …":(md==="login"?"Войти":"Зарегистрироваться")}</button>
+
+  <div style={{display:"flex",justifyContent:"center",marginTop:16}}>
+    <button onClick={function(){sM(md==="login"?"register":"login");sE("")}} className="n-btn" style={{color:"var(--color-accent)",fontSize:13,padding:"6px 4px"}}>{md==="login"?"Нет аккаунта? Создать":"← Уже есть аккаунт? Войти"}</button>
+  </div>
 </div>
+
+<div style={{textAlign:"center",marginTop:22,fontSize:12,color:"var(--color-text-muted)"}}>✦ Nox Aeterna 2.0 · Fantasy Companion</div>
 </div>
 </div>)}
 
