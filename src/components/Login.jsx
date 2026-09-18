@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { authLogin, authRegister } from '../firebase';
 import { CSS } from '../styles/globalCss';
+import { randomQuote } from '../data/quotes';
 
 function Login(pr){
+var _q=useState(randomQuote),quote=_q[0];
 var _m=useState("login"),md=_m[0],sM=_m[1];
 var _lg=useState(""),lg=_lg[0],sLg=_lg[1];
 var _p=useState(""),ps=_p[0],sP=_p[1];
@@ -36,11 +38,11 @@ return(<div style={{fontFamily:"'Inter',sans-serif",color:"var(--color-text)",ba
 <div className="n-card" style={{boxShadow:"var(--shadow-lg)",padding:28}}>
   <div style={{fontSize:11,fontWeight:700,letterSpacing:"0.14em",textTransform:"uppercase",color:"var(--color-accent)"}}>Nox Aeterna</div>
   <h1 style={{margin:"10px 0 6px",fontSize:26,fontWeight:600,letterSpacing:"-0.015em",lineHeight:1.15}}>{md==="login"?"С возвращением":"Создать аккаунт"}</h1>
-  <p style={{margin:"0 0 22px",fontSize:13,lineHeight:1.55,color:"var(--color-text-muted)"}}>{md==="login"?"Игра идёт между сессиями — заходи и продолжай с того же места.":"Один логин — один персонаж, который сохраняется между заходами."}</p>
+  <p style={{margin:"0 0 22px",fontSize:13,lineHeight:1.55,color:"var(--color-text-muted)",fontStyle:"italic"}}>{"«"+quote+"»"}</p>
 
   <div className="n-field" style={{marginBottom:14}}>
     <label>Логин</label>
-    <input className="n-input" value={lg} onChange={function(e){sLg(e.target.value)}} onKeyDown={onKeyDown} placeholder="kayran" autoCapitalize="none" autoCorrect="off"/>
+    <input className="n-input" value={lg} onChange={function(e){sLg(e.target.value)}} onKeyDown={onKeyDown} autoCapitalize="none" autoCorrect="off"/>
   </div>
   <div className="n-field" style={{marginBottom:md==="register"?14:20}}>
     <label>Пароль</label>
