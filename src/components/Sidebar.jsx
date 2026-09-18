@@ -21,10 +21,10 @@ var bsk=rc.bsp?1:0;var stL=40-uSP(c.stats||{});var skL=(60+bsk)-uSkP(c.skills||{
 var raceBonusTags=Object.entries(rc.st||{}).map(function(e){var sd=SD.find(function(s){return s.key===e[0]});return{label:"+"+e[1]+" "+(sd?sd.key:e[0]),color:sd?sd.color:"var(--color-accent)"}});
 /* ГМ редактирует характеристики/навыки напрямую, без пула и без трат
    очков уровня — на любом персонаже, запертом или нет. Игрок до «Принять»
-   свободно распределяет очки из общего пула; после «Принять» — только
-   тратит очки за уровни (spentLvlPts), назад отменить нельзя. */
-function uS(k,d){var stats=Object.assign({},c.stats);if(isGM){stats[k]=Math.max(1,Math.min(10,(stats[k]||0)+d));sv(Object.assign({},c,{stats:stats}));return}if(c.locked){if(d<0)return;var avL=(c.lvlPts||0)-(c.spentLvlPts||0);if(avL<5)return;stats[k]=(stats[k]||0)+1;if(stats[k]>10)return;sv(Object.assign({},c,{stats:stats,spentLvlPts:(c.spentLvlPts||0)+5}));return}stats[k]=(stats[k]||0)+d;if(stats[k]<1||stats[k]>8)return;if(uSP(stats)>40)return;sv(Object.assign({},c,{stats:stats}))}
-function uSk(n,d){var skills=Object.assign({},c.skills);if(isGM){skills[n]=Math.max(0,Math.min(10,(skills[n]||0)+d));sv(Object.assign({},c,{skills:skills}));return}if(c.locked){if(d<0)return;var sd=Object.values(SKD).flat().find(function(s){return s.name===n});var cost=sd&&sd.x2?4:2;var avL=(c.lvlPts||0)-(c.spentLvlPts||0);if(avL<cost)return;skills[n]=(skills[n]||0)+1;if(skills[n]>10)return;sv(Object.assign({},c,{skills:skills,spentLvlPts:(c.spentLvlPts||0)+cost}));return}skills[n]=(skills[n]||0)+d;if(skills[n]<0||skills[n]>10)return;if(uSkP(skills)>60+bsk)return;sv(Object.assign({},c,{skills:skills}))}
+   свободно распределяет очки из общего бюджета; после «Принять» — только
+   тратит очки, выданные за уровни (statPts/skillPts), назад отменить нельзя. */
+function uS(k,d){var stats=Object.assign({},c.stats);if(isGM){stats[k]=Math.max(1,Math.min(10,(stats[k]||0)+d));sv(Object.assign({},c,{stats:stats}));return}if(c.locked){if(d<0)return;if((c.statPts||0)<1)return;stats[k]=(stats[k]||0)+1;if(stats[k]>10)return;sv(Object.assign({},c,{stats:stats,statPts:(c.statPts||0)-1}));return}stats[k]=(stats[k]||0)+d;if(stats[k]<1||stats[k]>8)return;if(uSP(stats)>40)return;sv(Object.assign({},c,{stats:stats}))}
+function uSk(n,d){var skills=Object.assign({},c.skills);if(isGM){skills[n]=Math.max(0,Math.min(10,(skills[n]||0)+d));sv(Object.assign({},c,{skills:skills}));return}if(c.locked){if(d<0)return;var sd=Object.values(SKD).flat().find(function(s){return s.name===n});var cost=sd&&sd.x2?2:1;if((c.skillPts||0)<cost)return;skills[n]=(skills[n]||0)+1;if(skills[n]>10)return;sv(Object.assign({},c,{skills:skills,skillPts:(c.skillPts||0)-cost}));return}skills[n]=(skills[n]||0)+d;if(skills[n]<0||skills[n]>10)return;if(uSkP(skills)>60+bsk)return;sv(Object.assign({},c,{skills:skills}))}
 return(<aside className="n-sidebar" style={{flexShrink:0,borderRight:"1px solid var(--color-divider)",display:"flex",flexDirection:"column",minHeight:0,background:"var(--color-bg)",overflowY:"auto"}}>
 
 <div style={{padding:14,display:"flex",gap:10,alignItems:"flex-start",borderBottom:"1px solid var(--color-divider)"}}>
@@ -58,6 +58,7 @@ return(<aside className="n-sidebar" style={{flexShrink:0,borderRight:"1px solid 
 <div style={{padding:"10px 14px 4px",display:"flex",justifyContent:"space-between",alignItems:"baseline"}}>
 <span className="n-sidebar-hide-compact" style={{fontSize:10,fontWeight:700,letterSpacing:.06,textTransform:"uppercase",color:"var(--color-text-muted)"}}>Характеристики и навыки</span>
 {!c.locked&&!isGM&&<span style={{fontSize:10,color:(stL===0&&skL===0)?"#10b981":"var(--color-text-muted)"}}>{stL+"/40 · "+skL+"/"+(60+bsk)}</span>}
+{c.locked&&!isGM&&((c.statPts||0)>0||(c.skillPts||0)>0)&&<span style={{fontSize:10,fontWeight:700,color:"#f0b352"}}>{"Очки: "+(c.statPts||0)+" стат · "+(c.skillPts||0)+" нав."}</span>}
 {isGM&&<span style={{fontSize:10,color:"var(--color-accent)"}}>ГМ: свободное редактирование</span>}
 </div>
 

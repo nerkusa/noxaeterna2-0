@@ -34,7 +34,7 @@ function mHP(f,c){
   activeTraitEffects(c,getTraits()).forEach(function(e){if(e.type==="hp_flat")bonus+=(e.amount||0)});
   return Math.max(1,base+bonus);
 }
-function nC(name){return{name:name||"",level:1,xp:0,profId:"none",raceId:"none",humanBonusStat:"",portrait:"",hair:"",height:"",weight:"",alignment:"",eyeColor:"",skinColor:"",bio:"",lifepath:[],stats:iS(),skills:iSk(),locked:false,curHp:null,hpOv:null,curWill:null,willOv:null,hpRoll:r1(10),weapons:[],lvlPts:0,spentLvlPts:0,armors:[],equippedHead:null,equippedBody:null,shield:null,shieldHp:0,shieldMaxHp:0,equippedWeapon:null,weaponMode:"1h",inventory:[],traits:[],currency:{gold:0,silver:0,bronze:0,copper:0}}}
+function nC(name){return{name:name||"",level:1,xp:0,profId:"none",raceId:"none",humanBonusStat:"",portrait:"",hair:"",height:"",weight:"",alignment:"",eyeColor:"",skinColor:"",bio:"",lifepath:[],stats:iS(),skills:iSk(),locked:false,curHp:null,hpOv:null,curWill:null,willOv:null,hpRoll:r1(10),weapons:[],statPts:0,skillPts:0,armors:[],equippedHead:null,equippedBody:null,shield:null,shieldHp:0,shieldMaxHp:0,equippedWeapon:null,weaponMode:"1h",inventory:[],traits:[],currency:{gold:0,silver:0,bronze:0,copper:0}}}
 
 /* Опыт до следующего уровня растёт на 100 за уровень: 1→2 100, 2→3 200,
    3→4 300 ... 9→10 900. xpForLevel(N) — сколько всего опыта нужно набрать
@@ -47,6 +47,13 @@ function xpProgress(c){
   return{level:lvl,have:have,curThresh:curThresh,nextThresh:nextThresh,need:need,got:got,pct:Math.min(100,(got/need)*100),ready:have>=nextThresh};
 }
 
+/* Награда очками за каждый уровень (ключ — уровень, на который переходят).
+   Очко характеристики поднимает стат на 1. Очко навыка поднимает обычный
+   навык на 1, навык ×2 стоит 2 очка навыка (та же логика, что и при
+   первичном распределении). Уровни выше 10 получают награду 10-го. */
+var LEVEL_REWARDS={2:{stat:0,skill:2},3:{stat:0,skill:4},4:{stat:1,skill:2},5:{stat:1,skill:2},6:{stat:0,skill:3},7:{stat:1,skill:2},8:{stat:0,skill:4},9:{stat:2,skill:0},10:{stat:1,skill:5}};
+function levelUpReward(level){return LEVEL_REWARDS[level]||LEVEL_REWARDS[10]}
+
 /* Генерация случайных статов/навыков для заданной расы и профессии (имя/раса/класс не трогаются) */
 function rndCore(pr,rc){var st=iS();var rem=33;var pb=Math.floor(rem*0.7);var sp=0;if(pr.pS.length>0)for(var i=0;i<pb;i++){var cn=pr.pS.filter(function(k){return st[k]<8});if(!cn.length)break;st[pk(cn)]++;sp++}var lf=rem-sp;var ak=SD.map(function(s){return s.key});for(var j=0;j<lf;j++){var c2=ak.filter(function(k){return st[k]<8});if(!c2.length)break;st[pk(c2)]++}var sk=iSk();var aS=Object.values(SKD).flat();var co=function(n){var d=aS.find(function(s){return s.name===n});return d&&d.x2?2:1};var bk=rc.bsp?1:0;var sB=60+bk;var sp2=Math.floor(sB*0.7);var ss=0;if(pr.pSk.length>0)for(var x=0;x<200&&ss<sp2;x++){var c3=pr.pSk.filter(function(n){return sk[n]<8&&co(n)<=(sB-ss)});if(!c3.length)break;var n2=pk(c3);sk[n2]++;ss+=co(n2)}var sl=sB-ss;for(var y=0;y<200&&sl>0;y++){var c4=aS.map(function(s){return s.name}).filter(function(n){return sk[n]<6&&co(n)<=sl});if(!c4.length)break;var n3=pk(c4);sk[n3]++;sl-=co(n3)}var hb="";if(rc.fp&&pr.pS.length>0)hb=pk(pr.pS);return{humanBonusStat:hb,stats:st,skills:sk}}
 
@@ -56,4 +63,4 @@ function rnd(pId){var P=getProfs();var pr=P.find(function(p){return p.id===pId})
 /* Рандом только цифр: имя/класс/раса сохраняются */
 function rndStats(pId,raceId){var P=getProfs();var pr=P.find(function(p){return p.id===pId})||P[0];var R=getRaces();var rc=R.find(function(r){return r.id===raceId})||R[0];return rndCore(pr,rc)}
 
-export { iS, iSk, uSP, uSkP, gE, cF, mHP, nC, rnd, rndStats, xpForLevel, xpProgress };
+export { iS, iSk, uSP, uSkP, gE, cF, mHP, nC, rnd, rndStats, xpForLevel, xpProgress, levelUpReward };

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { getProfs } from '../../utils/profStore';
-import { cF, mHP, xpProgress } from '../../utils/character';
+import { cF, mHP, xpProgress, levelUpReward } from '../../utils/character';
 import BestiaryEditor from './BestiaryEditor';
 import DonatePage from './DonatePage';
 import GameView from '../GameView';
@@ -23,7 +23,7 @@ return(<div style={{background:"#1b1d29",border:"2px solid #c084fc18",borderRadi
   <div style={{height:4,borderRadius:2,background:"#0e0f16",overflow:"hidden",marginTop:1}}><div style={{width:xpp.pct+"%",height:"100%",background:xpp.ready?"linear-gradient(90deg,#10b981,#34d399)":"linear-gradient(90deg,#f59e0b,#fbbf24)"}}/></div>
 </div>
 <div style={{display:"flex",gap:2,marginTop:3,flexWrap:"wrap"}}>
-  <button onClick={function(){pr.saveChar(c._fbId,Object.assign({},c,{level:c.level+1,lvlPts:(c.lvlPts||0)+2}))}} title="Повысить уровень (+2 очка на распределение)" style={{padding:"3px 6px",borderRadius:4,border:"1px solid "+(xpp.ready?"#10b981":"#10b98128"),background:xpp.ready?"#10b981":"#0e2018",fontSize:8,fontWeight:700,color:xpp.ready?"#fff":"#34d399",cursor:"pointer"}}>⬆️ Ур.+1</button>
+  <button onClick={function(){var nl=c.level+1;var rw=levelUpReward(nl);pr.saveChar(c._fbId,Object.assign({},c,{level:nl,statPts:(c.statPts||0)+rw.stat,skillPts:(c.skillPts||0)+rw.skill}))}} title={"Повысить уровень (награда за ур."+(c.level+1)+": "+levelUpReward(c.level+1).stat+" очк. хар. + "+levelUpReward(c.level+1).skill+" очк. нав.)"} style={{padding:"3px 6px",borderRadius:4,border:"1px solid "+(xpp.ready?"#10b981":"#10b98128"),background:xpp.ready?"#10b981":"#0e2018",fontSize:8,fontWeight:700,color:xpp.ready?"#fff":"#34d399",cursor:"pointer"}}>⬆️ Ур.+1</button>
   <button onClick={function(){pr.saveChar(c._fbId,Object.assign({},c,{curHp:c.hpOv||mHP(cF(c).fs,c),curWill:c.willOv||cF(c).fs.WILL||1}))}} style={{padding:"3px 6px",borderRadius:4,border:"1px solid #10b98128",background:"#0e2018",fontSize:8,fontWeight:700,color:"#34d399",cursor:"pointer"}}>💤</button>
   {[-5,-1,1,5].map(function(d){return <button key={d} onClick={function(){var mx2=c.hpOv||mHP(cF(c).fs,c);var cur=c.curHp!==null&&c.curHp!==undefined?c.curHp:mx2;pr.saveChar(c._fbId,Object.assign({},c,{curHp:Math.max(0,Math.min(mx2,cur+d))}))}} style={{padding:"3px 5px",borderRadius:4,border:"1px solid #ef444420",background:d<0?"#2a1414":"#0e2018",fontSize:8,fontWeight:700,color:d<0?"#ef4444":"#10b981",cursor:"pointer"}}>{"HP"+(d>0?"+":"")+d}</button>})}
   <button onClick={function(){if(window.confirm("Удалить "+c.name+"?"))pr.deleteChar(c._fbId)}} style={{padding:"3px 6px",borderRadius:4,border:"1px solid #ef444440",background:"#2a1414",fontSize:8,fontWeight:700,color:"#ef4444",cursor:"pointer"}}>🗑️ Удалить</button>

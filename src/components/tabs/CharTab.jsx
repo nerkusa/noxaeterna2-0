@@ -98,11 +98,11 @@ return(<div className="n-card">
 </div>
 </div>)}
 
-function CharTab(pr){var c=pr.char;var sv=pr.save;var oR=pr.onRoll;var gm=pr.isGM;var inf=cF(c);var rc=inf.race;var fs=inf.fs;var es=inf.eSk;var pf=getProfs().find(function(p){return p.id===c.profId})||getProfs()[0];var avL=(c.lvlPts||0)-(c.spentLvlPts||0);var locked=c.locked&&!gm;
+function CharTab(pr){var c=pr.char;var sv=pr.save;var oR=pr.onRoll;var gm=pr.isGM;var inf=cF(c);var rc=inf.race;var fs=inf.fs;var es=inf.eSk;var pf=getProfs().find(function(p){return p.id===c.profId})||getProfs()[0];var locked=c.locked&&!gm;
 return(<div style={{display:"flex",flexDirection:"column",gap:16}}>
 
 <div className="n-card" style={{display:"flex",flexDirection:"column",gap:14}}>
-{c.locked&&avL>0&&<div style={{background:"rgba(245,158,11,.12)",border:"1.5px solid #f59e0b40",borderRadius:8,padding:"8px 10px",fontSize:12,fontWeight:600,color:"#f0b352"}}>{"Есть неизрасходованные очки: "+avL}</div>}
+{c.locked&&((c.statPts||0)>0||(c.skillPts||0)>0)&&<div style={{background:"rgba(245,158,11,.12)",border:"1.5px solid #f59e0b40",borderRadius:8,padding:"8px 10px",fontSize:12,fontWeight:600,color:"#f0b352"}}>{"Есть неизрасходованные очки: "+(c.statPts||0)+" характеристик, "+(c.skillPts||0)+" навыков — трать их в панели слева"}</div>}
 <div style={{display:"flex",gap:10,flexWrap:"wrap"}}><div className="n-field" style={{flex:2,minWidth:140}}><label>Имя</label><LiveField className="n-input" value={c.name||""} disabled={locked} onCommit={function(val){sv(Object.assign({},c,{name:val}))}}/></div><div className="n-field" style={{flex:1,minWidth:60}}><label>Ур.</label><input className="n-input" style={{background:"var(--color-surface)"}} value={c.level} disabled/></div></div>
 <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
 <div className="n-field" style={{flex:1,minWidth:150}}><label>Раса</label><select value={c.raceId} disabled={locked} onChange={function(e){sv(Object.assign({},c,{raceId:e.target.value,curHp:null}))}} className="n-input" style={{cursor:"pointer"}}>{getRaces().map(function(r){return <option key={r.id} value={r.id}>{r.name}</option>})}</select></div>
