@@ -11,8 +11,9 @@ const ALL_SK = Object.keys(SKD).reduce(function (a, k) { return a.concat(SKD[k].
 
 function normalize(traits) { return (Array.isArray(traits) && traits.length) ? traits : TRAITS.slice(); }
 
-function effectOf(t) { return (t.effects && t.effects[0]) || { type: 'none' }; }
-
+/* Одна черта теперь может нести НЕСКОЛЬКО эффектов сразу — например,
+   минус к одному навыку и плюс к другому, или минус к навыку и минус к
+   характеристике одновременно (как просил ГМ: не только «в одну сторону»). */
 export default function TraitEditor(pr) {
   const saveTraits = pr.saveTraits;
   const traits = normalize(pr.traits);
@@ -21,10 +22,21 @@ export default function TraitEditor(pr) {
 
   const persist = function (arr) { saveTraits(arr); };
   const upd = function (id, patch) { persist(traits.map(function (t) { return t.id === id ? Object.assign({}, t, patch) : t; })); };
-  const updEffect = function (id, patch) {
+  const addEffect = function (id) {
     const t = traits.find(function (x) { return x.id === id; });
-    const eff = Object.assign({}, effectOf(t), patch);
-    upd(id, { effects: eff.type === 'none' ? [] : [eff] });
+    upd(id, { effects: (t.effects || []).concat([{ type: 'none' }]) });
+  };
+  const updEffectAt = function (id, idx, patch) {
+    const t = traits.find(function (x) { return x.id === id; });
+    const effs = (t.effects || []).slice();
+    effs[idx] = Object.assign({}, effs[idx], patch);
+    upd(id, { effects: effs });
+  };
+  const delEffectAt = function (id, idx) {
+    const t = traits.find(function (x) { return x.id === id; });
+    const effs = (t.effects || []).slice();
+    effs.splice(idx, 1);
+    upd(id, { effects: effs });
   };
   const add = function () {
     const nt = { id: genId(), cat: 'positive', group: '', name: 'Новая черта', desc: '', how: '', effects: [] };
@@ -57,12 +69,13 @@ export default function TraitEditor(pr) {
       {shown.map(function (t) {
         const open = openId === t.id;
         const catDef = TRAIT_CATEGORIES.find(function (c) { return c.id === t.cat; }) || TRAIT_CATEGORIES[0];
-        const eff = effectOf(t);
+        const effs = t.effects || [];
+        const mechCount = effs.filter(function (e) { return e.type !== 'none'; }).length;
         return (
           <div key={t.id} style={{ border: '2px solid #34374a', borderRadius: 9, background: '#1b1d29', overflow: 'hidden' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 9px' }}>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontFamily: "'Inter',sans-serif", fontWeight: 700, fontSize: 12, color: '#e9e9ed' }}>{t.name}<span style={{ fontSize: 8, color: catDef.color, marginLeft: 6 }}>{catDef.name}</span>{eff.type !== 'none' && <span style={{ fontSize: 8, color: CLR, marginLeft: 6 }}>⚙ механика</span>}</div>
+                <div style={{ fontFamily: "'Inter',sans-serif", fontWeight: 700, fontSize: 12, color: '#e9e9ed' }}>{t.name}<span style={{ fontSize: 8, color: catDef.color, marginLeft: 6 }}>{catDef.name}</span>{mechCount > 0 && <span style={{ fontSize: 8, color: CLR, marginLeft: 6 }}>{'⚙ механик: ' + mechCount}</span>}</div>
                 <div style={{ fontSize: 8, color: '#9397ab', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.desc}</div>
               </div>
               <button onClick={function () { del(t.id); }} style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: 13, cursor: 'pointer' }}>🗑</button>
@@ -78,42 +91,53 @@ export default function TraitEditor(pr) {
                 </div>
                 <div><label style={lbl}>Эффект (для игрока, в листе)</label><textarea value={t.desc || ''} onChange={function (e) { upd(t.id, { desc: e.target.value }); }} style={Object.assign({}, inp, { minHeight: 44, resize: 'vertical' })} /></div>
                 <div><label style={lbl}>Как получить</label><textarea value={t.how || ''} onChange={function (e) { upd(t.id, { how: e.target.value }); }} style={Object.assign({}, inp, { minHeight: 32, resize: 'vertical' })} /></div>
-                <div style={{ background: '#1c1804', borderRadius: 6, padding: '6px 8px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <div style={{ fontSize: 8, color: CLR, fontWeight: 700 }}>⚙ Механика — считается автоматически на листе персонажа</div>
-                  <select value={eff.type} onChange={function (e) { updEffect(t.id, { type: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}>{TRAIT_EFFECT_TYPES.map(function (x) { return <option key={x.id} value={x.id}>{x.name}</option>; })}</select>
-                  {eff.type === 'stat_bonus' && (
-                    <div style={{ display: 'flex', gap: 6 }}>
-                      <div style={{ flex: 1 }}><label style={lbl}>Характеристика</label><select value={eff.stat || 'BODY'} onChange={function (e) { updEffect(t.id, { stat: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}>{SD.map(function (s) { return <option key={s.key} value={s.key}>{s.key + ' · ' + s.full}</option>; })}</select></div>
-                      <div style={{ width: 70 }}><label style={lbl}>Кол-во</label><input type="number" value={eff.amount || 0} onChange={function (e) { updEffect(t.id, { amount: parseInt(e.target.value) || 0 }); }} style={inp} /></div>
-                    </div>
-                  )}
-                  {eff.type === 'skill_bonus' && (
-                    <div style={{ display: 'flex', gap: 6 }}>
-                      <div style={{ flex: 1 }}><label style={lbl}>Навык</label><select value={eff.skill || ALL_SK[0]} onChange={function (e) { updEffect(t.id, { skill: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}>{ALL_SK.map(function (n) { return <option key={n} value={n}>{skLabel(n)}</option>; })}</select></div>
-                      <div style={{ width: 70 }}><label style={lbl}>Кол-во</label><input type="number" value={eff.amount || 0} onChange={function (e) { updEffect(t.id, { amount: parseInt(e.target.value) || 0 }); }} style={inp} /></div>
-                    </div>
-                  )}
-                  {eff.type === 'hp_flat' && (
-                    <div><label style={lbl}>± ХП</label><input type="number" value={eff.amount || 0} onChange={function (e) { updEffect(t.id, { amount: parseInt(e.target.value) || 0 }); }} style={inp} /></div>
-                  )}
-                  {eff.type === 'dual_wield' && (
-                    <div style={{ fontSize: 9, color: '#9397ab' }}>Персонаж с этой чертой сможет снарядить второе одноручное оружие и атаковать им во вкладке «Бой».</div>
-                  )}
-                  {eff.type === 'armor_effectiveness' && (
-                    <div>
-                      <label style={lbl}>Доля защиты брони (1 = норма, 0.667 = 2/3, 0.5 = половина)</label>
-                      <input type="number" step="0.01" min="0" max="1" value={eff.value != null ? eff.value : 1} onChange={function (e) { updEffect(t.id, { value: Math.max(0, Math.min(1, parseFloat(e.target.value))) || 0 }); }} style={inp} />
-                    </div>
-                  )}
-                  {eff.type === 'cancels' && (
-                    <div>
-                      <label style={lbl}>Отменяет черту (протез компенсирует увечье)</label>
-                      <select value={eff.target || ''} onChange={function (e) { updEffect(t.id, { target: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}>
-                        <option value="">— выбери черту —</option>
-                        {traits.filter(function (x) { return x.id !== t.id; }).map(function (x) { return <option key={x.id} value={x.id}>{x.name}</option>; })}
-                      </select>
-                    </div>
-                  )}
+                <div style={{ background: '#1c1804', borderRadius: 6, padding: '6px 8px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div style={{ fontSize: 8, color: CLR, fontWeight: 700 }}>⚙ Механика — считается автоматически на листе персонажа. Можно добавить несколько эффектов сразу (напр. минус к навыку и минус к характеристике, или несколько навыков разом).</div>
+                  {effs.length === 0 && <div style={{ fontSize: 9, color: '#75798c', fontStyle: 'italic' }}>Пока без механики — только описание</div>}
+                  {effs.map(function (eff, idx) {
+                    return (
+                      <div key={idx} style={{ border: '1px solid #34374a', borderRadius: 6, padding: 6, display: 'flex', flexDirection: 'column', gap: 6, background: '#171308' }}>
+                        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                          <select value={eff.type} onChange={function (e) { updEffectAt(t.id, idx, { type: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer', flex: 1 })}>{TRAIT_EFFECT_TYPES.map(function (x) { return <option key={x.id} value={x.id}>{x.name}</option>; })}</select>
+                          <button onClick={function () { delEffectAt(t.id, idx); }} title="Убрать этот эффект" style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: 13, cursor: 'pointer', flexShrink: 0 }}>✕</button>
+                        </div>
+                        {eff.type === 'stat_bonus' && (
+                          <div style={{ display: 'flex', gap: 6 }}>
+                            <div style={{ flex: 1 }}><label style={lbl}>Характеристика</label><select value={eff.stat || 'BODY'} onChange={function (e) { updEffectAt(t.id, idx, { stat: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}>{SD.map(function (s) { return <option key={s.key} value={s.key}>{s.key + ' · ' + s.full}</option>; })}</select></div>
+                            <div style={{ width: 70 }}><label style={lbl}>Кол-во (± )</label><input type="number" value={eff.amount || 0} onChange={function (e) { updEffectAt(t.id, idx, { amount: parseInt(e.target.value) || 0 }); }} style={inp} /></div>
+                          </div>
+                        )}
+                        {eff.type === 'skill_bonus' && (
+                          <div style={{ display: 'flex', gap: 6 }}>
+                            <div style={{ flex: 1 }}><label style={lbl}>Навык</label><select value={eff.skill || ALL_SK[0]} onChange={function (e) { updEffectAt(t.id, idx, { skill: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}>{ALL_SK.map(function (n) { return <option key={n} value={n}>{skLabel(n)}</option>; })}</select></div>
+                            <div style={{ width: 70 }}><label style={lbl}>Кол-во (± )</label><input type="number" value={eff.amount || 0} onChange={function (e) { updEffectAt(t.id, idx, { amount: parseInt(e.target.value) || 0 }); }} style={inp} /></div>
+                          </div>
+                        )}
+                        {eff.type === 'hp_flat' && (
+                          <div><label style={lbl}>± ХП</label><input type="number" value={eff.amount || 0} onChange={function (e) { updEffectAt(t.id, idx, { amount: parseInt(e.target.value) || 0 }); }} style={inp} /></div>
+                        )}
+                        {eff.type === 'dual_wield' && (
+                          <div style={{ fontSize: 9, color: '#9397ab' }}>Персонаж с этой чертой сможет снарядить второе одноручное оружие и атаковать им во вкладке «Бой».</div>
+                        )}
+                        {eff.type === 'armor_effectiveness' && (
+                          <div>
+                            <label style={lbl}>Доля защиты брони (1 = норма, 0.667 = 2/3, 0.5 = половина)</label>
+                            <input type="number" step="0.01" min="0" max="1" value={eff.value != null ? eff.value : 1} onChange={function (e) { updEffectAt(t.id, idx, { value: Math.max(0, Math.min(1, parseFloat(e.target.value))) || 0 }); }} style={inp} />
+                          </div>
+                        )}
+                        {eff.type === 'cancels' && (
+                          <div>
+                            <label style={lbl}>Отменяет черту (протез компенсирует увечье)</label>
+                            <select value={eff.target || ''} onChange={function (e) { updEffectAt(t.id, idx, { target: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}>
+                              <option value="">— выбери черту —</option>
+                              {traits.filter(function (x) { return x.id !== t.id; }).map(function (x) { return <option key={x.id} value={x.id}>{x.name}</option>; })}
+                            </select>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                  <button onClick={function () { addEffect(t.id); }} style={{ padding: '5px 8px', borderRadius: 6, border: '1px dashed ' + CLR + '60', background: 'transparent', color: CLR, fontWeight: 700, fontSize: 10, cursor: 'pointer' }}>➕ Добавить ещё эффект</button>
                 </div>
               </div>
             )}

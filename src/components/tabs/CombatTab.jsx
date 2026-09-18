@@ -143,8 +143,16 @@ else{oR({label:w.name+" Попад."+(aimP?" · "+selZone:""),d10:d,crit:R.crit,
   var rawDmg=Math.max(0,sm(dice)+activeBon+warDmgBon-durPen-woundPen);
   if(tgtNpc&&tgtId&&saveSpawned){
     applyDmgToNpc(tgtNpc,rawDmg,w.dmgType,selZone,saveSpawned,spawned,tgtId,pr.addLog,c.name||"???",function(ev){
-      var xpGain=tgtNpc.maxHp||0;
-      if(xpGain>0){sv(Object.assign({},c,{xp:(c.xp||0)+xpGain}));pr.addLog({who:c.name||"???",type:"xp",label:"Опыт за "+tgtNpc.name,detail:"+"+xpGain+" XP",total:0});}
+      var xpGain=tgtNpc.xpReward!=null?tgtNpc.xpReward:(tgtNpc.maxHp||0);
+      if(xpGain>0){
+        var recipients=(pr.characters||[]).filter(function(x){return x.active});
+        if(!recipients.some(function(x){return x._fbId===c._fbId}))recipients=recipients.concat([c]);
+        recipients.forEach(function(rc){
+          if(rc._fbId===c._fbId){sv(Object.assign({},c,{xp:(c.xp||0)+xpGain}));}
+          else if(pr.room){set(ref(db,"rooms/"+pr.room+"/characters/"+rc._fbId+"/xp"),(rc.xp||0)+xpGain);}
+        });
+        pr.addLog({who:c.name||"???",type:"xp",label:"Опыт за "+tgtNpc.name,detail:"+"+xpGain+" XP"+(recipients.length>1?" всем активным игрокам ("+recipients.length+")":""),total:0});
+      }
       if(pr.onNpcDeath)pr.onNpcDeath(ev);
     },w.name,pr.saveNpcHit);
   } else {
