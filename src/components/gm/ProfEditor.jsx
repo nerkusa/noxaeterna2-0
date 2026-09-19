@@ -37,6 +37,8 @@ export default function ProfEditor(pr) {
   const profs = normalize(pr.profs);
   const [openId, setOpenId] = useState(null);
   const [showSk, setShowSk] = useState(false);
+  const [q, setQ] = useState('');
+  const shownProfs = q.trim() ? profs.filter(p => p.id === 'none' || p.name.toLowerCase().includes(q.trim().toLowerCase())) : profs;
 
   const persist = function (arr) { saveProfs(arr); };
   const upd = function (id, patch) { persist(profs.map(function (p) { return p.id === id ? Object.assign({}, p, patch) : p; })); };
@@ -73,8 +75,10 @@ export default function ProfEditor(pr) {
         <div style={{ fontSize: 9, color: '#9397ab' }}>Названия, способности, предпочтения для «Рандома»</div>
       </div>
       <button onClick={addProf} style={{ padding: 10, borderRadius: 9, border: '2px dashed ' + CLR + '60', background: '#1f1330', color: CLR, fontFamily: "'Inter',sans-serif", fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>➕ Добавить класс</button>
+      <input value={q} onChange={function (e) { setQ(e.target.value); }} placeholder="🔎 Поиск класса по названию…" style={inp} />
+      {q.trim() && shownProfs.length === 0 && <div style={{ textAlign: 'center', padding: 10, color: '#9397ab', fontSize: 11, fontStyle: 'italic' }}>Ничего не найдено</div>}
 
-      {profs.map(function (p) {
+      {shownProfs.map(function (p) {
         const isNone = p.id === 'none';
         const open = openId === p.id;
         return (

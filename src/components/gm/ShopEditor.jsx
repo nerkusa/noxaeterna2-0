@@ -38,6 +38,7 @@ export default function ShopEditor(pr) {
   const saveShop = pr.saveShop;
   const [cat, setCat] = useState('armor');
   const [editId, setEditId] = useState(null);
+  const [q, setQ] = useState('');
 
   const persist = function (arr) { saveShop(arr); };
   const upd = function (id, patch) { persist(shop.map(function (i) { return i.id === id ? Object.assign({}, i, patch) : i; })); };
@@ -72,7 +73,8 @@ export default function ShopEditor(pr) {
     setEditId(it.id);
   };
 
-  const items = shop.filter(function (i) { return cat === 'item' ? (i.cat === 'item' || i.cat === 'tool' || i.cat === 'ammo') : i.cat === cat; });
+  const itemsByCat = shop.filter(function (i) { return cat === 'item' ? (i.cat === 'item' || i.cat === 'tool' || i.cat === 'ammo') : i.cat === cat; });
+  const items = q.trim() ? itemsByCat.filter(function (i) { return (i.name || '').toLowerCase().includes(q.trim().toLowerCase()); }) : itemsByCat;
   const catColor = (CATS.find(function (c) { return c.id === cat; }) || CATS[0]).color;
 
   function summary(it) {
@@ -210,8 +212,9 @@ export default function ShopEditor(pr) {
       </div>
 
       <button onClick={add} style={{ padding: 9, borderRadius: 8, border: '2px dashed ' + catColor + '60', background: catColor + '12', color: catColor, fontFamily: "'Inter',sans-serif", fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>➕ Добавить</button>
+      <input value={q} onChange={function (e) { setQ(e.target.value); }} placeholder="🔎 Поиск по названию…" style={inp} />
 
-      {items.length === 0 && <div style={{ textAlign: 'center', padding: 14, color: '#9397ab', fontSize: 11, fontStyle: 'italic' }}>Пусто — добавь первую вещь</div>}
+      {items.length === 0 && <div style={{ textAlign: 'center', padding: 14, color: '#9397ab', fontSize: 11, fontStyle: 'italic' }}>{q.trim() ? 'Ничего не найдено' : 'Пусто — добавь первую вещь'}</div>}
       {grouped ? grouped : items.map(itemRow)}
     </div>
   );

@@ -22,6 +22,8 @@ export default function RaceEditor(pr) {
   const races = normalize(pr.races);
   const [openId, setOpenId] = useState(null);
   const [showSk, setShowSk] = useState(false);
+  const [q, setQ] = useState('');
+  const shownRaces = q.trim() ? races.filter(r => r.id === 'none' || r.name.toLowerCase().includes(q.trim().toLowerCase())) : races;
 
   const persist = (arr) => saveRaces(arr);
   const updateRace = (id, patch) => persist(races.map(r => r.id === id ? Object.assign({}, r, patch) : r));
@@ -62,8 +64,10 @@ export default function RaceEditor(pr) {
         <div style={{ fontSize: 9, color: '#9397ab' }}>Меняй названия, бонусы статов, добавляй и удаляй расы</div>
       </div>
       <button onClick={addRace} style={{ padding: 10, borderRadius: 9, border: '2px dashed #10b98160', background: '#0e2018', color: '#34d399', fontFamily: "'Inter',sans-serif", fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>➕ Добавить расу</button>
+      <input value={q} onChange={function (e) { setQ(e.target.value); }} placeholder="🔎 Поиск расы по названию…" style={inp} />
+      {q.trim() && shownRaces.length === 0 && <div style={{ textAlign: 'center', padding: 10, color: '#9397ab', fontSize: 11, fontStyle: 'italic' }}>Ничего не найдено</div>}
 
-      {races.map(function (r) {
+      {shownRaces.map(function (r) {
         const isNone = r.id === 'none';
         const open = openId === r.id;
         const mods = Object.entries(r.st || {});

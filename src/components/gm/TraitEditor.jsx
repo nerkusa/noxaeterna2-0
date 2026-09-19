@@ -20,6 +20,7 @@ export default function TraitEditor(pr) {
   const traits = normalize(pr.traits);
   const [openId, setOpenId] = useState(null);
   const [catFilter, setCatFilter] = useState('all');
+  const [q, setQ] = useState('');
 
   const persist = function (arr) { saveTraits(arr); };
   const upd = function (id, patch) { persist(traits.map(function (t) { return t.id === id ? Object.assign({}, t, patch) : t; })); };
@@ -46,7 +47,8 @@ export default function TraitEditor(pr) {
   };
   const del = function (id) { if (window.confirm('Удалить черту из каталога?')) { persist(traits.filter(function (t) { return t.id !== id; })); setOpenId(null); } };
 
-  const shown = catFilter === 'all' ? traits : traits.filter(function (t) { return t.cat === catFilter; });
+  const byCat = catFilter === 'all' ? traits : traits.filter(function (t) { return t.cat === catFilter; });
+  const shown = q.trim() ? byCat.filter(function (t) { return t.name.toLowerCase().includes(q.trim().toLowerCase()); }) : byCat;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -65,8 +67,9 @@ export default function TraitEditor(pr) {
       </div>
 
       <button onClick={add} style={{ padding: 9, borderRadius: 8, border: '2px dashed ' + CLR + '60', background: CLR + '12', color: CLR, fontFamily: "'Inter',sans-serif", fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>➕ Добавить черту</button>
+      <input value={q} onChange={function (e) { setQ(e.target.value); }} placeholder="🔎 Поиск черты по названию…" style={inp} />
 
-      {shown.length === 0 && <div style={{ textAlign: 'center', padding: 14, color: '#9397ab', fontSize: 11, fontStyle: 'italic' }}>Пусто</div>}
+      {shown.length === 0 && <div style={{ textAlign: 'center', padding: 14, color: '#9397ab', fontSize: 11, fontStyle: 'italic' }}>{q.trim() ? 'Ничего не найдено' : 'Пусто'}</div>}
       {shown.map(function (t) {
         const open = openId === t.id;
         const catDef = TRAIT_CATEGORIES.find(function (c) { return c.id === t.cat; }) || TRAIT_CATEGORIES[0];
