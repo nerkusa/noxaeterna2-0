@@ -3,7 +3,7 @@ import { ARMOR_T, SHIELD_T } from '../../data/combat';
 import { DT, WT } from '../../data/stats';
 import { uid } from '../../utils/dice';
 import { CUR_ORDER, CUR_LABEL, CUR_ICON, CUR_NAME, emptyCurrency, fmtCurrency, toCopper } from '../../utils/currency';
-import { buildShopDefaults } from '../../data/shopDefaults';
+import { buildShopDefaults, buildMiscDefaults } from '../../data/shopDefaults';
 import LiveField from '../LiveField';
 
 const backBtn = { padding: '5px 12px', borderRadius: 6, border: '2px solid #34374a', background: '#1b1d29', color: '#e9e9ed', fontWeight: 700, fontSize: 11, cursor: 'pointer' };
@@ -74,13 +74,15 @@ export default function ShopEditor(pr) {
     persist(shop.concat([it]));
     setEditId(it.id);
   };
-  const seedDefaults = function () {
+  const seedFrom = function (builder, label) {
     const existingNames = shop.map(function (i) { return (i.name || '').trim().toLowerCase(); });
-    const toAdd = buildShopDefaults().filter(function (d) { return existingNames.indexOf(d.name.trim().toLowerCase()) < 0; });
+    const toAdd = builder().filter(function (d) { return existingNames.indexOf(d.name.trim().toLowerCase()) < 0; });
     if (toAdd.length === 0) { alert('Всё это уже есть в магазине.'); return; }
-    if (!window.confirm('Добавить стартовый набор из ' + toAdd.length + ' вещей (броня, оружие, щиты, зелья, боеприпасы, ремкомплекты)? Существующие вещи не тронет.')) return;
+    if (!window.confirm('Добавить ' + toAdd.length + ' вещей (' + label + ')? Существующие вещи не тронет.')) return;
     persist(shop.concat(toAdd));
   };
+  const seedDefaults = function () { seedFrom(buildShopDefaults, 'броня, оружие, щиты, зелья, боеприпасы, ремкомплекты'); };
+  const seedMisc = function () { seedFrom(buildMiscDefaults, 'бытовые мелочи и безделушки'); };
 
   const itemsByCat = shop.filter(function (i) { return cat === 'item' ? (i.cat === 'item' || i.cat === 'tool' || i.cat === 'ammo') : i.cat === cat; });
   const items = q.trim() ? itemsByCat.filter(function (i) { return (i.name || '').toLowerCase().includes(q.trim().toLowerCase()); }) : itemsByCat;
@@ -219,7 +221,10 @@ export default function ShopEditor(pr) {
         <div style={{ fontSize: 9, color: '#9397ab' }}>Добавляй вещи — игроки берут их из своего листа</div>
       </div>
 
-      <button onClick={seedDefaults} style={{ padding: 9, borderRadius: 8, border: '2px solid #10b98150', background: 'rgba(16,185,129,.1)', color: '#34d399', fontFamily: "'Inter',sans-serif", fontWeight: 700, fontSize: 11, cursor: 'pointer' }}>📦 Заполнить стартовым набором (броня, оружие, зелья, боеприпасы, ремкомплекты)</button>
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        <button onClick={seedDefaults} style={{ flex: '1 1 240px', padding: 9, borderRadius: 8, border: '2px solid #10b98150', background: 'rgba(16,185,129,.1)', color: '#34d399', fontFamily: "'Inter',sans-serif", fontWeight: 700, fontSize: 11, cursor: 'pointer' }}>📦 Стартовый набор (броня, оружие, зелья)</button>
+        <button onClick={seedMisc} style={{ flex: '1 1 240px', padding: 9, borderRadius: 8, border: '2px solid #f0b35250', background: 'rgba(240,179,82,.1)', color: '#f0b352', fontFamily: "'Inter',sans-serif", fontWeight: 700, fontSize: 11, cursor: 'pointer' }}>🎒 Бытовые мелочи и безделушки</button>
+      </div>
 
       <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
         {CATS.map(function (cc) {
