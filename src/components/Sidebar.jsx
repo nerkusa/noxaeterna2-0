@@ -87,7 +87,7 @@ return(<div key={st.key} style={{marginBottom:1}}>
 </div>
 {op&&sks&&<div style={{display:"flex",flexDirection:"column",gap:1,padding:"2px 0 8px 24px",borderLeft:"1px solid var(--color-divider)",marginLeft:16}}>
 {sks.map(function(sk){var ev=es[sk.name]||0;return(<div key={sk.name} style={{display:"flex",alignItems:"center",gap:6,padding:"4px 6px",borderRadius:6,background:ev>0?"rgba(233,233,237,.03)":"transparent"}}>
-<span style={{flex:1,fontSize:12,fontWeight:ev>0?600:400,color:ev>0?"var(--color-text)":"var(--color-text-muted)",minWidth:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{skLabel(sk.name)}{sk.x2&&<span style={{color:"#ef4444"}}> ×2</span>}</span>
+<span style={{flex:1,fontSize:12,fontWeight:ev>0?600:400,color:ev>0?"var(--color-text)":"var(--color-text-muted)",minWidth:0,lineHeight:1.25}}>{skLabel(sk.name)}{sk.x2&&<span style={{color:"#ef4444"}}> ×2</span>}</span>
 {(function(){var atFloor=c.locked&&!isGM&&(c.skills[sk.name]||0)<=((c.lockedSkills&&c.lockedSkills[sk.name])||0);return <button onClick={function(){uSk(sk.name,-1)}} disabled={atFloor} title={atFloor?"Это стартовое значение — вернуть можно только очки уровня":undefined} style={Object.assign({},S.sm,{width:18,height:18,fontSize:9,opacity:atFloor?0.35:1,cursor:atFloor?"default":"pointer"})}>−</button>})()}
 <span style={{fontSize:13,fontWeight:700,minWidth:16,textAlign:"center",color:ev>0?st.color:"var(--color-text-muted)"}}>{ev}</span>
 <button onClick={function(){uSk(sk.name,1)}} style={Object.assign({},S.sm,{width:18,height:18,fontSize:9,color:st.color})}>+</button>

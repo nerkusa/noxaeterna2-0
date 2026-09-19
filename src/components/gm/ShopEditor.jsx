@@ -41,6 +41,7 @@ export default function ShopEditor(pr) {
   const [cat, setCat] = useState('armor');
   const [editId, setEditId] = useState(null);
   const [q, setQ] = useState('');
+  const [collapsedGroups, setCollapsedGroups] = useState({});
 
   const persist = function (arr) { saveShop(arr); };
   const upd = function (id, patch) { persist(shop.map(function (i) { return i.id === id ? Object.assign({}, i, patch) : i; })); };
@@ -74,15 +75,13 @@ export default function ShopEditor(pr) {
     persist(shop.concat([it]));
     setEditId(it.id);
   };
-  const seedFrom = function (builder, label) {
+  const seedAll = function () {
     const existingNames = shop.map(function (i) { return (i.name || '').trim().toLowerCase(); });
-    const toAdd = builder().filter(function (d) { return existingNames.indexOf(d.name.trim().toLowerCase()) < 0; });
+    const toAdd = buildShopDefaults().concat(buildMiscDefaults()).filter(function (d) { return existingNames.indexOf(d.name.trim().toLowerCase()) < 0; });
     if (toAdd.length === 0) { alert('Всё это уже есть в магазине.'); return; }
-    if (!window.confirm('Добавить ' + toAdd.length + ' вещей (' + label + ')? Существующие вещи не тронет.')) return;
+    if (!window.confirm('Добавить ' + toAdd.length + ' готовых вещей из каталога (броня, оружие, щиты, зелья, боеприпасы, ремкомплекты, бытовые мелочи)? Существующие вещи не тронет.')) return;
     persist(shop.concat(toAdd));
   };
-  const seedDefaults = function () { seedFrom(buildShopDefaults, 'броня, оружие, щиты, зелья, боеприпасы, ремкомплекты'); };
-  const seedMisc = function () { seedFrom(buildMiscDefaults, 'бытовые мелочи и безделушки'); };
 
   const itemsByCat = shop.filter(function (i) { return cat === 'item' ? (i.cat === 'item' || i.cat === 'tool' || i.cat === 'ammo') : i.cat === cat; });
   const items = q.trim() ? itemsByCat.filter(function (i) { return (i.name || '').toLowerCase().includes(q.trim().toLowerCase()); }) : itemsByCat;
@@ -200,17 +199,23 @@ export default function ShopEditor(pr) {
     );
   }
 
-  // группировка по подкатегориям
+  // группировка по подкатегориям — длинные подсписки (>6 вещей) по умолчанию
+  // свёрнуты, чтобы страница не превращалась в один гигантский скролл
   const subs = SUBORDER[cat];
   let grouped = null;
   if (subs) {
     grouped = subs.map(function (sk) {
       const list = items.filter(function (i) { return subOf(i) === sk; });
       if (!list.length) return null;
+      const key = cat + ':' + sk;
+      const collapsed = collapsedGroups[key] !== undefined ? collapsedGroups[key] : (list.length > 6 && !q.trim());
       return (
         <div key={sk} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: catColor, marginTop: 4 }}>{SUBLABEL[cat][sk]}</div>
-          {list.map(itemRow)}
+          <button onClick={function () { setCollapsedGroups(function (c) { const n = Object.assign({}, c); n[key] = !collapsed; return n; }); }} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', background: 'none', border: 'none', padding: '4px 2px', marginTop: 4, cursor: 'pointer' }}>
+            <span style={{ fontSize: 10, fontWeight: 700, color: catColor }}>{SUBLABEL[cat][sk]}</span>
+            <span style={{ fontSize: 9, color: '#75798c' }}>{(collapsed ? '▸ показать ' : '▾ скрыть ') + list.length}</span>
+          </button>
+          {!collapsed && list.map(itemRow)}
         </div>
       );
     });
@@ -222,11 +227,7 @@ export default function ShopEditor(pr) {
       <div style={{ textAlign: 'center' }}>
         <div style={{ fontFamily: "'Inter',sans-serif", fontWeight: 900, fontSize: 16, color: '#f0b352' }}>🛒 Магазин / Вещи</div>
         <div style={{ fontSize: 9, color: '#9397ab' }}>Добавляй вещи — игроки берут их из своего листа</div>
-      </div>
-
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-        <button onClick={seedDefaults} style={{ flex: '1 1 240px', padding: 9, borderRadius: 8, border: '2px solid #10b98150', background: 'rgba(16,185,129,.1)', color: '#34d399', fontFamily: "'Inter',sans-serif", fontWeight: 700, fontSize: 11, cursor: 'pointer' }}>📦 Стартовый набор (броня, оружие, зелья)</button>
-        <button onClick={seedMisc} style={{ flex: '1 1 240px', padding: 9, borderRadius: 8, border: '2px solid #f0b35250', background: 'rgba(240,179,82,.1)', color: '#f0b352', fontFamily: "'Inter',sans-serif", fontWeight: 700, fontSize: 11, cursor: 'pointer' }}>🎒 Бытовые мелочи и безделушки</button>
+        <button onClick={seedAll} style={{ marginTop: 4, background: 'none', border: 'none', color: '#75798c', fontSize: 9, cursor: 'pointer', textDecoration: 'underline' }}>📦 добавить ещё из готового каталога</button>
       </div>
 
       <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
