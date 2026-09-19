@@ -108,8 +108,18 @@ const server = http.createServer(function (req, res) {
 });
 const wss = new WebSocketServer({ server });
 
+let connSeq = 1;
+
 wss.on('connection', function (ws) {
-  const localSubIds = new Set();
+  /* msg.id для подписок нумеруется на клиенте с нуля при каждой загрузке
+     страницы, поэтому у двух одновременно подключённых вкладок (например,
+     ГМ и игрок) id подписок совпадают ("s1", "s2", ...). Раньше subs был
+     глобальной Map с ключом = голый msg.id — вторая вкладка молча
+     затирала подписку первой на том же id, и та переставала получать
+     обновления по этому узлу (баг с "не удаляется чат" и т.п.). Ключ
+     теперь скоупится соединением. */
+  const connId = connSeq++;
+  const localSubKeys = new Set();
 
   ws.on('message', function (raw) {
     let msg;
@@ -120,13 +130,15 @@ wss.on('connection', function (ws) {
     }
     if (msg.t === 'sub') {
       const segments = splitPath(msg.path);
+      const key = connId + ':' + msg.id;
       const sub = { id: msg.id, ws: ws, path: msg.path || '', segments: segments };
-      subs.set(msg.id, sub);
-      localSubIds.add(msg.id);
+      subs.set(key, sub);
+      localSubKeys.add(key);
       sendVal(sub);
     } else if (msg.t === 'unsub') {
-      subs.delete(msg.id);
-      localSubIds.delete(msg.id);
+      const key = connId + ':' + msg.id;
+      subs.delete(key);
+      localSubKeys.delete(key);
     } else if (msg.t === 'set') {
       const segments = splitPath(msg.path);
       setAt(segments, msg.value === undefined ? null : msg.value);
@@ -206,12 +218,21 @@ wss.on('connection', function (ws) {
         }
       }
       ws.send(JSON.stringify({ t: 'change_account', rid: msg.rid, ok: !error, error: error, login: newLogin, role: 'player' }));
+    } else if (msg.t === 'delete_account') {
+      /* Удаление персонажа ГМ-ом должно полностью освобождать логин/пароль,
+         иначе повторная регистрация под тем же именем падает с «логин занят». */
+      const login = String(msg.login || '').trim();
+      if (login && login.toLowerCase() !== ADMIN_LOGIN.toLowerCase() && users[login]) {
+        delete users[login];
+        scheduleUsersSave();
+      }
+      if (msg.rid) ws.send(JSON.stringify({ t: 'ack', rid: msg.rid }));
     }
   });
 
   ws.on('close', function () {
-    localSubIds.forEach(function (id) {
-      subs.delete(id);
+    localSubKeys.forEach(function (key) {
+      subs.delete(key);
     });
   });
 });

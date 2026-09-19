@@ -150,6 +150,14 @@ function authChangeAccount(room, oldLogin, currentPassword, newLogin, newPasswor
   });
 }
 
+function authDeleteAccount(login) {
+  return new Promise(function (resolve) {
+    var rid = 'r' + (ridSeq++);
+    waiters.set(rid, { resolve: resolve });
+    send({ t: 'delete_account', login: login, rid: rid });
+  });
+}
+
 var db = {};
 
-export { db, ref, set, get, onValue, update, remove, push, authLogin, authRegister, authChangeAccount };
+export { db, ref, set, get, onValue, update, remove, push, authLogin, authRegister, authChangeAccount, authDeleteAccount };

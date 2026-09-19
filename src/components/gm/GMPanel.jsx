@@ -23,6 +23,7 @@ return(<div style={{background:"#1b1d29",border:"2px solid #c084fc18",borderRadi
 <div style={{marginTop:3}}>
   <div style={{display:"flex",justifyContent:"space-between",fontSize:7,color:xpp.ready?"#34d399":"#9397ab"}}><span>{"XP: "+xpp.got+"/"+xpp.need+" до ур."+(xpp.level+1)}</span>{xpp.ready&&<span>✓ готов</span>}</div>
   <div style={{height:4,borderRadius:2,background:"#0e0f16",overflow:"hidden",marginTop:1}}><div style={{width:xpp.pct+"%",height:"100%",background:xpp.ready?"linear-gradient(90deg,#10b981,#34d399)":"linear-gradient(90deg,#f59e0b,#fbbf24)"}}/></div>
+  <div style={{fontSize:7,color:"#7c8299",marginTop:2}}>{"Награда за ур."+(c.level+1)+": +"+levelUpReward(c.level+1).stat+" хар. очк. · +"+levelUpReward(c.level+1).skill+" нав. очк."}</div>
 </div>
 <div style={{display:"flex",gap:2,marginTop:3,flexWrap:"wrap"}}>
   <button onClick={function(){var nl=c.level+1;var rw=levelUpReward(nl);pr.saveChar(c._fbId,Object.assign({},c,{level:nl,statPts:(c.statPts||0)+rw.stat,skillPts:(c.skillPts||0)+rw.skill,levelUpPending:{level:nl,stat:rw.stat,skill:rw.skill}}))}} title={"Повысить уровень (награда за ур."+(c.level+1)+": "+levelUpReward(c.level+1).stat+" очк. хар. + "+levelUpReward(c.level+1).skill+" очк. нав.)"} style={{padding:"3px 6px",borderRadius:4,border:"1px solid "+(xpp.ready?"#10b981":"#10b98128"),background:xpp.ready?"#10b981":"#0e2018",fontSize:8,fontWeight:700,color:xpp.ready?"#fff":"#34d399",cursor:"pointer"}}>⬆️ Ур.+1</button>
@@ -30,8 +31,9 @@ return(<div style={{background:"#1b1d29",border:"2px solid #c084fc18",borderRadi
   {[-5,-1,1,5].map(function(d){return <button key={d} onClick={function(){var mx2=c.hpOv||mHP(cF(c).fs,c);var cur=c.curHp!==null&&c.curHp!==undefined?c.curHp:mx2;pr.saveChar(c._fbId,Object.assign({},c,{curHp:Math.max(0,Math.min(mx2,cur+d))}))}} style={{padding:"3px 5px",borderRadius:4,border:"1px solid #ef444420",background:d<0?"#2a1414":"#0e2018",fontSize:8,fontWeight:700,color:d<0?"#ef4444":"#10b981",cursor:"pointer"}}>{"HP"+(d>0?"+":"")+d}</button>})}
   <button onClick={function(){if(window.confirm("Удалить "+c.name+"?"))pr.deleteChar(c._fbId)}} style={{padding:"3px 6px",borderRadius:4,border:"1px solid #ef444440",background:"#2a1414",fontSize:8,fontWeight:700,color:"#ef4444",cursor:"pointer"}}>🗑️ Удалить</button>
 </div>
-<div style={{display:"flex",gap:3,marginTop:3}}>
-  <input type="number" value={xg} onChange={function(e){sXg(e.target.value)}} placeholder="XP" style={{width:50,padding:"2px 4px",fontSize:8,borderRadius:4,border:"1px solid #34374a",background:"#161826",color:"#e9e9ed"}}/>
+<div style={{display:"flex",gap:3,marginTop:3,alignItems:"center"}}>
+  <span style={{fontSize:7,color:"#7c8299"}}>Выдать опыт:</span>
+  <input type="number" value={xg} onChange={function(e){sXg(e.target.value)}} placeholder="±XP" style={{width:50,padding:"2px 4px",fontSize:8,borderRadius:4,border:"1px solid #34374a",background:"#161826",color:"#e9e9ed"}}/>
   <button onClick={giveXp} style={{padding:"3px 8px",borderRadius:4,border:"1px solid #f0b35240",background:"#241c08",fontSize:8,fontWeight:700,color:"#f0b352",cursor:"pointer"}}>Выдать XP</button>
 </div>
 </div>)}
@@ -58,7 +60,6 @@ return(<div style={{flex:1,minHeight:0,display:"flex",flexDirection:"column"}}><
 <GMRoll addLog={pr.addLog}/>
 {pr.characters.length===0&&<div style={{textAlign:"center",padding:20,color:"#9397ab"}}>Ожидаем...</div>}
 {pr.characters.map(function(c){return <CharCard key={c._fbId} char={c} saveChar={pr.saveChar} deleteChar={pr.deleteChar} onOpen={function(id){sS(id)}}/>})}
-<div style={{border:"2px solid #34374a",borderRadius:9,padding:"7px 8px",background:"#1b1d29"}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}><span style={{fontFamily:"'Inter',sans-serif",fontWeight:700,fontSize:12}}>📜 Общий лог</span><button onClick={function(){if(window.confirm("Очистить все логи?"))pr.clearLogs()}} style={{fontSize:8,background:"#2a1414",border:"1px solid #ef444420",borderRadius:4,padding:"2px 6px",cursor:"pointer",color:"#ef4444",fontWeight:700}}>🗑️ Очистить</button></div><div style={{maxHeight:250,overflowY:"auto",display:"flex",flexDirection:"column",gap:2}}>{(pr.logs||[]).length===0&&<div style={{textAlign:"center",padding:10,color:"#9397ab",fontStyle:"italic",fontSize:9}}>Пусто</div>}{(pr.logs||[]).map(function(l,i){var bgc=l.type==="magic_fail"?"#311717":l.type==="magic"?"#1f1330":l.type==="rest"?"#0e2018":l.type==="dodge"?"#0e2018":l.type==="zone"?"#231b08":l.type==="hit"?"#0e1a2b":l.type==="dmg_npc"?"#2a1414":l.type==="dmg"?"#2a1414":l.type==="spawn"?"#1f1330":"#1b1d29";return <div key={i} style={{background:bgc,border:"1px solid #34374a20",borderRadius:5,padding:"4px 6px",fontSize:9,animation:i===0?"slideIn 0.3s":"none"}}><div style={{display:"flex",justifyContent:"space-between"}}><span style={{fontWeight:700,color:"#e9e9ed"}}>{l.who||"?"}</span>{l.ts&&<span style={{fontSize:7,color:"#c2b69e"}}>{new Date(l.ts).toLocaleTimeString()}</span>}</div><div style={{color:"#9397ab",marginTop:1}}>{l.label}</div>{l.detail&&<div style={{fontSize:8,color:"#9397ab",fontFamily:"monospace"}}>{l.detail}</div>}{l.total>0&&<div style={{fontFamily:"'Inter',sans-serif",fontWeight:700,fontSize:13,color:l.type==="magic_fail"?"#dc2626":"#e9e9ed"}}>{"= "+l.total}</div>}</div>})}</div></div>
 </div></div>)}
 
 

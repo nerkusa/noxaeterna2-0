@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { db, ref, set, get, onValue, update, remove, authChangeAccount } from './firebase';
+import { db, ref, set, get, onValue, update, remove, authChangeAccount, authDeleteAccount } from './firebase';
 import { CSS } from './styles/globalCss';
 import { nC } from './utils/character';
 import { setRaces } from './utils/raceStore';
@@ -61,7 +61,10 @@ get(ref(db,"rooms/"+room+"/characters/"+pId)).then(function(snap){
   set(ref(db,"rooms/"+room+"/characters/"+pId),nC(pId));
 })},[room,isGM,pId]);
 function saveChar(id,d){if(!room)return;var c=Object.assign({},d);delete c._fbId;set(ref(db,"rooms/"+room+"/characters/"+id),c);sCh(function(p){var n=Object.assign({},p);n[id]=c;return n})}
-function deleteChar(id){if(!room)return;remove(ref(db,"rooms/"+room+"/characters/"+id))}
+/* Персонаж = логин игрока (см. эффект выше), поэтому удаление персонажа
+   должно освобождать и сам аккаунт — иначе логин/пароль остаются занятыми
+   и повторно зарегистрироваться под тем же именем нельзя. */
+function deleteChar(id){if(!room)return;remove(ref(db,"rooms/"+room+"/characters/"+id));authDeleteAccount(id)}
 function saveLore(d){if(!room)return;set(ref(db,"rooms/"+room+"/lore"),d);sLo(d)}
 function saveMap(d){if(!room)return;set(ref(db,"rooms/"+room+"/mapData"),d);sMapData(d)}
 function addLog(e){if(!room)return;set(ref(db,"rooms/"+room+"/logs/"+Date.now()),Object.assign({},e,{ts:Date.now()}))}
