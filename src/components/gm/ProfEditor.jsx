@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { PROFS, PROF_DESC } from '../../data/professions';
 import { SD, SKD, skLabel } from '../../data/stats';
+import LiveField from '../LiveField';
 
 const backBtn = { padding: '5px 12px', borderRadius: 6, border: '2px solid #34374a', background: '#1b1d29', color: '#e9e9ed', fontWeight: 700, fontSize: 11, cursor: 'pointer' };
 const inp = { width: '100%', padding: '6px 8px', border: '2px solid #34374a', borderRadius: 6, fontSize: 12, fontFamily: "'Inter',sans-serif", background: '#232532', color: '#e9e9ed', outline: 'none' };
@@ -89,11 +90,11 @@ export default function ProfEditor(pr) {
 
             {open && !isNone && (
               <div style={{ padding: '0 9px 9px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <div><label style={lbl}>Название</label><input value={p.name} onChange={function (e) { upd(p.id, { name: e.target.value }); }} style={inp} /></div>
-                <div><label style={lbl}>Название способности</label><input value={p.abN || ''} onChange={function (e) { upd(p.id, { abN: e.target.value }); }} style={inp} /></div>
-                <div><label style={lbl}>Способность кратко (в списке)</label><input value={p.ab || ''} placeholder="напр. +5 атака/день" onChange={function (e) { upd(p.id, { ab: e.target.value }); }} style={inp} /></div>
-                <div><label style={lbl}>Описание класса</label><textarea value={p.desc || ''} onChange={function (e) { upd(p.id, { desc: e.target.value }); }} style={Object.assign({}, inp, { minHeight: 44, resize: 'vertical' })} /></div>
-                <div><label style={lbl}>Описание способности</label><textarea value={p.abilityDesc || ''} onChange={function (e) { upd(p.id, { abilityDesc: e.target.value }); }} style={Object.assign({}, inp, { minHeight: 40, resize: 'vertical' })} /></div>
+                <div><label style={lbl}>Название</label><LiveField value={p.name} onCommit={function (val) { upd(p.id, { name: val }); }} style={inp} /></div>
+                <div><label style={lbl}>Название способности</label><LiveField value={p.abN || ''} onCommit={function (val) { upd(p.id, { abN: val }); }} style={inp} /></div>
+                <div><label style={lbl}>Способность кратко (в списке)</label><LiveField value={p.ab || ''} placeholder="напр. +5 атака/день" onCommit={function (val) { upd(p.id, { ab: val }); }} style={inp} /></div>
+                <div><label style={lbl}>Описание класса</label><LiveField tag="textarea" value={p.desc || ''} onCommit={function (val) { upd(p.id, { desc: val }); }} style={Object.assign({}, inp, { minHeight: 44, resize: 'vertical' })} /></div>
+                <div><label style={lbl}>Описание способности</label><LiveField tag="textarea" value={p.abilityDesc || ''} onCommit={function (val) { upd(p.id, { abilityDesc: val }); }} style={Object.assign({}, inp, { minHeight: 40, resize: 'vertical' })} /></div>
                 <div>
                   <label style={lbl}>Тип способности</label>
                   <select value={p.abilityType || 'flavor'} onChange={function (e) { upd(p.id, { abilityType: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}>{ATYPES.map(function (t) { return <option key={t.id} value={t.id}>{t.name}</option>; })}</select>
@@ -102,8 +103,8 @@ export default function ProfEditor(pr) {
                   <div style={{ background: '#1c1530', borderRadius: 6, padding: '6px 8px', display: 'flex', flexDirection: 'column', gap: 6 }}>
                     <div style={{ fontSize: 8, color: '#a78bfa', fontWeight: 700 }}>🎲 Параметры броска — кнопка появится в листе игрока</div>
                     <div style={{ display: 'flex', gap: 6 }}>
-                      <div style={{ flex: 1 }}><label style={lbl}>Кость</label><input value={p.rollDice || ''} placeholder="1d8" onChange={function (e) { upd(p.id, { rollDice: e.target.value }); }} style={inp} /></div>
-                      <div style={{ width: 64 }}><label style={lbl}>Бонус +</label><input type="number" value={p.rollBonus || 0} onChange={function (e) { upd(p.id, { rollBonus: parseInt(e.target.value) || 0 }); }} style={inp} /></div>
+                      <div style={{ flex: 1 }}><label style={lbl}>Кость</label><LiveField value={p.rollDice || ''} placeholder="1d8" onCommit={function (val) { upd(p.id, { rollDice: val }); }} style={inp} /></div>
+                      <div style={{ width: 64 }}><label style={lbl}>Бонус +</label><LiveField type="number" value={p.rollBonus || 0} onCommit={function (val) { upd(p.id, { rollBonus: parseInt(val) || 0 }); }} style={inp} /></div>
                     </div>
                     <div><label style={lbl}>+ Характеристика</label><select value={p.rollStat || ''} onChange={function (e) { upd(p.id, { rollStat: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}><option value="">— нет —</option>{SD.map(function (s) { return <option key={s.key} value={s.key}>{s.key + ' · ' + s.full}</option>; })}</select></div>
                     <div><label style={lbl}>+ Навык</label><select value={p.rollSkill || ''} onChange={function (e) { upd(p.id, { rollSkill: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}><option value="">— нет —</option>{ALL_SK.map(function (n) { return <option key={n} value={n}>{skLabel(n)}</option>; })}</select></div>

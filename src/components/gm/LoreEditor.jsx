@@ -1,7 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import MapView from '../tabs/MapView';
 import LoreContent from '../LoreContent';
 import { normalizeSections, sectionsToObj, newSection, downscaleImage, MAP_META, LORE_COLORS, LORE_ICONS } from '../../utils/lore';
+import LiveField from '../LiveField';
 
 const backBtn = { padding: '5px 12px', borderRadius: 6, border: '2px solid #34374a', background: '#1b1d29', color: '#e9e9ed', fontWeight: 700, fontSize: 11, cursor: 'pointer' };
 const lbl = { display: 'block', fontSize: 9, fontWeight: 700, color: '#9397ab', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 3 };
@@ -14,18 +15,31 @@ const fmtBtn = { padding: '4px 8px', borderRadius: 5, border: '1px solid #34374a
 function BlockEditor(pr) {
   const block = pr.block;
   const ref = useRef(null);
+  /* Локальный буфер текста — та же защита от гонки, что и в LiveField
+     (входящее block.value из пропсов не перетирает то, что ГМ ещё
+     печатает), но textarea держим "ручной", а не через LiveField,
+     потому что кнопкам разметки (Ж/К/H1/…) нужен прямой ref на DOM-узел
+     для позиции курсора — через forwardRef это делать сложнее, чем
+     просто продублировать логику буфера здесь. */
+  const [text, setText] = useState(block.value || '');
+  const focusedRef = useRef(false);
+  useEffect(function () { if (!focusedRef.current) setText(block.value || ''); }, [block.value]);
   const wrap = function (pre, post) {
     const ta = ref.current; if (!ta) return;
-    const s = ta.selectionStart, e = ta.selectionEnd, v = block.value || '';
+    const s = ta.selectionStart, e = ta.selectionEnd, v = text;
     const sel = v.slice(s, e) || 'текст';
-    pr.onChange({ value: v.slice(0, s) + pre + sel + post + v.slice(e) });
+    const nv = v.slice(0, s) + pre + sel + post + v.slice(e);
+    setText(nv);
+    pr.onChange({ value: nv });
     setTimeout(function () { ta.focus(); ta.selectionStart = s + pre.length; ta.selectionEnd = s + pre.length + sel.length; }, 0);
   };
   const prefixLine = function (pre) {
     const ta = ref.current; if (!ta) return;
-    const v = block.value || '', s = ta.selectionStart;
+    const v = text, s = ta.selectionStart;
     const ls = v.lastIndexOf('\n', s - 1) + 1;
-    pr.onChange({ value: v.slice(0, ls) + pre + v.slice(ls) });
+    const nv = v.slice(0, ls) + pre + v.slice(ls);
+    setText(nv);
+    pr.onChange({ value: nv });
     setTimeout(function () { ta.focus(); }, 0);
   };
   const ctrls = (
@@ -42,7 +56,7 @@ function BlockEditor(pr) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}><span style={{ fontSize: 9, color: '#9397ab', fontWeight: 700 }}>🖼️ Изображение</span>{ctrls}</div>
         {block.value && <img src={block.value} alt="" style={{ width: '100%', borderRadius: 8, border: '2px solid #34374a', marginBottom: 6, display: 'block' }} />}
         <label style={{ display: 'inline-block', padding: '6px 10px', borderRadius: 6, border: '1px solid #8b5cf640', background: '#1f1330', color: '#a78bfa', fontSize: 10, fontWeight: 700, cursor: 'pointer', marginBottom: 6 }}>🔄 Заменить<input type="file" accept="image/*" style={{ display: 'none' }} onChange={function (e) { const f = e.target.files && e.target.files[0]; if (f) pr.onReplaceImage(f); }} /></label>
-        <input placeholder="Подпись (необязательно)" value={block.caption || ''} onChange={function (e) { pr.onChange({ caption: e.target.value }); }} style={inp} />
+        <LiveField placeholder="Подпись (необязательно)" value={block.caption || ''} onCommit={function (val) { pr.onChange({ caption: val }); }} style={inp} />
       </div>
     );
   }
@@ -58,7 +72,7 @@ function BlockEditor(pr) {
         <button onMouseDown={function (e) { e.preventDefault(); }} onClick={function () { prefixLine('- '); }} style={fmtBtn}>• Список</button>
         <button onMouseDown={function (e) { e.preventDefault(); }} onClick={function () { prefixLine('---\n'); }} style={fmtBtn}>― Линия</button>
       </div>
-      <textarea ref={ref} value={block.value || ''} onChange={function (e) { pr.onChange({ value: e.target.value }); }} style={Object.assign({}, inp, { minHeight: 130, resize: 'vertical', lineHeight: 1.5, fontSize: 12, padding: 8 })} />
+      <textarea ref={ref} value={text} onChange={function (e) { setText(e.target.value); pr.onChange({ value: e.target.value }); }} onFocus={function () { focusedRef.current = true; }} onBlur={function () { focusedRef.current = false; setText(block.value || ''); }} style={Object.assign({}, inp, { minHeight: 130, resize: 'vertical', lineHeight: 1.5, fontSize: 12, padding: 8 })} />
     </div>
   );
 }
@@ -151,7 +165,7 @@ export default function LoreEditor(pr) {
         <div style={{ background: '#1b1d29', border: '2px solid #34374a', borderRadius: 10, padding: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div>
             <label style={lbl}>Название</label>
-            <input value={sec.title} onChange={function (e) { updateSection(sec.id, { title: e.target.value }); }} style={inp} />
+            <LiveField value={sec.title} onCommit={function (val) { updateSection(sec.id, { title: val }); }} style={inp} />
           </div>
           <div>
             <label style={lbl}>Иконка</label>

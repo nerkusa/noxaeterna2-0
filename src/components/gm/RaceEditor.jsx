@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { RACES, RACE_DESC } from '../../data/races';
 import { SD, SKD } from '../../data/stats';
+import LiveField from '../LiveField';
 
 const backBtn = { padding: '5px 12px', borderRadius: 6, border: '2px solid #34374a', background: '#1b1d29', color: '#e9e9ed', fontWeight: 700, fontSize: 11, cursor: 'pointer' };
 const inp = { width: '100%', padding: '6px 8px', border: '2px solid #34374a', borderRadius: 6, fontSize: 12, fontFamily: "'Inter',sans-serif", background: '#232532', color: '#e9e9ed', outline: 'none' };
@@ -81,7 +82,7 @@ export default function RaceEditor(pr) {
               <div style={{ padding: '0 9px 9px', display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <div>
                   <label style={lbl}>Название</label>
-                  <input value={r.name} onChange={function (e) { updateRace(r.id, { name: e.target.value }); }} style={inp} />
+                  <LiveField value={r.name} onCommit={function (val) { updateRace(r.id, { name: val }); }} style={inp} />
                 </div>
                 <div>
                   <label style={lbl}>Бонусы характеристик</label>
@@ -133,11 +134,11 @@ export default function RaceEditor(pr) {
                 </div>
                 <div>
                   <label style={lbl}>Особенность (необязательно)</label>
-                  <input value={r.sp || ''} placeholder="напр. Breath 1d8, Слепота…" onChange={function (e) { updateRace(r.id, { sp: e.target.value || null }); }} style={inp} />
+                  <LiveField value={r.sp || ''} placeholder="напр. Breath 1d8, Слепота…" onCommit={function (val) { updateRace(r.id, { sp: val || null }); }} style={inp} />
                 </div>
                 <div>
                   <label style={lbl}>Описание (показывается игрокам)</label>
-                  <textarea value={r.desc || ''} onChange={function (e) { updateRace(r.id, { desc: e.target.value }); }} style={Object.assign({}, inp, { minHeight: 50, resize: 'vertical', fontSize: 11 })} />
+                  <LiveField tag="textarea" value={r.desc || ''} onCommit={function (val) { updateRace(r.id, { desc: val }); }} style={Object.assign({}, inp, { minHeight: 50, resize: 'vertical', fontSize: 11 })} />
                 </div>
               </div>
             )}

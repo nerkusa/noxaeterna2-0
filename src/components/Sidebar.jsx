@@ -18,6 +18,10 @@ var mx=c.hpOv||mHP(fs,c);var curHp=c.curHp!==null&&c.curHp!==undefined?c.curHp:m
 var mxW=c.willOv||fs.WILL||1;var curW=c.curWill!==null&&c.curWill!==undefined?c.curWill:mxW;var wP=mxW>0?(curW/mxW)*100:0;
 var xpp=xpProgress(c);
 var bsk=rc.bsp?1:0;var stL=40-uSP(c.stats||{});var skL=(60+bsk)-uSkP(c.skills||{});
+/* Есть ли что фиксировать: текущее распределение уже отличается от
+   последней зафиксированной точки (lockedStats/lockedSkills) — то есть
+   игрок потратил очки уровня, но ещё явно не подтвердил выбор. */
+var hasUnlocked=c.locked&&!isGM&&(JSON.stringify(c.stats||{})!==JSON.stringify(c.lockedStats||{})||JSON.stringify(c.skills||{})!==JSON.stringify(c.lockedSkills||{}));
 /* e[1] у штрафов уже отрицательное число — не приписываем свой "+",
    иначе получалось "+-1 EMP" вместо "-1 EMP". */
 var raceBonusTags=Object.entries(rc.st||{}).map(function(e){var sd=SD.find(function(s){return s.key===e[0]});return{label:(e[1]>0?"+":"")+e[1]+" "+(sd?sd.key:e[0]),color:e[1]<0?"#ef4444":(sd?sd.color:"var(--color-accent)")}});
@@ -97,7 +101,8 @@ return(<div key={st.key} style={{marginBottom:1}}>
 {!c.locked&&!isGM&&<button onClick={function(){sU({name:c.name,raceId:c.raceId,humanBonusStat:c.humanBonusStat,stats:Object.assign({},c.stats),skills:Object.assign({},c.skills)});var r=rndStats(c.profId,c.raceId);sv(Object.assign({},c,r,{curHp:null,curWill:null}))}} className="n-btn n-btn-secondary" style={{flex:"1 1 auto",color:"#f0b352",borderColor:"#f59e0b40"}}>Рандом</button>}
 {!c.locked&&!isGM&&undo&&<button onClick={function(){sv(Object.assign({},c,undo,{curHp:null,curWill:null}));sU(null)}} className="n-btn n-btn-secondary" style={{flex:"1 1 auto",color:"var(--color-accent)"}}>Отменить</button>}
 {!c.locked&&!isGM&&<button onClick={function(){if(!window.confirm("Принять распределение характеристик и навыков? Дальше менять их сможет только ГМ."))return;sv(Object.assign({},c,{locked:true,lockedStats:Object.assign({},c.stats),lockedSkills:Object.assign({},c.skills)}))}} className="n-btn n-btn-primary" style={{flex:"1 1 auto"}}>✓ Принять</button>}
-{c.locked&&!isGM&&<span style={{flex:1,textAlign:"center",fontSize:11,color:"var(--color-text-muted)",alignSelf:"center"}}>Распределение закреплено</span>}
+{hasUnlocked&&<button onClick={function(){if(!window.confirm("Зафиксировать текущее распределение очков уровня? Вернуть их обратно после этого будет нельзя."))return;sv(Object.assign({},c,{lockedStats:Object.assign({},c.stats),lockedSkills:Object.assign({},c.skills)}))}} className="n-btn n-btn-primary" style={{flex:"1 1 auto"}}>🔒 Зафиксировать</button>}
+{c.locked&&!isGM&&!hasUnlocked&&<span style={{flex:1,textAlign:"center",fontSize:11,color:"var(--color-text-muted)",alignSelf:"center"}}>Распределение закреплено</span>}
 {isGM&&<span style={{flex:1,textAlign:"center",fontSize:11,color:c.locked?"#34d399":"#f0b352"}}>{c.locked?"✓ Принят игроком":"Черновик — ещё не принят"}</span>}
 </div>
 </aside>)}

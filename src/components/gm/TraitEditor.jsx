@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { TRAITS, TRAIT_CATEGORIES, TRAIT_EFFECT_TYPES, genId } from '../../data/traits';
 import { SD, SKD, skLabel } from '../../data/stats';
+import LiveField from '../LiveField';
 
 const backBtn = { padding: '5px 12px', borderRadius: 6, border: '2px solid #34374a', background: '#1b1d29', color: '#e9e9ed', fontWeight: 700, fontSize: 11, cursor: 'pointer' };
 const inp = { width: '100%', padding: '6px 8px', border: '2px solid #34374a', borderRadius: 6, fontSize: 12, fontFamily: "'Inter',sans-serif", background: '#232532', color: '#e9e9ed', outline: 'none' };
@@ -84,13 +85,13 @@ export default function TraitEditor(pr) {
 
             {open && (
               <div style={{ padding: '0 9px 9px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <div><label style={lbl}>Название</label><input value={t.name} onChange={function (e) { upd(t.id, { name: e.target.value }); }} style={inp} /></div>
+                <div><label style={lbl}>Название</label><LiveField value={t.name} onCommit={function (val) { upd(t.id, { name: val }); }} style={inp} /></div>
                 <div style={{ display: 'flex', gap: 6 }}>
                   <div style={{ flex: 1 }}><label style={lbl}>Категория</label><select value={t.cat} onChange={function (e) { upd(t.id, { cat: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}>{TRAIT_CATEGORIES.map(function (c) { return <option key={c.id} value={c.id}>{c.name}</option>; })}</select></div>
-                  <div style={{ flex: 1 }}><label style={lbl}>Группа (необязательно)</label><input value={t.group || ''} placeholder="напр. Физические" onChange={function (e) { upd(t.id, { group: e.target.value }); }} style={inp} /></div>
+                  <div style={{ flex: 1 }}><label style={lbl}>Группа (необязательно)</label><LiveField value={t.group || ''} placeholder="напр. Физические" onCommit={function (val) { upd(t.id, { group: val }); }} style={inp} /></div>
                 </div>
-                <div><label style={lbl}>Эффект (для игрока, в листе)</label><textarea value={t.desc || ''} onChange={function (e) { upd(t.id, { desc: e.target.value }); }} style={Object.assign({}, inp, { minHeight: 44, resize: 'vertical' })} /></div>
-                <div><label style={lbl}>Как получить</label><textarea value={t.how || ''} onChange={function (e) { upd(t.id, { how: e.target.value }); }} style={Object.assign({}, inp, { minHeight: 32, resize: 'vertical' })} /></div>
+                <div><label style={lbl}>Эффект (для игрока, в листе)</label><LiveField tag="textarea" value={t.desc || ''} onCommit={function (val) { upd(t.id, { desc: val }); }} style={Object.assign({}, inp, { minHeight: 44, resize: 'vertical' })} /></div>
+                <div><label style={lbl}>Как получить</label><LiveField tag="textarea" value={t.how || ''} onCommit={function (val) { upd(t.id, { how: val }); }} style={Object.assign({}, inp, { minHeight: 32, resize: 'vertical' })} /></div>
                 <div style={{ background: '#1c1804', borderRadius: 6, padding: '6px 8px', display: 'flex', flexDirection: 'column', gap: 8 }}>
                   <div style={{ fontSize: 8, color: CLR, fontWeight: 700 }}>⚙ Механика — считается автоматически на листе персонажа. Можно добавить несколько эффектов сразу (напр. минус к навыку и минус к характеристике, или несколько навыков разом).</div>
                   {effs.length === 0 && <div style={{ fontSize: 9, color: '#75798c', fontStyle: 'italic' }}>Пока без механики — только описание</div>}
@@ -104,17 +105,17 @@ export default function TraitEditor(pr) {
                         {eff.type === 'stat_bonus' && (
                           <div style={{ display: 'flex', gap: 6 }}>
                             <div style={{ flex: 1 }}><label style={lbl}>Характеристика</label><select value={eff.stat || 'BODY'} onChange={function (e) { updEffectAt(t.id, idx, { stat: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}>{SD.map(function (s) { return <option key={s.key} value={s.key}>{s.key + ' · ' + s.full}</option>; })}</select></div>
-                            <div style={{ width: 70 }}><label style={lbl}>Кол-во (± )</label><input type="number" value={eff.amount || 0} onChange={function (e) { updEffectAt(t.id, idx, { amount: parseInt(e.target.value) || 0 }); }} style={inp} /></div>
+                            <div style={{ width: 70 }}><label style={lbl}>Кол-во (± )</label><LiveField type="number" value={eff.amount || 0} onCommit={function (val) { updEffectAt(t.id, idx, { amount: parseInt(val) || 0 }); }} style={inp} /></div>
                           </div>
                         )}
                         {eff.type === 'skill_bonus' && (
                           <div style={{ display: 'flex', gap: 6 }}>
                             <div style={{ flex: 1 }}><label style={lbl}>Навык</label><select value={eff.skill || ALL_SK[0]} onChange={function (e) { updEffectAt(t.id, idx, { skill: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}>{ALL_SK.map(function (n) { return <option key={n} value={n}>{skLabel(n)}</option>; })}</select></div>
-                            <div style={{ width: 70 }}><label style={lbl}>Кол-во (± )</label><input type="number" value={eff.amount || 0} onChange={function (e) { updEffectAt(t.id, idx, { amount: parseInt(e.target.value) || 0 }); }} style={inp} /></div>
+                            <div style={{ width: 70 }}><label style={lbl}>Кол-во (± )</label><LiveField type="number" value={eff.amount || 0} onCommit={function (val) { updEffectAt(t.id, idx, { amount: parseInt(val) || 0 }); }} style={inp} /></div>
                           </div>
                         )}
                         {eff.type === 'hp_flat' && (
-                          <div><label style={lbl}>± ХП</label><input type="number" value={eff.amount || 0} onChange={function (e) { updEffectAt(t.id, idx, { amount: parseInt(e.target.value) || 0 }); }} style={inp} /></div>
+                          <div><label style={lbl}>± ХП</label><LiveField type="number" value={eff.amount || 0} onCommit={function (val) { updEffectAt(t.id, idx, { amount: parseInt(val) || 0 }); }} style={inp} /></div>
                         )}
                         {eff.type === 'dual_wield' && (
                           <div style={{ fontSize: 9, color: '#9397ab' }}>Персонаж с этой чертой сможет снарядить второе одноручное оружие и атаковать им во вкладке «Бой».</div>
@@ -122,7 +123,7 @@ export default function TraitEditor(pr) {
                         {eff.type === 'armor_effectiveness' && (
                           <div>
                             <label style={lbl}>Доля защиты брони (1 = норма, 0.667 = 2/3, 0.5 = половина)</label>
-                            <input type="number" step="0.01" min="0" max="1" value={eff.value != null ? eff.value : 1} onChange={function (e) { updEffectAt(t.id, idx, { value: Math.max(0, Math.min(1, parseFloat(e.target.value))) || 0 }); }} style={inp} />
+                            <LiveField type="number" step="0.01" min="0" max="1" value={eff.value != null ? eff.value : 1} onCommit={function (val) { updEffectAt(t.id, idx, { value: Math.max(0, Math.min(1, parseFloat(val))) || 0 }); }} style={inp} />
                           </div>
                         )}
                         {eff.type === 'cancels' && (

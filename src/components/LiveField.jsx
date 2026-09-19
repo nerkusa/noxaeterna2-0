@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, forwardRef } from 'react';
 
 /* Поле ввода с локальным буфером: печатать плавно даже если onCommit
    гоняет значение через сеть (WS до сервера и обратно) — пока поле
-   в фокусе, входящее value из пропсов его не перетирает. */
-function LiveField(pr){
+   в фокусе, входящее value из пропсов его не перетирает.
+   forwardRef — чтобы вызывающий код мог достучаться до DOM-узла (нужно,
+   например, для курсорных фокусов вроде вставки markdown-разметки). */
+function LiveField(pr,fwdRef){
 var tag=pr.tag||"input";
 var rest={};
 Object.keys(pr).forEach(function(k){if(k!=="tag"&&k!=="value"&&k!=="onCommit")rest[k]=pr[k]});
@@ -13,8 +15,8 @@ useEffect(function(){if(!focused.current)sV(pr.value)},[pr.value]);
 function onChange(e){sV(e.target.value);pr.onCommit(e.target.value)}
 function onFocus(e){focused.current=true;if(rest.onFocus)rest.onFocus(e)}
 function onBlur(e){focused.current=false;sV(pr.value);if(rest.onBlur)rest.onBlur(e)}
-if(tag==="textarea")return <textarea {...rest} value={v==null?"":v} onChange={onChange} onFocus={onFocus} onBlur={onBlur}/>;
-return <input {...rest} value={v==null?"":v} onChange={onChange} onFocus={onFocus} onBlur={onBlur}/>;
+if(tag==="textarea")return <textarea {...rest} ref={fwdRef} value={v==null?"":v} onChange={onChange} onFocus={onFocus} onBlur={onBlur}/>;
+return <input {...rest} ref={fwdRef} value={v==null?"":v} onChange={onChange} onFocus={onFocus} onBlur={onBlur}/>;
 }
 
-export default LiveField;
+export default forwardRef(LiveField);
