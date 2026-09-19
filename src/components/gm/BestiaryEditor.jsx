@@ -14,7 +14,7 @@ import InitiativeBar from '../combat/InitiativeBar';
 /* Встроенная рукопашная атака — есть у каждого NPC изначально */
 var FIST={name:"Кулаки",dice:"1d6",dmgType:"Д",bonus:0,type:"Brawl"};
 /* Навыки NPC и характеристика, от которой кидается бросок */
-var NPC_SK=[{k:"dodge",l:"Уклонение",st:"DEX"},{k:"resist",l:"Сопротивление",st:"BODY"},{k:"brawl",l:"Рукопашный бой",st:"BODY"},{k:"battleWeapon",l:"Боевое оружие",st:"REF"},{k:"simpleWeapon",l:"Простое оружие",st:"REF"},{k:"guns",l:"Огнестрельное оружие",st:"REF"},{k:"archery",l:"Стрельба",st:"REF"},{k:"thrown",l:"Метательное оружие",st:"REF"},{k:"athletics",l:"Атлетика",st:"BODY"},{k:"spellcast",l:"Чародейство",st:"WILL"},{k:"mresist",l:"Сопротивление магии",st:"WILL"}];
+var NPC_SK=[{k:"dodge",l:"Уклонение",st:"DEX"},{k:"resist",l:"Сопротивление",st:"BODY"},{k:"brawl",l:"Рукопашный бой",st:"BODY"},{k:"battleWeapon",l:"Боевое оружие",st:"REF"},{k:"simpleWeapon",l:"Простое оружие",st:"REF"},{k:"guns",l:"Огнестрельное оружие",st:"REF"},{k:"archery",l:"Стрельба",st:"REF"},{k:"thrown",l:"Метательное оружие",st:"REF"},{k:"athletics",l:"Атлетика",st:"BODY"},{k:"spellcast",l:"Чудотворство",st:"WILL"},{k:"mresist",l:"Сопротивление чудотворству",st:"WILL"}];
 
 function BestiaryEditor(pr){
 var templ=pr.npcTempl||{};var spawned=pr.spawned||{};

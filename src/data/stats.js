@@ -5,8 +5,11 @@ var WS={Battle:"Боевое оружие",Simple:"Простое оружие",
 var WSTAT={Brawl:"BODY"};function wStat(t){return WSTAT[t]||"REF"}
 /* Человекочитаемые названия типов оружия */
 var WT_LABEL={Battle:"Боевое",Simple:"Простое",Guns:"Огнестрел",Archery:"Лук",Thrown:"Метательное",Brawl:"Рукопашный"};function wtLabel(t){return WT_LABEL[t]||t}
-/* Переопределения отображаемых имён навыков (сейчас не требуются — имена уже на русском) */
-var SK_LABEL={};
+/* Переопределения отображаемых имён навыков — сам навык в SKD/skills персонажа
+   остаётся "Чародейство"/"Сопротивление магии" (иначе у всех уже созданных
+   персонажей слетели бы вложенные туда очки), а на экране показываем новое
+   название. */
+var SK_LABEL={"Чародейство":"Чудотворство","Сопротивление магии":"Сопротивление чудотворству"};
 function skLabel(n){return SK_LABEL[n]||n}
 
 export { SD, SKD, WS, DT, WT, SK_LABEL, skLabel, WSTAT, wStat, WT_LABEL, wtLabel };
