@@ -51,9 +51,10 @@ function pickItem(it){
   var heal=it.heal||"";
   var inv=(c.inventory||[]).slice();
   if(ptype){
+    var bundle=it.bundleQty||1;
     var ex=inv.find(function(i){return i.proj&&i.ptype===ptype});
-    if(ex){inv=inv.map(function(i){return i===ex?Object.assign({},i,{qty:(i.qty||0)+1}):i})}
-    else{inv=inv.concat([{id:uid(),name:it.name,qty:1,equipped:false,proj:true,ptype:ptype}])}
+    if(ex){inv=inv.map(function(i){return i===ex?Object.assign({},i,{qty:(i.qty||0)+bundle}):i})}
+    else{inv=inv.concat([{id:uid(),name:it.name,qty:bundle,equipped:false,proj:true,ptype:ptype}])}
   } else if(dice){
     inv=inv.concat([{id:uid(),name:it.name,qty:1,equipped:false,tool:true,dice:dice}]);
   } else if(heal){
@@ -80,7 +81,7 @@ return(<div style={{display:"flex",flexDirection:"column",gap:6}}>
 return(<div key={it.id} style={{display:"flex",alignItems:"center",gap:6,background:"#232532",border:"1px solid #34374a",borderRadius:6,padding:"4px 7px"}}>
 <div style={{flex:1,minWidth:0}}>
 <div style={{fontSize:10,fontWeight:700,color:"#e9e9ed"}}>{it.name}{cost>0?<span style={{fontSize:8,color:"#d97706",marginLeft:5}}>{"💰 "+fmtCurrency(price)}</span>:null}</div>
-<div style={{fontSize:8,color:"#9397ab"}}>{[it.desc,ptype?"снаряд: "+ptype:null,dice?"починка "+dice:null,heal?("🧪 "+heal+(it.healWill?" Воли":" HP")):null].filter(Boolean).join(" · ")}</div>
+<div style={{fontSize:8,color:"#9397ab"}}>{[it.desc,ptype?("снаряд: "+ptype+(it.bundleQty>1?" ×"+it.bundleQty:"")):null,dice?"починка "+dice:null,heal?("🧪 "+heal+(it.healWill?" Воли":" HP")):null].filter(Boolean).join(" · ")}</div>
 </div>
 <button onClick={function(){pickItem(it)}} style={{padding:"3px 9px",borderRadius:5,border:"none",background:"#f59e0b",color:"#161826",fontWeight:700,fontSize:9,cursor:"pointer"}}>Взять</button>
 </div>)})}

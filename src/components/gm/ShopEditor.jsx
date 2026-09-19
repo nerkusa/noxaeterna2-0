@@ -95,7 +95,7 @@ export default function ShopEditor(pr) {
     // item (и легаси tool/ammo) — обычная вещь, необязательно с функцией снаряда или ремкомплекта
     const parts = [];
     if (it.desc) parts.push(it.desc);
-    if (it.ptype || it.cat === 'ammo') parts.push('🏹 Снаряд: ' + (it.ptype || 'Стрела'));
+    if (it.ptype || it.cat === 'ammo') parts.push('🏹 Снаряд: ' + (it.ptype || 'Стрела') + (it.bundleQty > 1 ? ' ×' + it.bundleQty : ''));
     if (it.dice || it.cat === 'tool') parts.push('🔧 Починка ' + (it.dice || '1d4'));
     if (it.heal) parts.push('🧪 ' + it.heal + (it.healWill ? ' Воли' : ' HP'));
     return parts.join(' · ');
@@ -167,8 +167,11 @@ export default function ShopEditor(pr) {
         {field('Название', <LiveField value={it.name} onCommit={function (val) { upd(it.id, { name: val }); }} style={inp} />)}
         {field('Описание', <LiveField tag="textarea" value={it.desc} onCommit={function (val) { upd(it.id, { desc: val }); }} style={Object.assign({}, inp, { minHeight: 40, resize: 'vertical' })} />)}
         {priceField(it)}
-        <div style={{ display: 'flex', gap: 6 }}>
+        <div style={{ display: 'flex', gap: 6, alignItems: 'flex-end' }}>
           {field('Тип снаряда (необязательно)', <select value={it.ptype || ''} onChange={function (e) { upd(it.id, { ptype: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}><option value="">— нет —</option>{PROJ_TYPES.map(function (p) { return <option key={p} value={p}>{p}</option>; })}</select>)}
+          {it.ptype && field('Штук за покупку', <LiveField type="number" min="1" value={it.bundleQty || 1} onCommit={function (val) { upd(it.id, { bundleQty: Math.max(1, parseInt(val) || 1) }); }} style={inp} />)}
+        </div>
+        <div style={{ display: 'flex', gap: 6 }}>
           {field('Кубик починки (необязательно)', <select value={it.dice || ''} onChange={function (e) { upd(it.id, { dice: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}><option value="">— нет —</option>{REPAIR_DICE.map(function (d) { return <option key={d} value={d}>{d}</option>; })}</select>)}
         </div>
         <div style={{ display: 'flex', gap: 6, alignItems: 'flex-end' }}>

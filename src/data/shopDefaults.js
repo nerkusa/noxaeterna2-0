@@ -4,8 +4,9 @@ import { uid } from '../utils/dice';
    характеристиками (урон/HP/цена сбалансированы друг относительно друга
    по тиру simple/battle/archery/guns и типу брони light/medium/heavy),
    плюс расходники — зелья (лечат HP или Волю через кубик), боеприпасы
-   (тратятся при перезарядке лука/арбалета/огнестрела) и ремкомплекты
-   (чинят броню/щиты/оружие — 1 раз в день, см. вкладку «Броня»).
+   (лук/арбалет тратят стрелу/болт с каждым выстрелом напрямую из
+   инвентаря; огнестрел — через «Перезарядить», как обычная обойма) и
+   ремкомплекты (чинят броню/щиты/оружие — 1 раз в день, вкладка «Броня»).
    Цены — {gold,silver,bronze,copper}, 1з=10с=1000бр=10000м. */
 
 function price(gold, silver, bronze) {
@@ -38,19 +39,19 @@ function buildShopDefaults() {
     { cat: 'weapon', name: 'Двуручный меч', wtype: 'Battle', dmgType: 'Р', dmgDice: '2d6', hands: 2, bonus: 0, price: price(1, 2, 0), desc: 'Огромный клинок — нужны обе руки, зато и урон соответствующий.' },
     { cat: 'weapon', name: 'Алебарда', wtype: 'Battle', dmgType: 'Р', dmgDice: '2d8', hands: 2, bonus: 0, price: price(1, 5, 0), desc: 'Древковое оружие пехоты — держит дистанцию.' },
     // ── Оружие: стрелковое (нужен колчан — см. раздел боеприпасов) ──
-    { cat: 'weapon', name: 'Короткий лук', wtype: 'Archery', dmgType: 'С', dmgDice: '1d6', hands: 2, bonus: 0, clip: 1, ammoType: 'Стрела', price: price(0, 5, 0), desc: 'Компактный лук для верховых и разведчиков.' },
-    { cat: 'weapon', name: 'Длинный лук', wtype: 'Archery', dmgType: 'С', dmgDice: '1d8', hands: 2, bonus: 0, clip: 1, ammoType: 'Стрела', price: price(0, 8, 0), desc: 'Требует силы, но бьёт далеко и больно.' },
-    { cat: 'weapon', name: 'Арбалет', wtype: 'Archery', dmgType: 'С', dmgDice: '1d10', hands: 2, bonus: 0, clip: 1, ammoType: 'Болт', price: price(1, 0, 0), desc: 'Медленно взводится, зато не требует долгой тренировки.' },
+    { cat: 'weapon', name: 'Короткий лук', wtype: 'Archery', dmgType: 'С', dmgDice: '1d6', hands: 2, bonus: 0, ammoType: 'Стрела', price: price(0, 5, 0), desc: 'Компактный лук для верховых и разведчиков.' },
+    { cat: 'weapon', name: 'Длинный лук', wtype: 'Archery', dmgType: 'С', dmgDice: '1d8', hands: 2, bonus: 0, ammoType: 'Стрела', price: price(0, 8, 0), desc: 'Требует силы, но бьёт далеко и больно.' },
+    { cat: 'weapon', name: 'Арбалет', wtype: 'Archery', dmgType: 'С', dmgDice: '1d10', hands: 2, bonus: 0, ammoType: 'Болт', price: price(1, 0, 0), desc: 'Медленно взводится, зато не требует долгой тренировки.' },
     // ── Оружие: метательное и рукопашное ──
     { cat: 'weapon', name: 'Метательные ножи', wtype: 'Thrown', dmgType: 'К', dmgDice: '1d4', hands: 1, bonus: 0, price: price(0, 0, 3), desc: 'Продаются связкой — удобно иметь про запас.' },
     { cat: 'weapon', name: 'Кастеты', wtype: 'Brawl', dmgType: 'Д', dmgDice: '1d4', hands: 1, bonus: 0, price: price(0, 0, 2), desc: 'Утяжеляют кулак, не занимая руку целиком.' },
     // ── Оружие: огнестрельное (нужны патроны) ──
     { cat: 'weapon', name: 'Пистолет', wtype: 'Guns', dmgType: 'П', dmgDice: '1d8', hands: 1, bonus: 0, clip: 1, price: price(1, 5, 0), desc: 'Кремнёвый пистолет — один точный выстрел на всю перезарядку.' },
     { cat: 'weapon', name: 'Мушкет', wtype: 'Guns', dmgType: 'П', dmgDice: '2d6', hands: 2, bonus: 0, clip: 1, price: price(3, 0, 0), desc: 'Тяжёлый и медленный, но пробивает почти любую броню.' },
-    // ── Боеприпасы (расходуются при «Перезарядить» у нужного оружия) ──
-    { cat: 'item', name: 'Стрелы (колчан)', ptype: 'Стрела', price: price(0, 0, 5), desc: 'Десяток охотничьих стрел.' },
-    { cat: 'item', name: 'Болты (колчан)', ptype: 'Болт', price: price(0, 0, 8), desc: 'Арбалетные болты с гранёным наконечником.' },
-    { cat: 'item', name: 'Патроны', ptype: 'Пуля', price: price(0, 2, 0), desc: 'Заряды пороха и свинца для огнестрела.' },
+    // ── Боеприпасы (стрелы/болты списываются сразу за выстрел; патроны — через «Перезарядить») ──
+    { cat: 'item', name: 'Стрелы (колчан, 10 шт)', ptype: 'Стрела', bundleQty: 10, price: price(0, 0, 5), desc: 'Десяток охотничьих стрел.' },
+    { cat: 'item', name: 'Болты (колчан, 10 шт)', ptype: 'Болт', bundleQty: 10, price: price(0, 0, 8), desc: 'Арбалетные болты с гранёным наконечником.' },
+    { cat: 'item', name: 'Патроны (10 шт)', ptype: 'Пуля', bundleQty: 10, price: price(0, 2, 0), desc: 'Заряды пороха и свинца для огнестрела.' },
     // ── Ремкомплекты (вкладка «Броня» → «Ремонт снаряжения», 1/день) ──
     { cat: 'item', name: 'Точильный камень', dice: '1d4', price: price(0, 0, 3), desc: 'Для правки лезвия в полевых условиях.' },
     { cat: 'item', name: 'Набор инструментов', dice: '1d6', price: price(0, 0, 8), desc: 'Отвёртки, клещи, запасные ремни и заклёпки.' },
