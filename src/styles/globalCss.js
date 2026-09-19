@@ -78,7 +78,7 @@ input,textarea,select,button{color:inherit;font-family:inherit}
 
 /* ── Сайдбар характеристик: широкий с полными названиями, на узких
    экранах сжимается в компактную полоску (только код/значение/кубик) ── */
-.n-sidebar{width:260px}
+.n-sidebar{width:300px}
 @media (max-width:680px){
   .n-sidebar{width:118px}
   .n-sidebar-hide-compact{display:none !important}

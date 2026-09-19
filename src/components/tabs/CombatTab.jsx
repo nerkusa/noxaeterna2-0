@@ -301,7 +301,7 @@ else{oR({label:w.name+" Попад."+(aimP?" · "+selZone:""),d10:d,crit:R.crit,
 <div className="n-card">
 <Lbl>Инвентарь</Lbl>
 <div style={{marginTop:8}}>
-<InvTab char={c} save={sv} shop={pr.shop}/>
+<InvTab char={c} save={sv} shop={pr.shop} addLog={pr.addLog} onRoll={oR}/>
 </div>
 </div>
 

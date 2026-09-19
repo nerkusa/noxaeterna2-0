@@ -3,6 +3,7 @@ import { ARMOR_T, SHIELD_T } from '../../data/combat';
 import { DT, WT } from '../../data/stats';
 import { uid } from '../../utils/dice';
 import { CUR_ORDER, CUR_LABEL, CUR_ICON, CUR_NAME, emptyCurrency, fmtCurrency, toCopper } from '../../utils/currency';
+import { buildShopDefaults } from '../../data/shopDefaults';
 import LiveField from '../LiveField';
 
 const backBtn = { padding: '5px 12px', borderRadius: 6, border: '2px solid #34374a', background: '#1b1d29', color: '#e9e9ed', fontWeight: 700, fontSize: 11, cursor: 'pointer' };
@@ -19,6 +20,7 @@ const CATS = [
 const PROJ_TYPES = ['Стрела', 'Болт', 'Пуля'];
 
 const REPAIR_DICE = ['1d4', '1d6', '1d8', '1d10', '1d12'];
+const HEAL_DICE = ['1d4', '1d6', '2d4', '2d6', '3d6', '4d6'];
 
 // подкатегории для группировки
 const SUBLABEL = {
@@ -72,6 +74,13 @@ export default function ShopEditor(pr) {
     persist(shop.concat([it]));
     setEditId(it.id);
   };
+  const seedDefaults = function () {
+    const existingNames = shop.map(function (i) { return (i.name || '').trim().toLowerCase(); });
+    const toAdd = buildShopDefaults().filter(function (d) { return existingNames.indexOf(d.name.trim().toLowerCase()) < 0; });
+    if (toAdd.length === 0) { alert('Всё это уже есть в магазине.'); return; }
+    if (!window.confirm('Добавить стартовый набор из ' + toAdd.length + ' вещей (броня, оружие, щиты, зелья, боеприпасы, ремкомплекты)? Существующие вещи не тронет.')) return;
+    persist(shop.concat(toAdd));
+  };
 
   const itemsByCat = shop.filter(function (i) { return cat === 'item' ? (i.cat === 'item' || i.cat === 'tool' || i.cat === 'ammo') : i.cat === cat; });
   const items = q.trim() ? itemsByCat.filter(function (i) { return (i.name || '').toLowerCase().includes(q.trim().toLowerCase()); }) : itemsByCat;
@@ -86,6 +95,7 @@ export default function ShopEditor(pr) {
     if (it.desc) parts.push(it.desc);
     if (it.ptype || it.cat === 'ammo') parts.push('🏹 Снаряд: ' + (it.ptype || 'Стрела'));
     if (it.dice || it.cat === 'tool') parts.push('🔧 Починка ' + (it.dice || '1d4'));
+    if (it.heal) parts.push('🧪 ' + it.heal + (it.healWill ? ' Воли' : ' HP'));
     return parts.join(' · ');
   }
 
@@ -136,6 +146,7 @@ export default function ShopEditor(pr) {
           {(it.dmgType === 'П' || it.wtype === 'Archery') && (
             <div style={{ display: 'flex', gap: 6 }}>
               {field(it.wtype === 'Archery' ? '🏹 Колчан (выстрелов)' : '🔫 Обойма (патронов)', <LiveField type="number" value={it.clip || 1} onCommit={function (val) { upd(it.id, { clip: parseInt(val) || 1 }); }} style={inp} />)}
+              {it.wtype === 'Archery' && field('Тип боеприпаса', <select value={it.ammoType || 'Стрела'} onChange={function (e) { upd(it.id, { ammoType: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}><option value="Стрела">Стрела (лук)</option><option value="Болт">Болт (арбалет)</option></select>)}
             </div>
           )}
           {it.hands === 1.5 && (
@@ -158,7 +169,11 @@ export default function ShopEditor(pr) {
           {field('Тип снаряда (необязательно)', <select value={it.ptype || ''} onChange={function (e) { upd(it.id, { ptype: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}><option value="">— нет —</option>{PROJ_TYPES.map(function (p) { return <option key={p} value={p}>{p}</option>; })}</select>)}
           {field('Кубик починки (необязательно)', <select value={it.dice || ''} onChange={function (e) { upd(it.id, { dice: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}><option value="">— нет —</option>{REPAIR_DICE.map(function (d) { return <option key={d} value={d}>{d}</option>; })}</select>)}
         </div>
-        <div style={{ fontSize: 8, color: '#9397ab', fontStyle: 'italic' }}>Тип снаряда делает вещь боеприпасом (тратится при перезарядке нужного оружия). Кубик починки делает вещь ремкомплектом (чинит снаряжение 1 раз в день). Можно оставить оба поля пустыми — тогда это просто предмет.</div>
+        <div style={{ display: 'flex', gap: 6, alignItems: 'flex-end' }}>
+          {field('🧪 Кубик лечения (необязательно)', <select value={it.heal || ''} onChange={function (e) { upd(it.id, { heal: e.target.value }); }} style={Object.assign({}, inp, { cursor: 'pointer' })}><option value="">— нет —</option>{HEAL_DICE.map(function (d) { return <option key={d} value={d}>{d}</option>; })}</select>)}
+          {it.heal && <label style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 10, color: '#9397ab', paddingBottom: 8, whiteSpace: 'nowrap' }}><input type="checkbox" checked={!!it.healWill} onChange={function (e) { upd(it.id, { healWill: e.target.checked }); }} />Лечит Волю, а не HP</label>}
+        </div>
+        <div style={{ fontSize: 8, color: '#9397ab', fontStyle: 'italic' }}>Тип снаряда делает вещь боеприпасом (тратится при перезарядке нужного оружия). Кубик починки делает вещь ремкомплектом (чинит снаряжение 1 раз в день). Кубик лечения делает вещь зельем — игрок сможет «Использовать» его из инвентаря, чтобы восстановить HP (или Волю). Поля можно оставить пустыми — тогда это просто предмет.</div>
       </div>
     );
   }
@@ -203,6 +218,8 @@ export default function ShopEditor(pr) {
         <div style={{ fontFamily: "'Inter',sans-serif", fontWeight: 900, fontSize: 16, color: '#f0b352' }}>🛒 Магазин / Вещи</div>
         <div style={{ fontSize: 9, color: '#9397ab' }}>Добавляй вещи — игроки берут их из своего листа</div>
       </div>
+
+      <button onClick={seedDefaults} style={{ padding: 9, borderRadius: 8, border: '2px solid #10b98150', background: 'rgba(16,185,129,.1)', color: '#34d399', fontFamily: "'Inter',sans-serif", fontWeight: 700, fontSize: 11, cursor: 'pointer' }}>📦 Заполнить стартовым набором (броня, оружие, зелья, боеприпасы, ремкомплекты)</button>
 
       <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
         {CATS.map(function (cc) {
