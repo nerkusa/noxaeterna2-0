@@ -18,13 +18,18 @@ var mx=c.hpOv||mHP(fs,c);var curHp=c.curHp!==null&&c.curHp!==undefined?c.curHp:m
 var mxW=c.willOv||fs.WILL||1;var curW=c.curWill!==null&&c.curWill!==undefined?c.curWill:mxW;var wP=mxW>0?(curW/mxW)*100:0;
 var xpp=xpProgress(c);
 var bsk=rc.bsp?1:0;var stL=40-uSP(c.stats||{});var skL=(60+bsk)-uSkP(c.skills||{});
-var raceBonusTags=Object.entries(rc.st||{}).map(function(e){var sd=SD.find(function(s){return s.key===e[0]});return{label:"+"+e[1]+" "+(sd?sd.key:e[0]),color:sd?sd.color:"var(--color-accent)"}});
+/* e[1] у штрафов уже отрицательное число — не приписываем свой "+",
+   иначе получалось "+-1 EMP" вместо "-1 EMP". */
+var raceBonusTags=Object.entries(rc.st||{}).map(function(e){var sd=SD.find(function(s){return s.key===e[0]});return{label:(e[1]>0?"+":"")+e[1]+" "+(sd?sd.key:e[0]),color:e[1]<0?"#ef4444":(sd?sd.color:"var(--color-accent)")}});
 /* ГМ редактирует характеристики/навыки напрямую, без пула и без трат
    очков уровня — на любом персонаже, запертом или нет. Игрок до «Принять»
-   свободно распределяет очки из общего бюджета; после «Принять» — только
-   тратит очки, выданные за уровни (statPts/skillPts), назад отменить нельзя. */
-function uS(k,d){var stats=Object.assign({},c.stats);if(isGM){stats[k]=Math.max(1,Math.min(10,(stats[k]||0)+d));sv(Object.assign({},c,{stats:stats}));return}if(c.locked){if(d<0)return;if((c.statPts||0)<1)return;stats[k]=(stats[k]||0)+1;if(stats[k]>10)return;sv(Object.assign({},c,{stats:stats,statPts:(c.statPts||0)-1}));return}stats[k]=(stats[k]||0)+d;if(stats[k]<1||stats[k]>8)return;if(uSP(stats)>40)return;sv(Object.assign({},c,{stats:stats}))}
-function uSk(n,d){var skills=Object.assign({},c.skills);if(isGM){skills[n]=Math.max(0,Math.min(10,(skills[n]||0)+d));sv(Object.assign({},c,{skills:skills}));return}if(c.locked){if(d<0)return;var sd=Object.values(SKD).flat().find(function(s){return s.name===n});var cost=sd&&sd.x2?2:1;if((c.skillPts||0)<cost)return;skills[n]=(skills[n]||0)+1;if(skills[n]>10)return;sv(Object.assign({},c,{skills:skills,skillPts:(c.skillPts||0)-cost}));return}skills[n]=(skills[n]||0)+d;if(skills[n]<0||skills[n]>10)return;if(uSkP(skills)>60+bsk)return;sv(Object.assign({},c,{skills:skills}))}
+   свободно распределяет очки из общего бюджета; после «Принять» — тратит
+   очки, выданные за уровни (statPts/skillPts). "-" при этом тоже работает
+   и возвращает потраченное очко обратно — но не ниже значения, которое
+   было зафиксировано при «Принять» (lockedStats/lockedSkills), чтобы
+   нельзя было вернуть себе очки из стартового распределения. */
+function uS(k,d){var stats=Object.assign({},c.stats);if(isGM){stats[k]=Math.max(1,Math.min(10,(stats[k]||0)+d));sv(Object.assign({},c,{stats:stats}));return}if(c.locked){var floor=(c.lockedStats&&c.lockedStats[k])||1;if(d<0){if((stats[k]||0)<=floor)return;stats[k]=stats[k]-1;sv(Object.assign({},c,{stats:stats,statPts:(c.statPts||0)+1}));return}if((c.statPts||0)<1)return;stats[k]=(stats[k]||0)+1;if(stats[k]>10)return;sv(Object.assign({},c,{stats:stats,statPts:(c.statPts||0)-1}));return}stats[k]=(stats[k]||0)+d;if(stats[k]<1||stats[k]>8)return;if(uSP(stats)>40)return;sv(Object.assign({},c,{stats:stats}))}
+function uSk(n,d){var skills=Object.assign({},c.skills);var sd=Object.values(SKD).flat().find(function(s){return s.name===n});var cost=sd&&sd.x2?2:1;if(isGM){skills[n]=Math.max(0,Math.min(10,(skills[n]||0)+d));sv(Object.assign({},c,{skills:skills}));return}if(c.locked){var floor2=(c.lockedSkills&&c.lockedSkills[n])||0;if(d<0){if((skills[n]||0)<=floor2)return;skills[n]=skills[n]-1;sv(Object.assign({},c,{skills:skills,skillPts:(c.skillPts||0)+cost}));return}if((c.skillPts||0)<cost)return;skills[n]=(skills[n]||0)+1;if(skills[n]>10)return;sv(Object.assign({},c,{skills:skills,skillPts:(c.skillPts||0)-cost}));return}skills[n]=(skills[n]||0)+d;if(skills[n]<0||skills[n]>10)return;if(uSkP(skills)>60+bsk)return;sv(Object.assign({},c,{skills:skills}))}
 return(<aside className="n-sidebar" style={{flexShrink:0,borderRight:"1px solid var(--color-divider)",display:"flex",flexDirection:"column",minHeight:0,background:"var(--color-bg)",overflowY:"auto"}}>
 
 <div style={{padding:14,display:"flex",gap:10,alignItems:"flex-start",borderBottom:"1px solid var(--color-divider)"}}>
@@ -73,13 +78,13 @@ return(<div key={st.key} style={{marginBottom:1}}>
 <span onClick={function(e){e.stopPropagation();var R=rollHit();var d=R.d;var t=d+v;if(pr.addLog)pr.addLog({who:c.name||"???",type:"skill",label:"Бросок "+st.key+(R.crit?" 🌟КРИТ":R.fumble?" 💀ПРОВАЛ":""),detail:"d10("+d+") + "+st.key+"("+v+") = "+t,total:t});oR({label:st.key,d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:st.key,value:v}],total:t})}} title="Бросить характеристику" style={{color:st.color,cursor:"pointer",padding:"2px 2px 2px 4px",display:"flex",alignItems:"center"}}><IconD10 size={13}/></span>
 </button>
 <div style={{display:"flex",justifyContent:"flex-end",gap:4,padding:"0 8px 2px"}}>
-<button onClick={function(){uS(st.key,-1)}} style={Object.assign({},S.sm,{width:20,height:18,fontSize:10})}>−</button>
+{(function(){var atFloor=c.locked&&!isGM&&(c.stats[st.key]||0)<=((c.lockedStats&&c.lockedStats[st.key])||1);return <button onClick={function(){uS(st.key,-1)}} disabled={atFloor} title={atFloor?"Это стартовое значение — вернуть можно только очки уровня":undefined} style={Object.assign({},S.sm,{width:20,height:18,fontSize:10,opacity:atFloor?0.35:1,cursor:atFloor?"default":"pointer"})}>−</button>})()}
 <button onClick={function(){uS(st.key,1)}} style={Object.assign({},S.sm,{width:20,height:18,fontSize:10,color:st.color})}>+</button>
 </div>
 {op&&sks&&<div style={{display:"flex",flexDirection:"column",gap:1,padding:"2px 0 8px 24px",borderLeft:"1px solid var(--color-divider)",marginLeft:16}}>
 {sks.map(function(sk){var ev=es[sk.name]||0;return(<div key={sk.name} style={{display:"flex",alignItems:"center",gap:6,padding:"4px 6px",borderRadius:6,background:ev>0?"rgba(233,233,237,.03)":"transparent"}}>
 <span style={{flex:1,fontSize:12,fontWeight:ev>0?600:400,color:ev>0?"var(--color-text)":"var(--color-text-muted)",minWidth:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{skLabel(sk.name)}{sk.x2&&<span style={{color:"#ef4444"}}> ×2</span>}</span>
-<button onClick={function(){uSk(sk.name,-1)}} style={Object.assign({},S.sm,{width:18,height:18,fontSize:9})}>−</button>
+{(function(){var atFloor=c.locked&&!isGM&&(c.skills[sk.name]||0)<=((c.lockedSkills&&c.lockedSkills[sk.name])||0);return <button onClick={function(){uSk(sk.name,-1)}} disabled={atFloor} title={atFloor?"Это стартовое значение — вернуть можно только очки уровня":undefined} style={Object.assign({},S.sm,{width:18,height:18,fontSize:9,opacity:atFloor?0.35:1,cursor:atFloor?"default":"pointer"})}>−</button>})()}
 <span style={{fontSize:13,fontWeight:700,minWidth:16,textAlign:"center",color:ev>0?st.color:"var(--color-text-muted)"}}>{ev}</span>
 <button onClick={function(){uSk(sk.name,1)}} style={Object.assign({},S.sm,{width:18,height:18,fontSize:9,color:st.color})}>+</button>
 <span onClick={function(){var R=rollHit();var d=R.d;var sv2=fs[st.key];var t=d+sv2+ev;if(pr.addLog)pr.addLog({who:c.name||"???",type:"skill",label:"Бросок "+skLabel(sk.name)+(R.crit?" 🌟КРИТ":R.fumble?" 💀ПРОВАЛ":""),detail:"d10("+d+") + "+st.key+"("+sv2+") + "+skLabel(sk.name)+"("+ev+") = "+t,total:t});oR({label:skLabel(sk.name),d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:st.key,value:sv2},{label:skLabel(sk.name),value:ev}],total:t})}} style={{color:st.color,cursor:"pointer",opacity:ev>0?1:0.4,display:"flex",alignItems:"center"}}><IconD10 size={12}/></span>
@@ -91,7 +96,7 @@ return(<div key={st.key} style={{marginBottom:1}}>
 <div style={{padding:"10px 14px 14px",borderTop:"1px solid var(--color-divider)",display:"flex",flexWrap:"wrap",gap:8}}>
 {!c.locked&&!isGM&&<button onClick={function(){sU({name:c.name,raceId:c.raceId,humanBonusStat:c.humanBonusStat,stats:Object.assign({},c.stats),skills:Object.assign({},c.skills)});var r=rndStats(c.profId,c.raceId);sv(Object.assign({},c,r,{curHp:null,curWill:null}))}} className="n-btn n-btn-secondary" style={{flex:"1 1 auto",color:"#f0b352",borderColor:"#f59e0b40"}}>Рандом</button>}
 {!c.locked&&!isGM&&undo&&<button onClick={function(){sv(Object.assign({},c,undo,{curHp:null,curWill:null}));sU(null)}} className="n-btn n-btn-secondary" style={{flex:"1 1 auto",color:"var(--color-accent)"}}>Отменить</button>}
-{!c.locked&&!isGM&&<button onClick={function(){if(!window.confirm("Принять распределение характеристик и навыков? Дальше менять их сможет только ГМ."))return;sv(Object.assign({},c,{locked:true}))}} className="n-btn n-btn-primary" style={{flex:"1 1 auto"}}>✓ Принять</button>}
+{!c.locked&&!isGM&&<button onClick={function(){if(!window.confirm("Принять распределение характеристик и навыков? Дальше менять их сможет только ГМ."))return;sv(Object.assign({},c,{locked:true,lockedStats:Object.assign({},c.stats),lockedSkills:Object.assign({},c.skills)}))}} className="n-btn n-btn-primary" style={{flex:"1 1 auto"}}>✓ Принять</button>}
 {c.locked&&!isGM&&<span style={{flex:1,textAlign:"center",fontSize:11,color:"var(--color-text-muted)",alignSelf:"center"}}>Распределение закреплено</span>}
 {isGM&&<span style={{flex:1,textAlign:"center",fontSize:11,color:c.locked?"#34d399":"#f0b352"}}>{c.locked?"✓ Принят игроком":"Черновик — ещё не принят"}</span>}
 </div>

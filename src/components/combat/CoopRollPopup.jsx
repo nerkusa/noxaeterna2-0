@@ -49,8 +49,8 @@ return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.55)",displ
 </div>
 :<div onClick={function(e){e.stopPropagation()}} style={{background:"linear-gradient(135deg,#232532,#1b1d29)",border:"3px solid #9184d9",borderRadius:16,padding:"16px 20px",textAlign:"center",minWidth:290,maxWidth:400,boxShadow:"0 20px 60px rgba(0,0,0,0.3)",animation:"popIn 0.3s"}}>
   <div style={{fontSize:11,color:"#9184d9",fontWeight:700,marginBottom:2,textTransform:"uppercase",letterSpacing:.04}}>🤝 Совместное действие</div>
-  <div style={{fontSize:13,color:"#e9e9ed",fontWeight:600,marginBottom:r.desc?4:10}}>{r.label}</div>
-  {r.desc&&<div style={{fontSize:11,color:"#9397ab",fontStyle:"italic",marginBottom:10}}>{r.desc}</div>}
+  <div style={{fontSize:13,color:"#e9e9ed",fontWeight:600,marginBottom:r.desc?6:10}}>{r.label}</div>
+  {r.desc&&<div style={{fontSize:12,color:"#c084fc",fontWeight:600,fontStyle:"italic",marginBottom:10,padding:"5px 9px",background:"rgba(192,132,252,.1)",borderRadius:7,borderLeft:"3px solid #c084fc",textAlign:"left",whiteSpace:"pre-line"}}>{"💬 "+r.desc}</div>}
   <div style={{display:"flex",gap:8}}>{Side(r.a)}{Side(r.b)}</div>
   <button onClick={p.onClose} style={{marginTop:12,padding:"4px 18px",borderRadius:6,border:"2px solid #34374a",background:"#1b1d29",fontWeight:700,fontSize:11,cursor:"pointer",color:"#e9e9ed"}}>OK</button>
 </div>}
