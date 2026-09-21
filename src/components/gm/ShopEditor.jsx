@@ -32,10 +32,12 @@ const SUBLABEL = {
   },
   weapon: { Battle: '⚔️ Боевое оружие', Simple: '🗡️ Простое оружие', Guns: '🔫 Огнестрел', Archery: '🏹 Лук', Thrown: '🪃 Метательное', Brawl: '👊 Рукопашное' },
   shield: { light: '🛡 Щит лёгкий', medium: '🛡 Щит средний', tower: '🛡 Щит тяжёлый' },
+  item: { potion: '🧪 Зелья и тоники', ammo: '🏹 Боеприпасы', repair: '🔧 Ремкомплекты', misc: '🎒 Бытовые вещи' },
 };
-const SUBORDER = { armor: ['light-head', 'light-body', 'medium-head', 'medium-body', 'heavy-head', 'heavy-body'], weapon: ['Battle', 'Simple', 'Guns', 'Archery', 'Thrown', 'Brawl'], shield: ['light', 'medium', 'tower'] };
+const SUBORDER = { armor: ['light-head', 'light-body', 'medium-head', 'medium-body', 'heavy-head', 'heavy-body'], weapon: ['Battle', 'Simple', 'Guns', 'Archery', 'Thrown', 'Brawl'], shield: ['light', 'medium', 'tower'], item: ['potion', 'ammo', 'repair', 'misc'] };
 const SLOT_LABEL = { head: 'Голова', body: 'Тело' };
-function subOf(it) { if (it.cat === 'armor') return (it.type || 'light') + '-' + (it.slot || 'body'); if (it.cat === 'shield') return it.type; if (it.cat === 'weapon') return it.wtype; return null; }
+function itemSubOf(it) { if (it.heal) return 'potion'; if (it.ptype || it.cat === 'ammo') return 'ammo'; if (it.dice || it.cat === 'tool') return 'repair'; return 'misc'; }
+function subOf(it) { if (it.cat === 'armor') return (it.type || 'light') + '-' + (it.slot || 'body'); if (it.cat === 'shield') return it.type; if (it.cat === 'weapon') return it.wtype; if (it.cat === 'item' || it.cat === 'tool' || it.cat === 'ammo') return itemSubOf(it); return null; }
 
 function field(label, node) { return <div style={{ flex: 1 }}><label style={lbl}>{label}</label>{node}</div>; }
 function priceOf(it) { return (it.price && typeof it.price === 'object') ? it.price : emptyCurrency(); }

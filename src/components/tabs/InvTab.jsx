@@ -8,7 +8,12 @@ import LiveField from '../LiveField';
 /* "NdM" -> сумма броска (та же логика, что и у ремкомплектов в ArmorSection) */
 function rollDice(d){var m=(""+d).match(/(\d+)d(\d+)/);if(!m)return r1(4);var n=parseInt(m[1])||1,f=parseInt(m[2])||4,t=0;for(var i=0;i<n;i++)t+=r1(f);return t}
 
+var ITEM_SUBORDER=["potion","ammo","repair","misc"];
+var ITEM_SUBLABEL={potion:"🧪 Зелья и тоники",ammo:"🏹 Боеприпасы",repair:"🔧 Ремкомплекты",misc:"🎒 Бытовые вещи"};
+function itemSubOf(it){if(it.heal)return"potion";if(it.ptype||it.cat==="ammo")return"ammo";if(it.dice||it.cat==="tool")return"repair";return"misc"}
+
 function InvTab(pr){var c=pr.char;var sv=pr.save;var _a=useState("");var ni=_a[0];var sNI=_a[1];var _sp=useState(false);var spOpen=_sp[0];var sSpOpen=_sp[1];
+var _cg=useState({});var collapsedGroups=_cg[0];var sCG=_cg[1];
 var shopItems=(pr.shop||[]).filter(function(i){return i.cat==="item"||i.cat==="tool"||i.cat==="ammo"});
 var curr=c.currency||{gold:0,silver:(c.gold||0),bronze:0,copper:0};
 
@@ -77,13 +82,23 @@ return(<div style={{display:"flex",flexDirection:"column",gap:6}}>
 </div>
 {spOpen&&<div style={{background:"#1b1d29",border:"1px solid #34374a",borderRadius:8,padding:6,display:"flex",flexDirection:"column",gap:3}}>
 {shopItems.length===0&&<div style={{fontSize:9,color:"#9397ab",fontStyle:"italic",textAlign:"center",padding:6}}>Пусто — ГМ ещё не добавил вещи</div>}
-{shopItems.map(function(it){var ptype=it.ptype||(it.cat==="ammo"?"Стрела":"");var dice=it.dice||(it.cat==="tool"?"1d4":"");var heal=it.heal||"";var price=priceOf(it);var cost=toCopper(price);
+{ITEM_SUBORDER.map(function(sk){
+var list=shopItems.filter(function(it){return itemSubOf(it)===sk});
+if(!list.length)return null;
+var collapsed=collapsedGroups[sk]!==undefined?collapsedGroups[sk]:list.length>6;
+return(<div key={sk} style={{display:"flex",flexDirection:"column",gap:3}}>
+<button onClick={function(){sCG(function(cg){var n=Object.assign({},cg);n[sk]=!collapsed;return n})}} style={{display:"flex",justifyContent:"space-between",alignItems:"center",width:"100%",background:"none",border:"none",padding:"3px 1px",marginTop:3,cursor:"pointer"}}>
+<span style={{fontSize:9,fontWeight:700,color:"#f59e0b"}}>{ITEM_SUBLABEL[sk]}</span>
+<span style={{fontSize:8,color:"#75798c"}}>{(collapsed?"▸ показать ":"▾ скрыть ")+list.length}</span>
+</button>
+{!collapsed&&list.map(function(it){var ptype=it.ptype||(it.cat==="ammo"?"Стрела":"");var dice=it.dice||(it.cat==="tool"?"1d4":"");var heal=it.heal||"";var price=priceOf(it);var cost=toCopper(price);
 return(<div key={it.id} style={{display:"flex",alignItems:"center",gap:6,background:"#232532",border:"1px solid #34374a",borderRadius:6,padding:"4px 7px"}}>
 <div style={{flex:1,minWidth:0}}>
 <div style={{fontSize:10,fontWeight:700,color:"#e9e9ed"}}>{it.name}{cost>0?<span style={{fontSize:8,color:"#d97706",marginLeft:5}}>{"💰 "+fmtCurrency(price)}</span>:null}</div>
 <div style={{fontSize:8,color:"#9397ab"}}>{[it.desc,ptype?("снаряд: "+ptype+(it.bundleQty>1?" ×"+it.bundleQty:"")):null,dice?"починка "+dice:null,heal?("🧪 "+heal+(it.healWill?" Воли":" HP")):null].filter(Boolean).join(" · ")}</div>
 </div>
 <button onClick={function(){pickItem(it)}} style={{padding:"3px 9px",borderRadius:5,border:"none",background:"#f59e0b",color:"#161826",fontWeight:700,fontSize:9,cursor:"pointer"}}>Взять</button>
+</div>)})}
 </div>)})}
 </div>}
 <div style={{background:"#2a2008",borderRadius:8,padding:"6px 8px",display:"flex",flexWrap:"wrap",gap:8,justifyContent:"space-between"}}>
