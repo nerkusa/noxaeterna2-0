@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { db, ref, set } from '../../firebase';
-import { ARMOR_T, ZONES, aimPen } from '../../data/combat';
+import { ARMOR_T, SHIELD_T, ZONES, aimPen } from '../../data/combat';
 import { DT, SD, SKD, WT, skLabel } from '../../data/stats';
 import { S } from '../../styles/ui';
 import { cF, mHP } from '../../utils/character';
@@ -11,6 +11,7 @@ import PlayerAttackNotif from '../combat/PlayerAttackNotif';
 import RollPopup from '../combat/RollPopup';
 import InitiativeBar from '../combat/InitiativeBar';
 import ShopPicker from '../ShopPicker';
+import { buildNpcDefaults } from '../../data/npcDefaults';
 
 /* Встроенная рукопашная атака — есть у каждого NPC изначально */
 var FIST={name:"Кулаки",dice:"1d6",dmgType:"Д",bonus:0,type:"Brawl"};
@@ -44,6 +45,7 @@ var _skn=useState(null);var skNpc=_skn[0];var sSkNpc=_skn[1];
 var _nweapons=useState([]);var nweapons=_nweapons[0];var sNWeapons=_nweapons[1];
 var _nar=useState("none");var nar=_nar[0];var sNAR=_nar[1];var _narh=useState(10);var narh=_narh[0];var sNARH=_narh[1];var _narnm=useState("");var narnm=_narnm[0];var sNARNM=_narnm[1];
 var _narbod=useState("none");var narbod=_narbod[0];var sNARBOD=_narbod[1];var _narbh=useState(10);var narbh=_narbh[0];var sNARBH=_narbh[1];var _narbnm=useState("");var narbnm=_narbnm[0];var sNARBNM=_narbnm[1];
+var _nsh=useState("none");var nsh=_nsh[0];var sNSh=_nsh[1];var _nshh=useState(15);var nshh=_nshh[0];var sNShH=_nshh[1];var _nshnm=useState("");var nshnm=_nshnm[0];var sNShNM=_nshnm[1];
 var _twn=useState("");var twn=_twn[0];var sTWN=_twn[1];var _twd=useState("1d6");var twd=_twd[0];var sTWD=_twd[1];var _twt=useState("Battle");var twt=_twt[0];var sTWT=_twt[1];var _twdt=useState("Р");var twdt=_twdt[0];var sTWDT=_twdt[1];var _twb=useState(0);var twb=_twb[0];var sTWB=_twb[1];var _tmgc=useState(false);var tmgc=_tmgc[0];var sTMGC=_tmgc[1];
 var _nmagic=useState(false);var nmagic=_nmagic[0];var sNMagic=_nmagic[1];
 var _nexsk=useState({});var nexsk=_nexsk[0];var sNExSk=_nexsk[1];
@@ -54,14 +56,28 @@ var allPlayerChars=pr.characters||[];
 
 function addCat(){if(!catName.trim())return;var n=Object.assign({},templ);n[catName.trim()]={_created:Date.now()};pr.saveNpcTempl(n);sCatName("")}
 function delCat(c2){var n=Object.assign({},templ);delete n[c2];pr.saveNpcTempl(n)}
-function resetForm(){sNN("");sNL(1);sNHP(20);sNXP(20);sNStats({INT:3,REF:3,DEX:3,BODY:3,EMP:1,CRA:1,WILL:3});sNSkills({dodge:2,resist:2});sNExSk({});sNWeapons([]);sNAR("none");sNARH(10);sNARNM("");sNARBOD("none");sNARBH(10);sNARBNM("");sNMagic(false);sEditNpc(null)}
-function loadNpcToForm(n){sNN(n.name||"");sNL(n.level||1);sNHP(n.maxHp||20);sNXP(n.xpReward!=null?n.xpReward:(n.maxHp||20));sNStats(n.stats||{INT:3,REF:3,DEX:3,BODY:3,EMP:1,CRA:1,WILL:3});sNSkills(n.skills||{dodge:2,resist:2});sNExSk(n.extraSkills||{});sNWeapons(n.weapons||[]);sNAR(n.armorHead||"none");sNARH(n.armorHeadHp||10);sNARNM(n.armorHeadName||"");sNARBOD(n.armorBody||"none");sNARBH(n.armorBodyHp||10);sNARBNM(n.armorBodyName||"");sNMagic(!!n.hasMagic)}
-function saveNpc(){if(!nn.trim()||!selCat)return;var n=Object.assign({},templ);if(!n[selCat])n[selCat]={_created:Date.now()};var id=editNpc||("npc_"+Date.now());n[selCat][id]={name:nn.trim(),level:nl,hp:nhp,maxHp:nhp,xpReward:nxp,stats:Object.assign({},nstats),skills:Object.assign({},nskills),extraSkills:Object.assign({},nexsk),weapons:nweapons.slice(),armorHead:nar,armorHeadHp:narh,armorHeadMaxHp:narh,armorHeadName:nar!=="none"?narnm.trim():"",armorBody:narbod,armorBodyHp:narbh,armorBodyMaxHp:narbh,armorBodyName:narbod!=="none"?narbnm.trim():"",hasMagic:nmagic};pr.saveNpcTempl(n);resetForm()}
+function seedNpcs(){
+  var defaults=buildNpcDefaults();var n=Object.assign({},templ);var added=0;
+  Object.keys(defaults).forEach(function(catName){
+    var defCat=defaults[catName];var existing=n[catName]||{_created:Date.now()};
+    var existingNames={};Object.keys(existing).forEach(function(k){if(k!=="_created")existingNames[(existing[k].name||"").trim().toLowerCase()]=true;});
+    var merged=Object.assign({},existing);
+    Object.keys(defCat).forEach(function(k){if(k==="_created")return;var nd=defCat[k];var nameKey=(nd.name||"").trim().toLowerCase();if(existingNames[nameKey])return;merged[k]=nd;added++;});
+    n[catName]=merged;
+  });
+  if(added===0){alert("Все эти NPC уже есть в бестиарии.");return;}
+  if(!window.confirm("Добавить "+added+" готовых NPC из каталога (бандиты, нежить, звери, элитные воины, боссы)? Существующих не тронет.")) return;
+  pr.saveNpcTempl(n);
+}
+function resetForm(){sNN("");sNL(1);sNHP(20);sNXP(20);sNStats({INT:3,REF:3,DEX:3,BODY:3,EMP:1,CRA:1,WILL:3});sNSkills({dodge:2,resist:2});sNExSk({});sNWeapons([]);sNAR("none");sNARH(10);sNARNM("");sNARBOD("none");sNARBH(10);sNARBNM("");sNSh("none");sNShH(15);sNShNM("");sNMagic(false);sEditNpc(null)}
+function loadNpcToForm(n){sNN(n.name||"");sNL(n.level||1);sNHP(n.maxHp||20);sNXP(n.xpReward!=null?n.xpReward:(n.maxHp||20));sNStats(n.stats||{INT:3,REF:3,DEX:3,BODY:3,EMP:1,CRA:1,WILL:3});sNSkills(n.skills||{dodge:2,resist:2});sNExSk(n.extraSkills||{});sNWeapons(n.weapons||[]);sNAR(n.armorHead||"none");sNARH(n.armorHeadHp||10);sNARNM(n.armorHeadName||"");sNARBOD(n.armorBody||"none");sNARBH(n.armorBodyHp||10);sNARBNM(n.armorBodyName||"");sNSh(n.shieldType||"none");sNShH(n.shieldHp||15);sNShNM(n.shieldName||"");sNMagic(!!n.hasMagic)}
+function saveNpc(){if(!nn.trim()||!selCat)return;var n=Object.assign({},templ);if(!n[selCat])n[selCat]={_created:Date.now()};var id=editNpc||("npc_"+Date.now());n[selCat][id]={name:nn.trim(),level:nl,hp:nhp,maxHp:nhp,xpReward:nxp,stats:Object.assign({},nstats),skills:Object.assign({},nskills),extraSkills:Object.assign({},nexsk),weapons:nweapons.slice(),armorHead:nar,armorHeadHp:narh,armorHeadMaxHp:narh,armorHeadName:nar!=="none"?narnm.trim():"",armorBody:narbod,armorBodyHp:narbh,armorBodyMaxHp:narbh,armorBodyName:narbod!=="none"?narbnm.trim():"",shieldType:nsh,shieldHp:nshh,shieldMaxHp:nshh,shieldName:nsh!=="none"?nshnm.trim():"",hasMagic:nmagic};pr.saveNpcTempl(n);resetForm()}
 function delNpc(cat,id){var n=Object.assign({},templ);if(n[cat])delete n[cat][id];pr.saveNpcTempl(n)}
 function addTmpWeapon(){if(!twn.trim())return;sNWeapons(nweapons.concat([{id:uid(),name:twn.trim(),dice:twd,type:twt,dmgType:twdt,bonus:twb,magic:tmgc}]));sTWN("");sTMGC(false)}
 function addWeaponFromShop(it){sNWeapons(nweapons.concat([{id:uid(),name:it.name,dice:it.dmgDice,type:it.wtype,dmgType:it.dmgType,bonus:it.bonus||0,magic:false}]))}
 function pickArmorHead(it){sNAR(it.type||"light");sNARH(it.hp||10);sNARNM(it.name||"")}
 function pickArmorBody(it){sNARBOD(it.type||"light");sNARBH(it.hp||10);sNARBNM(it.name||"")}
+function pickShield(it){sNSh(it.type||"light");sNShH(it.hp||15);sNShNM(it.name||"")}
 function spawnNpc(cat,id){var t=templ[cat]&&templ[cat][id];if(!t)return;var sp=Object.assign({},spawned);var sid="s_"+Date.now();sp[sid]=Object.assign({},t,{_catId:cat,_tmplId:id,spawnedAt:Date.now()});pr.saveSpawned(sp);pr.addLog({who:"ГМ",type:"spawn",label:"👹 "+t.name+" появился!",detail:"",total:0})}
 function despawn(id){var sp=Object.assign({},spawned);delete sp[id];pr.saveSpawned(sp)}
 function updateSpawned(id,data){var sp=Object.assign({},spawned);sp[id]=data;pr.saveSpawned(sp)}
@@ -185,10 +201,13 @@ function npcVsNpc(s,w){
   var zoneD=r1(6);var zoneObj=ZONES[zoneD-1];var crit=R.crit?1.5:1;var rawDmg=Math.floor((sm(dice)+(w.bonus||0))*crit);var mult=Math.floor(rawDmg*zoneObj.mult);
   var at=zoneObj.slot==="head"?(tgt.armorHead||"none"):(tgt.armorBody||"none");var ahp=zoneObj.slot==="head"?(tgt.armorHeadHp||0):(tgt.armorBodyHp||0);if(ahp<=0)at="none";
   var ae=zoneObj.ignoreArmor?{ad:0,hd:mult,desc:"🔓"+zoneObj.name}:calcAE(at,w.dmgType||"Р",mult);
+  var shieldDmg=0,shieldDesc="";
+  if(tgt.shieldType&&tgt.shieldType!=="none"&&(tgt.shieldHp||0)>0){var shObj=SHIELD_T.find(function(t){return t.id===tgt.shieldType});var absorb=shObj?shObj.absorb:0;shieldDmg=Math.floor(ae.hd*absorb);ae=Object.assign({},ae,{hd:Math.max(0,ae.hd-shieldDmg)});shieldDesc=" 🛡"+(tgt.shieldName||(shObj?shObj.name:tgt.shieldType))+" −"+shieldDmg;}
   var newHp=Math.max(0,(tgt.hp||0)-ae.hd);var upd=Object.assign({},tgt,{hp:newHp});
+  if(shieldDmg>0)upd.shieldHp=Math.max(0,(tgt.shieldHp||0)-shieldDmg);
   if(ae.ad>0){if(zoneObj.slot==="head")upd.armorHeadHp=Math.max(0,(tgt.armorHeadHp||0)-ae.ad);else upd.armorBodyHp=Math.max(0,(tgt.armorBodyHp||0)-ae.ad);}
   updateSpawned(npcTgtId,upd);
-  pr.addLog({who:s.name,type:"dmg",label:"🤝 "+s.name+" → "+tgt.name+" ["+zoneObj.e+zoneObj.name+"] "+ae.hd+" HP"+(R.crit?" 🌟":""),detail:hit+" vs "+dodge+" | "+ae.desc+" | ❤️ "+(tgt.hp||0)+"→"+newHp,total:ae.hd});
+  pr.addLog({who:s.name,type:"dmg",label:"🤝 "+s.name+" → "+tgt.name+" ["+zoneObj.e+zoneObj.name+"] "+ae.hd+" HP"+(R.crit?" 🌟":""),detail:hit+" vs "+dodge+" | "+ae.desc+shieldDesc+" | ❤️ "+(tgt.hp||0)+"→"+newHp,total:ae.hd});
   sRollP({label:s.name+" → "+tgt.name,d10:R.d,crit:R.crit,fumble:R.fumble,parts:[{label:atName,value:rv},{label:"нав",value:skVal}],total:hit,subtext:"💥 "+ae.hd+" урона ("+zoneObj.name+")\n❤️ "+(tgt.hp||0)+"→"+newHp});
 }
 /* Союзный NPC-маг творит чудо по вражескому NPC — d6 проверка → контест против Miracle Resist цели */
@@ -207,9 +226,13 @@ function npcMagicNpc(s,npcSpawnId){
   var crit=R.crit?1.5:1;var rawDmg=Math.floor(ft*crit);var zoneD=r1(6);var zoneObj=ZONES[zoneD-1];var mult=Math.floor(rawDmg*zoneObj.mult);
   var at=zoneObj.slot==="head"?(tgt.armorHead||"none"):(tgt.armorBody||"none");var ahp=zoneObj.slot==="head"?(tgt.armorHeadHp||0):(tgt.armorBodyHp||0);if(ahp<=0)at="none";
   var ae=zoneObj.ignoreArmor?{ad:0,hd:mult,desc:"🔓"+zoneObj.name}:calcAE(at,"Д",mult);
-  var newHp=Math.max(0,(tgt.hp||0)-ae.hd);var upd=Object.assign({},tgt,{hp:newHp});if(ae.ad>0){if(zoneObj.slot==="head")upd.armorHeadHp=Math.max(0,(tgt.armorHeadHp||0)-ae.ad);else upd.armorBodyHp=Math.max(0,(tgt.armorBodyHp||0)-ae.ad);}
+  var shieldDmg2=0,shieldDesc2="";
+  if(tgt.shieldType&&tgt.shieldType!=="none"&&(tgt.shieldHp||0)>0){var shObj2=SHIELD_T.find(function(t){return t.id===tgt.shieldType});var absorb2=shObj2?shObj2.absorb:0;shieldDmg2=Math.floor(ae.hd*absorb2);ae=Object.assign({},ae,{hd:Math.max(0,ae.hd-shieldDmg2)});shieldDesc2=" 🛡"+(tgt.shieldName||(shObj2?shObj2.name:tgt.shieldType))+" −"+shieldDmg2;}
+  var newHp=Math.max(0,(tgt.hp||0)-ae.hd);var upd=Object.assign({},tgt,{hp:newHp});
+  if(shieldDmg2>0)upd.shieldHp=Math.max(0,(tgt.shieldHp||0)-shieldDmg2);
+  if(ae.ad>0){if(zoneObj.slot==="head")upd.armorHeadHp=Math.max(0,(tgt.armorHeadHp||0)-ae.ad);else upd.armorBodyHp=Math.max(0,(tgt.armorBodyHp||0)-ae.ad);}
   updateSpawned(npcTgtId,upd);
-  pr.addLog({who:s.name,type:"magic",label:"🔮 "+s.name+" → "+tgt.name+" "+ae.hd+" HP"+(R.crit?" 🌟":""),detail:hitC+" vs "+res+" | "+ae.desc+" | ❤️ "+(tgt.hp||0)+"→"+newHp,total:ae.hd});
+  pr.addLog({who:s.name,type:"magic",label:"🔮 "+s.name+" → "+tgt.name+" "+ae.hd+" HP"+(R.crit?" 🌟":""),detail:hitC+" vs "+res+" | "+ae.desc+shieldDesc2+" | ❤️ "+(tgt.hp||0)+"→"+newHp,total:ae.hd});
   sRollP({label:s.name+" 🔮 → "+tgt.name,d10:R.d,crit:R.crit,parts:[{label:"WILL",value:will},{label:"Miracle",value:msk}],total:hitC,subtext:"💥 "+ae.hd+" урона ("+zoneObj.name+")\n❤️ "+(tgt.hp||0)+"→"+newHp});
 }
 
@@ -261,6 +284,7 @@ return <div key={id} style={{background:"#232532",border:"1px solid #34374a",bor
 <div style={{display:"flex",alignItems:"center",gap:3,marginTop:2}}><span style={{fontSize:8}}>❤️</span><div style={{flex:1,background:"#232532",borderRadius:3,height:8,overflow:"hidden"}}><div style={{height:"100%",width:hpP+"%",background:(s.hp||0)<=0?"#e9e9ed":"#ef4444",borderRadius:3}}/></div><div style={{display:"flex",gap:1}}>{[-5,-1,1,5].map(function(d){return <button key={d} onClick={function(){updateSpawned(id,Object.assign({},s,{hp:Math.max(0,Math.min(s.maxHp,(s.hp||0)+d))}))}} style={{padding:"1px 4px",borderRadius:3,fontSize:7,fontWeight:700,border:"1px solid #34374a",background:d<0?"#2a1414":"#0e2018",color:d<0?"#ef4444":"#10b981",cursor:"pointer"}}>{d>0?"+"+d:d}</button>})}</div><span style={{fontSize:9,fontWeight:700,fontFamily:"'Inter',sans-serif"}}>{(s.hp||0)+"/"+s.maxHp}</span></div>
 {s.armorHead&&s.armorHead!=="none"&&<div style={{fontSize:7,color:"#9397ab",marginTop:1}}>🧠 {s.armorHeadName||(ARMOR_T.find(function(a){return a.id===s.armorHead})||{}).name||s.armorHead} {s.armorHeadHp||0}/{s.armorHeadMaxHp||0}</div>}
 {s.armorBody&&s.armorBody!=="none"&&<div style={{fontSize:7,color:"#9397ab"}}>🫀 {s.armorBodyName||(ARMOR_T.find(function(a){return a.id===s.armorBody})||{}).name||s.armorBody} {s.armorBodyHp||0}/{s.armorBodyMaxHp||0}</div>}
+{s.shieldType&&s.shieldType!=="none"&&<div style={{fontSize:7,color:"#9397ab"}}>🛡 {s.shieldName||(SHIELD_T.find(function(t){return t.id===s.shieldType})||{}).name||s.shieldType} {s.shieldHp||0}/{s.shieldMaxHp||0}</div>}
 <div style={{display:"flex",gap:2,marginTop:3,flexWrap:"wrap"}}>
 <div style={{display:"flex",gap:1,marginBottom:1}}>
 <button onClick={function(){s.side==="ally"?npcVsNpc(s,FIST):npcAttack(s,FIST)}} title="Рукопашная (BODY+Brawl)" style={{padding:"2px 5px",borderRadius:4,border:"1px solid #f59e0b40",background:"#231b08",fontSize:7,fontWeight:700,color:"#f0b352",cursor:"pointer"}}>{"👊 Кулаки"+(s.side==="ally"?(npcTgtId?" ⚔️":""):(playerTgtId?" →":""))}</button>
@@ -284,7 +308,10 @@ return <div key={id} style={{background:"#232532",border:"1px solid #34374a",bor
 
 {/* Категории */}
 {(pr.logs||[]).filter(function(l){return l.type==="hit"||l.type==="dmg"||l.type==="dmg_npc"||l.type==="dodge"||l.type==="magic"||l.type==="magic_fail"||l.type==="spawn"}).slice(0,8).length>0&&<div style={{border:"2px solid #34374a",borderRadius:9,padding:"6px 8px",background:"#1b1d29"}}><div style={{fontFamily:"'Inter',sans-serif",fontWeight:700,fontSize:11,marginBottom:4}}>📜 Боевой лог</div><div style={{maxHeight:130,overflowY:"auto",display:"flex",flexDirection:"column",gap:2}}>{(pr.logs||[]).filter(function(l){return l.type==="hit"||l.type==="dmg"||l.type==="dmg_npc"||l.type==="dodge"||l.type==="magic"||l.type==="magic_fail"||l.type==="spawn"}).slice(0,8).map(function(l,i){var bgc=l.type==="magic_fail"?"#311717":l.type==="magic"?"#1f1330":l.type==="dodge"?"#0e2018":l.type==="hit"?"#0e1a2b":l.type==="spawn"?"#1f1330":"#2a1414";return <div key={i} style={{background:bgc,borderRadius:4,padding:"3px 6px",fontSize:8}}><b>{l.who||"?"}: {l.label}</b>{l.total>0&&<span style={{fontFamily:"'Inter',sans-serif",fontWeight:700,marginLeft:4}}>={l.total}</span>}</div>})}</div></div>}
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
 <div style={{fontFamily:"'Inter',sans-serif",fontWeight:700,fontSize:12}}>📁 Категории</div>
+<button onClick={seedNpcs} style={{background:"none",border:"none",color:"#75798c",fontSize:9,cursor:"pointer",textDecoration:"underline"}}>📦 добавить готовых NPC из каталога</button>
+</div>
 <div style={{display:"flex",gap:3}}><input style={Object.assign({},S.inp,{flex:1})} value={catName} onChange={function(e){sCatName(e.target.value)}} placeholder="Новая категория..." onKeyDown={function(e){if(e.key==="Enter")addCat()}}/><button onClick={addCat} style={{padding:"4px 10px",borderRadius:5,border:"none",background:"#10b981",color:"#fff",fontWeight:700,fontSize:10,cursor:"pointer"}}>+</button></div>
 {cats.length===0&&<div style={{textAlign:"center",padding:12,color:"#9397ab",fontStyle:"italic",fontSize:9}}>Создай категорию (Бандиты, Нежить, Звери...)</div>}
 {cats.map(function(cat){var npcs=templ[cat]||{};var npcArr=Object.entries(npcs).filter(function(e){return e[0]!=="_created"});var isOpen=selCat===cat;return <div key={cat} style={{border:"2px solid #ef444418",borderRadius:8,overflow:"hidden"}}><button onClick={function(){sCat(isOpen?null:cat)}} style={{width:"100%",display:"flex",justifyContent:"space-between",padding:"6px 8px",background:"#2a1414",border:"none",cursor:"pointer",fontFamily:"'Inter',sans-serif",fontWeight:700,fontSize:11,color:"#ef4444"}}><span>{"📁 "+cat+" ("+npcArr.length+")"}</span><span style={{transform:isOpen?"rotate(180deg)":"none"}}>▼</span></button>
@@ -328,6 +355,13 @@ return <div key={id} style={{background:"#232532",border:"1px solid #34374a",bor
 {narbod!=="none"&&<div style={{flex:2}}><label style={{fontSize:6,fontWeight:700}}>Название</label><input style={Object.assign({},S.inp,{fontSize:8,padding:2})} value={narbnm} onChange={function(e){sNARBNM(e.target.value)}} placeholder="напр. Кольчуга"/></div>}
 </div>
 <ShopPicker color="#9184d9" label="📦 Доспех из магазина" items={(pr.shop||[]).filter(function(i){return i.cat==="armor"&&(i.slot||"body")==="body"})} subOf={function(it){return it.type||"light"}} suborder={["light","medium","heavy"]} sublabels={{light:"Лёгкий",medium:"Средний",heavy:"Тяжёлый"}} sub={function(it){return it.hp+" HP"+(it.desc?" · "+it.desc:"")}} onPick={pickArmorBody}/>
+<div style={{fontSize:8,fontWeight:700,marginTop:4}}>Щит</div>
+<div style={{display:"flex",gap:3,alignItems:"flex-end"}}>
+<div style={{flex:1}}><label style={{fontSize:6,fontWeight:700}}>Тип</label><select value={nsh} onChange={function(e){sNSh(e.target.value)}} style={Object.assign({},S.inp,{fontSize:8,padding:2})}><option value="none">Нет</option>{SHIELD_T.map(function(t){return <option key={t.id} value={t.id}>{t.name+" "+(t.absorb*100)+"%"}</option>})}</select></div>
+{nsh!=="none"&&<div style={{flex:1}}><label style={{fontSize:6,fontWeight:700}}>HP</label><input style={Object.assign({},S.inp,{fontSize:8,padding:2})} type="number" value={nshh} onChange={function(e){sNShH(parseInt(e.target.value)||1)}} placeholder="HP"/></div>}
+{nsh!=="none"&&<div style={{flex:2}}><label style={{fontSize:6,fontWeight:700}}>Название</label><input style={Object.assign({},S.inp,{fontSize:8,padding:2})} value={nshnm} onChange={function(e){sNShNM(e.target.value)}} placeholder="напр. Круглый щит"/></div>}
+</div>
+<ShopPicker color="#38bdf8" label="📦 Щит из магазина" items={(pr.shop||[]).filter(function(i){return i.cat==="shield"})} subOf={function(it){return it.type||"light"}} suborder={["light","medium","tower"]} sublabels={{light:"Лёгкий",medium:"Средний",tower:"Башенный"}} sub={function(it){var t2=SHIELD_T.find(function(x){return x.id===it.type});return (t2?t2.name+" "+(t2.absorb*100)+"%":it.type)+" · "+it.hp+" HP"+(it.desc?" · "+it.desc:"")}} onPick={pickShield}/>
 <div style={{display:"flex",gap:3,marginTop:2}}><button onClick={function(){saveNpc();sCat(cat)}} style={{flex:1,padding:6,borderRadius:5,border:"none",background:"#ef4444",color:"#fff",fontWeight:700,fontSize:10,cursor:"pointer"}}>{editNpc?"💾 Сохранить":"Создать NPC"}</button>{editNpc&&<button onClick={resetForm} style={{padding:"6px 10px",borderRadius:5,border:"2px solid #34374a",background:"#232532",fontWeight:700,fontSize:10,cursor:"pointer"}}>Отмена</button>}</div>
 </div>
 <button onClick={function(){if(window.confirm("Удалить категорию "+cat+"?"))delCat(cat)}} style={{fontSize:8,color:"#ef4444",background:"none",border:"none",cursor:"pointer",marginTop:3}}>🗑️ Удалить категорию</button>
