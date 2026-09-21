@@ -94,7 +94,6 @@ export default function TraitEditor(pr) {
                   <div style={{ flex: 1 }}><label style={lbl}>Группа (необязательно)</label><LiveField value={t.group || ''} placeholder="напр. Физические" onCommit={function (val) { upd(t.id, { group: val }); }} style={inp} /></div>
                 </div>
                 <div><label style={lbl}>Эффект (для игрока, в листе)</label><LiveField tag="textarea" value={t.desc || ''} onCommit={function (val) { upd(t.id, { desc: val }); }} style={Object.assign({}, inp, { minHeight: 44, resize: 'vertical' })} /></div>
-                <div><label style={lbl}>Как получить</label><LiveField tag="textarea" value={t.how || ''} onCommit={function (val) { upd(t.id, { how: val }); }} style={Object.assign({}, inp, { minHeight: 32, resize: 'vertical' })} /></div>
                 <div style={{ background: '#1c1804', borderRadius: 6, padding: '6px 8px', display: 'flex', flexDirection: 'column', gap: 8 }}>
                   <div style={{ fontSize: 8, color: CLR, fontWeight: 700 }}>⚙ Механика — считается автоматически на листе персонажа. Можно добавить несколько эффектов сразу (напр. минус к навыку и минус к характеристике, или несколько навыков разом).</div>
                   {effs.length === 0 && <div style={{ fontSize: 9, color: '#75798c', fontStyle: 'italic' }}>Пока без механики — только описание</div>}

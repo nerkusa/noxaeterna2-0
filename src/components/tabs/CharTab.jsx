@@ -27,7 +27,7 @@ return(<div className="n-card">
 <div style={{fontSize:10,color:"var(--color-text-muted)",marginTop:2}}>{t.desc}</div>
 </button>)})}
 </div>}
-{mine.length===0&&!pick&&<div style={{fontSize:12,color:"var(--color-text-muted)",fontStyle:"italic"}}>Пока нет черт — они выдаются ГМ за события в игре</div>}
+{mine.length===0&&!pick&&<div style={{fontSize:12,color:"var(--color-text-muted)",fontStyle:"italic"}}>Черты будут получены по ходу игры</div>}
 {mine.length>0&&<div style={{display:"flex",flexDirection:"column",gap:6}}>
 {mine.map(function(t){var cat=TRAIT_CATEGORIES.find(function(x){return x.id===t.cat})||TRAIT_CATEGORIES[0];return(
 <div key={t.id} style={{padding:"8px 10px",background:"var(--color-sunken)",borderRadius:9,border:"1px solid "+cat.color+"30"}}>
