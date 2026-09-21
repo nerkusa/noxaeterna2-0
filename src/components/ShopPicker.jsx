@@ -6,6 +6,7 @@ import { emptyCurrency, toCopper, fmtCurrency } from '../utils/currency';
 //        optional grouping: subOf(item)->key, suborder[], sublabels{key:label}
 export default function ShopPicker(pr) {
   const [open, setOpen] = useState(false);
+  const [collapsedGroups, setCollapsedGroups] = useState({});
   const items = pr.items || [];
   const color = pr.color || '#f59e0b';
 
@@ -30,10 +31,14 @@ export default function ShopPicker(pr) {
     body = pr.suborder.map(function (sk) {
       const list = items.filter(function (i) { return pr.subOf(i) === sk; });
       if (!list.length) return null;
+      const collapsed = collapsedGroups[sk] !== undefined ? collapsedGroups[sk] : list.length > 6;
       return (
         <div key={sk} style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-          <div style={{ fontSize: 9, fontWeight: 700, color: color, marginTop: 3 }}>{(pr.sublabels && pr.sublabels[sk]) || sk}</div>
-          {list.map(row)}
+          <button onClick={function () { setCollapsedGroups(function (c) { const n = Object.assign({}, c); n[sk] = !collapsed; return n; }); }} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', background: 'none', border: 'none', padding: '3px 1px', marginTop: 3, cursor: 'pointer' }}>
+            <span style={{ fontSize: 9, fontWeight: 700, color: color }}>{(pr.sublabels && pr.sublabels[sk]) || sk}</span>
+            <span style={{ fontSize: 8, color: '#75798c' }}>{(collapsed ? '▸ показать ' : '▾ скрыть ') + list.length}</span>
+          </button>
+          {!collapsed && list.map(row)}
         </div>
       );
     });

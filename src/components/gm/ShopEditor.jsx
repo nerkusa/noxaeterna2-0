@@ -22,15 +22,20 @@ const PROJ_TYPES = ['Стрела', 'Болт', 'Пуля'];
 const REPAIR_DICE = ['1d4', '1d6', '1d8', '1d10', '1d12'];
 const HEAL_DICE = ['1d4', '1d6', '2d4', '2d6', '3d6', '4d6'];
 
-// подкатегории для группировки
+// подкатегории для группировки — броня делится и по ярусу (лёгкая/средняя/тяжёлая), и по слоту (голова/тело),
+// чтобы список не открывался одним гигантским полотном
 const SUBLABEL = {
-  armor: { head: '🧠 Голова', body: '🫀 Тело' },
+  armor: {
+    'light-head': '🪖 Шлем лёгкий', 'light-body': '🧥 Доспех лёгкий',
+    'medium-head': '🪖 Шлем средний', 'medium-body': '🧥 Доспех средний',
+    'heavy-head': '🪖 Шлем тяжёлый', 'heavy-body': '🧥 Доспех тяжёлый',
+  },
   weapon: { Battle: '⚔️ Боевое оружие', Simple: '🗡️ Простое оружие', Guns: '🔫 Огнестрел', Archery: '🏹 Лук', Thrown: '🪃 Метательное', Brawl: '👊 Рукопашное' },
-  shield: { light: '🟢 Лёгкий щит', medium: '🟡 Средний щит', tower: '🔵 Башенный щит' },
+  shield: { light: '🛡 Щит лёгкий', medium: '🛡 Щит средний', tower: '🛡 Щит тяжёлый' },
 };
-const SUBORDER = { armor: ['head', 'body'], weapon: ['Battle', 'Simple', 'Guns', 'Archery', 'Thrown', 'Brawl'], shield: ['light', 'medium', 'tower'] };
+const SUBORDER = { armor: ['light-head', 'light-body', 'medium-head', 'medium-body', 'heavy-head', 'heavy-body'], weapon: ['Battle', 'Simple', 'Guns', 'Archery', 'Thrown', 'Brawl'], shield: ['light', 'medium', 'tower'] };
 const SLOT_LABEL = { head: 'Голова', body: 'Тело' };
-function subOf(it) { if (it.cat === 'armor') return it.slot || 'body'; if (it.cat === 'shield') return it.type; if (it.cat === 'weapon') return it.wtype; return null; }
+function subOf(it) { if (it.cat === 'armor') return (it.type || 'light') + '-' + (it.slot || 'body'); if (it.cat === 'shield') return it.type; if (it.cat === 'weapon') return it.wtype; return null; }
 
 function field(label, node) { return <div style={{ flex: 1 }}><label style={lbl}>{label}</label>{node}</div>; }
 function priceOf(it) { return (it.price && typeof it.price === 'object') ? it.price : emptyCurrency(); }
@@ -81,6 +86,13 @@ export default function ShopEditor(pr) {
     if (toAdd.length === 0) { alert('Всё это уже есть в магазине.'); return; }
     if (!window.confirm('Добавить ' + toAdd.length + ' готовых вещей из каталога (броня, оружие, щиты, зелья, боеприпасы, ремкомплекты, бытовые мелочи)? Существующие вещи не тронет.')) return;
     persist(shop.concat(toAdd));
+  };
+  const clearCat = function () {
+    const toRemove = itemsByCat;
+    if (toRemove.length === 0) { alert('В этой категории пусто.'); return; }
+    if (!window.confirm('Удалить все вещи категории «' + (CATS.find(function (c) { return c.id === cat; }) || CATS[0]).name + '» (' + toRemove.length + ' шт.)? Это уберёт их у всех игроков, кто ещё не взял их в инвентарь — уже взятое останется. Отменить нельзя.')) return;
+    const removeIds = {}; toRemove.forEach(function (i) { removeIds[i.id] = true; });
+    persist(shop.filter(function (i) { return !removeIds[i.id]; }));
   };
 
   const itemsByCat = shop.filter(function (i) { return cat === 'item' ? (i.cat === 'item' || i.cat === 'tool' || i.cat === 'ammo') : i.cat === cat; });
@@ -227,7 +239,10 @@ export default function ShopEditor(pr) {
       <div style={{ textAlign: 'center' }}>
         <div style={{ fontFamily: "'Inter',sans-serif", fontWeight: 900, fontSize: 16, color: '#f0b352' }}>🛒 Магазин / Вещи</div>
         <div style={{ fontSize: 9, color: '#9397ab' }}>Добавляй вещи — игроки берут их из своего листа</div>
-        <button onClick={seedAll} style={{ marginTop: 4, background: 'none', border: 'none', color: '#75798c', fontSize: 9, cursor: 'pointer', textDecoration: 'underline' }}>📦 добавить ещё из готового каталога</button>
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 4 }}>
+          <button onClick={seedAll} style={{ background: 'none', border: 'none', color: '#75798c', fontSize: 9, cursor: 'pointer', textDecoration: 'underline' }}>📦 добавить ещё из готового каталога</button>
+          <button onClick={clearCat} style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: 9, cursor: 'pointer', textDecoration: 'underline' }}>🗑 очистить текущую категорию</button>
+        </div>
       </div>
 
       <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
