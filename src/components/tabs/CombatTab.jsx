@@ -68,7 +68,10 @@ return(<div style={{display:"flex",flexDirection:"column",gap:14}}>
 </div>
 {willPen!==0&&<div style={{fontSize:10,color:"#ef4444",textAlign:"right"}}>{willPen+" ко всем броскам"}</div>}
 </div>
-<button onClick={function(){var healHp=sm(rN(2,6));var healWill=r1(10);var newHp=Math.min(mx,curHp+healHp);var newWill=Math.min(mxW,curW+healWill);sv(Object.assign({},c,{curHp:newHp,curWill:newWill,shakenPenalty:0,broken:false,warriorBonus:false,warriorBonusUsed:false,sensitiveBonus:false,customStance:false,merchantUsed:false,repairUsed:false}));pr.addLog({who:c.name||"???",type:"rest",label:"Отдых — способности восстановлены",detail:"HP +"+healHp+" (2d6), Воля +"+healWill+" (1d10)",total:0})}} className="n-btn n-btn-secondary" style={{color:"#34d399",padding:"6px 14px"}}>Отдых</button>
+<div style={{display:"flex",flexDirection:"column",gap:4}}>
+<button onClick={function(){var healHp=sm(rN(2,6));var healWill=r1(10);var newHp=Math.min(mx,curHp+healHp);var newWill=Math.min(mxW,curW+healWill);sv(Object.assign({},c,{curHp:newHp,curWill:newWill,shakenPenalty:0,broken:false,warriorBonus:false,warriorBonusUsed:false,sensitiveBonus:false,customStance:false,merchantUsed:false,repairUsed:false}));pr.addLog({who:c.name||"???",type:"rest",label:"Короткий отдых — способности восстановлены",detail:"HP +"+healHp+" (2d6), Воля +"+healWill+" (1d10)",total:0})}} title="2d6 HP + 1d10 Воли" className="n-btn n-btn-secondary" style={{color:"#34d399",padding:"5px 14px",fontSize:12}}>Короткий отдых</button>
+<button onClick={function(){if(!window.confirm("Полноценный отдых — полностью восстановить HP и Волю?"))return;sv(Object.assign({},c,{curHp:mx,curWill:mxW,shakenPenalty:0,broken:false,warriorBonus:false,warriorBonusUsed:false,sensitiveBonus:false,customStance:false,merchantUsed:false,repairUsed:false}));pr.addLog({who:c.name||"???",type:"rest",label:"Полноценный отдых — всё восстановлено",detail:"HP "+mx+"/"+mx+", Воля "+mxW+"/"+mxW,total:0})}} title="Полностью восстанавливает HP и Волю" className="n-btn n-btn-secondary" style={{color:"#60a5fa",padding:"5px 14px",fontSize:12}}>Полноценный отдых</button>
+</div>
 </div>
 
 <div className="n-combat-grid">
