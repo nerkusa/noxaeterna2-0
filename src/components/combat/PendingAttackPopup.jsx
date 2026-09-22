@@ -80,12 +80,17 @@ function PendingAttackPopup(pr){
   function giveInFear(){
     var lostBy=atk.hitRoll-(atk.fearRoll||0);
     var broken=lostBy>=5||atk.fearD===1;
+    var wLoss=2+Math.floor(Math.random()*2);
+    var newWill=myCurWill-wLoss;
+    var patch={curWill:newWill};
     if(broken){
-      update(ref(db,"rooms/"+pr.room+"/characters/"+myId),{broken:true});
-      addLog({who:myChar.name||"???",type:"fear",label:"💀 Сломлен от страха перед "+atk.attackerName,detail:"Пропуск хода / вынужденное отступление в этот раунд",total:0});
+      patch.broken=true;
+      update(ref(db,"rooms/"+pr.room+"/characters/"+myId),patch);
+      addLog({who:myChar.name||"???",type:"fear",label:"💀 Сломлен от страха перед "+atk.attackerName,detail:"Пропуск хода / вынужденное отступление в этот раунд | Воля: "+myCurWill+"→"+newWill+" (−"+wLoss+")",total:0});
     } else {
-      update(ref(db,"rooms/"+pr.room+"/characters/"+myId),{shakenPenalty:2});
-      addLog({who:myChar.name||"???",type:"fear",label:"😰 Потрясён перед "+atk.attackerName,detail:"−2 к следующему броску",total:0});
+      patch.shakenPenalty=2;
+      update(ref(db,"rooms/"+pr.room+"/characters/"+myId),patch);
+      addLog({who:myChar.name||"???",type:"fear",label:"😰 Потрясён перед "+atk.attackerName,detail:"−2 к следующему броску | Воля: "+myCurWill+"→"+newWill+" (−"+wLoss+")",total:0});
     }
     remove(ref(db,"rooms/"+pr.room+"/pendingAttacks/"+id));
   }
@@ -125,7 +130,7 @@ function PendingAttackPopup(pr){
               <div style={{fontFamily:"'Inter',sans-serif",fontWeight:700,fontSize:13,color:"#f87171",marginTop:4,marginBottom:8}}>😨 Не устоял! Выбери реакцию:</div>
               <div style={{display:"flex",flexDirection:"column",gap:6}}>
                 <button onClick={overcomeFear} style={{width:"100%",padding:10,borderRadius:8,border:"none",background:"#3b82f6",color:"#fff",fontFamily:"'Inter',sans-serif",fontWeight:900,fontSize:12,cursor:"pointer"}}>{freeOvercome?"❄️ Пересилить (бесплатно — Хладнокровие)":"💪 Пересилить (−2 Воли)"}</button>
-                <button onClick={giveInFear} style={{width:"100%",padding:10,borderRadius:8,border:"2px solid #ef444440",background:"none",color:"#ef4444",fontFamily:"'Inter',sans-serif",fontWeight:700,fontSize:12,cursor:"pointer"}}>😨 Поддаться</button>
+                <button onClick={giveInFear} style={{width:"100%",padding:10,borderRadius:8,border:"2px solid #ef444440",background:"none",color:"#ef4444",fontFamily:"'Inter',sans-serif",fontWeight:700,fontSize:12,cursor:"pointer"}}>😨 Поддаться (−2/3 Воли)</button>
               </div>
             </div>
           }
