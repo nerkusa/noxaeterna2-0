@@ -66,7 +66,7 @@ function seedNpcs(){
     n[catName]=merged;
   });
   if(added===0){alert("Все эти NPC уже есть в бестиарии.");return;}
-  if(!window.confirm("Добавить "+added+" готовых NPC из каталога (бандиты, нежить, звери, элитные воины, боссы)? Существующих не тронет.")) return;
+  if(!window.confirm("Добавить "+added+" готовых NPC из каталога (бандиты, лучники, стража, чудотворцы, орды, ракси, драконорождённые, фракционные, дворфы, эльфы, боссы)? Существующих не тронет.")) return;
   pr.saveNpcTempl(n);
 }
 function resetForm(){sNN("");sNL(1);sNHP(20);sNXP(20);sNStats({INT:3,REF:3,DEX:3,BODY:3,EMP:1,CRA:1,WILL:3});sNSkills({dodge:2,resist:2});sNExSk({});sNWeapons([]);sNAR("none");sNARH(10);sNARNM("");sNARBOD("none");sNARBH(10);sNARBNM("");sNSh("none");sNShH(15);sNShNM("");sNMagic(false);sEditNpc(null)}

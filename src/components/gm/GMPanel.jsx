@@ -199,6 +199,10 @@ function HistoryPanel(pr) {
 function ChatSection(pr) {
   const [chatRoll, setChatRoll] = useState(null);
   const [chatCoopRoll, setChatCoopRoll] = useState(null);
+  const [speakAs, setSpeakAs] = useState('Мастер');
+  const spawnedList = Object.entries(pr.spawned || {}).filter(function (e) { var hp = e[1].hp !== undefined ? e[1].hp : e[1].maxHp; return hp > 0; });
+  const speakOptions = ['Мастер'].concat(spawnedList.map(function (e) { return e[1].name; }));
+  const activeSpeaker = speakOptions.indexOf(speakAs) >= 0 ? speakAs : 'Мастер';
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
       <RollPopup roll={chatRoll} onClose={function () { setChatRoll(null); }} />
@@ -207,8 +211,17 @@ function ChatSection(pr) {
         <span style={{ fontFamily: "'Inter',sans-serif", fontWeight: 900, fontSize: 15, color: 'var(--color-accent)', flex: 1 }}>💬 Чат</span>
         {pr.clearChat && <button onClick={function () { if (!window.confirm('Очистить весь чат (сообщения и броски)?')) return; pr.clearChat(); if (pr.clearLogs) pr.clearLogs(); }} className="n-btn" style={{ padding: '4px 8px', fontSize: 11, color: '#ef4444' }}>Очистить</button>}
       </div>
+      {spawnedList.length > 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 10, color: '#9397ab', fontWeight: 700 }}>🎭 Говорю за:</span>
+          {speakOptions.map(function (name) {
+            const on = activeSpeaker === name;
+            return <button key={name} onClick={function () { setSpeakAs(name); }} style={{ padding: '3px 9px', borderRadius: 6, border: '2px solid ' + (on ? (name === 'Мастер' ? '#7c3aed' : '#ef4444') : '#34374a'), background: on ? (name === 'Мастер' ? '#1f1330' : '#2a1414') : '#1b1d29', color: on ? (name === 'Мастер' ? '#a78bfa' : '#ef4444') : '#9397ab', fontWeight: on ? 700 : 400, fontSize: 10, cursor: 'pointer' }}>{name === 'Мастер' ? '🎙 Мастер' : '👹 ' + name}</button>;
+          })}
+        </div>
+      )}
       <div style={{ flex: 1, minHeight: 0 }}>
-        <ChatTab chat={pr.chat} logs={pr.logs} sendChat={pr.sendChat} addLog={pr.addLog} onRoll={setChatRoll} onCoopRoll={setChatCoopRoll} characters={pr.characters} who="Мастер" />
+        <ChatTab chat={pr.chat} logs={pr.logs} sendChat={pr.sendChat} addLog={pr.addLog} onRoll={setChatRoll} onCoopRoll={setChatCoopRoll} characters={pr.characters} who={activeSpeaker} />
       </div>
     </div>
   );
@@ -230,7 +243,7 @@ function GMPanel(pr) {
       <NavRail section={section} setSection={setSection} onDonate={function () { setShowDonate(true); }} />
       <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: 12 }}>
         {section === 'overview' && <Overview characters={pr.characters} saveChar={pr.saveChar} deleteChar={pr.deleteChar} onOpen={function (id) { setSid(id); }} addLog={pr.addLog} addGmLog={pr.addGmLog} myName={pr.myName} />}
-        {section === 'chat' && <ChatSection chat={pr.chat} logs={pr.logs} sendChat={pr.sendChat} addLog={pr.addLog} clearChat={pr.clearChat} clearLogs={pr.clearLogs} characters={pr.characters} />}
+        {section === 'chat' && <ChatSection chat={pr.chat} logs={pr.logs} sendChat={pr.sendChat} addLog={pr.addLog} clearChat={pr.clearChat} clearLogs={pr.clearLogs} characters={pr.characters} spawned={pr.spawned} />}
         {section === 'history' && <HistoryPanel gmLog={pr.gmLog} clearGmLog={pr.clearGmLog} />}
         {section === 'bestiary' && <BestiaryEditor npcTempl={pr.npcTempl} saveNpcTempl={pr.saveNpcTempl} spawned={pr.spawned} saveSpawned={pr.saveSpawned} onBack={backToOverview} addLog={pr.addLog} characters={pr.characters} roomCode={pr.roomCode} savePendingAttack={pr.savePendingAttack} clearPendingAttack={pr.clearPendingAttack} pendAtk={pr.pendAtk} logs={pr.logs} initiative={pr.initiative} saveInitiative={pr.saveInitiative} shop={pr.shop} />}
         {section === 'lore' && <LoreEditor lore={pr.lore} saveLore={pr.saveLore} mapData={pr.mapData} saveMap={pr.saveMap} characters={pr.characters} onBack={backToOverview} />}
