@@ -2,6 +2,7 @@ import React from 'react';
 import { db, ref, update, remove } from '../../firebase';
 import { ZONES, SHIELD_T, zoneByName } from '../../data/combat';
 import { calcAE } from '../../utils/combat';
+import { willPenalty } from '../../utils/character';
 import { r1, rN, sm, rollHit } from '../../utils/dice';
 import DamagePopup from './DamagePopup';
 import PlayerAttackStatus from './PlayerAttackStatus';
@@ -85,18 +86,18 @@ function PlayerAttackNotif(pr){
   function doDodge(){
     if(!npc)return;
     var st=npc.stats||{};var sk=npc.skills||{};var exsk=npc.extraSkills||{};
-    var wp=npcCurWill()<0?-5:0;
+    var wp=willPenalty(npcCurWill());
     var R=rollHit();var d=R.d;
     if(isFear){
       var wv0=st.WILL||0;var sc0=exsk["Самообладание"]||0;var t0=d+wv0+sc0+wp;
-      var det0="d10("+d+")+WILL("+wv0+")+Самообладание("+sc0+")"+(wp?"−5(деморализован)":"")+"="+t0;
+      var det0="d10("+d+")+WILL("+wv0+")+Самообладание("+sc0+")"+(wp?" "+wp+"(деморализован)":"")+"="+t0;
       resolveFear(t0,det0);
       return;
     }
     var dv=isMag?(st.WILL||0):(st.DEX||0);
     var dg=isMag?(sk.mresist||0):(sk.dodge||0);
     var t=d+dv+dg+wp;
-    var det=isMag?("d10("+d+")+WILL("+dv+")+Сопр.чудотв.("+dg+")"+(wp?"−5(деморализован)":"")+"="+t):("d10("+d+")+DEX("+dv+")+Уклонение("+dg+")"+(wp?"−5(деморализован)":"")+"="+t);
+    var det=isMag?("d10("+d+")+WILL("+dv+")+Сопр.чудотв.("+dg+")"+(wp?" "+wp+"(деморализован)":"")+"="+t):("d10("+d+")+DEX("+dv+")+Уклонение("+dg+")"+(wp?" "+wp+"(деморализован)":"")+"="+t);
     var dodged=t>=atk.hitRoll;
     update(ref(db,"rooms/"+pr.room+"/pendingAttacks/"+id),{dodgeRoll:t,status:dodged?"done":"pending_dmg",dodgeDetail:det});
     addLog({who:npc.name,type:isMag?"magic":"dodge",label:(isMag?(dodged?"✨ Устоял против чуда — ":"❌ Не устоял против чуда — "):(dodged?"✅ Уклонился от ":"❌ Не уклонился от "))+atk.attackerName,detail:det+" vs "+atk.hitRoll,total:t});
@@ -128,6 +129,7 @@ function PlayerAttackNotif(pr){
           <span style={{background:"#2b2e40",borderRadius:5,padding:"2px 6px",textAlign:"center"}}><span style={{color:"#9397ab",fontSize:7,display:"block"}}>{atkSkillName2}</span><span style={{fontFamily:"'Inter',sans-serif",fontSize:13,fontWeight:700}}>{atkSkill2}</span></span>
           {atkBonus2!==0&&<span style={{color:"#9397ab"}}>+</span>}
           {atkBonus2!==0&&<span style={{background:"#2b2e40",borderRadius:5,padding:"2px 6px",textAlign:"center"}}><span style={{color:"#9397ab",fontSize:7,display:"block"}}>Бнс</span><span style={{fontFamily:"'Inter',sans-serif",fontSize:13,fontWeight:700}}>{atkBonus2}</span></span>}
+          {!!atk.atkPenalty&&<span style={{background:"#2b2e40",borderRadius:5,padding:"2px 6px",textAlign:"center"}}><span style={{color:"#9397ab",fontSize:7,display:"block"}}>Штраф</span><span style={{fontFamily:"'Inter',sans-serif",fontSize:13,fontWeight:700,color:"#ef4444"}}>{atk.atkPenalty}</span></span>}
         </div>
         <div style={{fontFamily:"'Inter',sans-serif",fontSize:32,fontWeight:900,color:"#60a5fa"}}>{"= "+atk.hitRoll}</div>
         {atk.atkCrit&&<div style={{fontSize:11,color:"#d97706",fontWeight:700}}>🌟 КРИТ ×1.5</div>}{atk.atkFumble&&<div style={{fontSize:11,color:"#dc2626",fontWeight:700}}>💀 ПРОВАЛ</div>}

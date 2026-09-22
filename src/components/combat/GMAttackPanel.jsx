@@ -84,7 +84,7 @@ function GMAttackPanel(pr){
           <span style={{fontFamily:"'Inter',sans-serif",fontSize:20,fontWeight:900,color:atkD===10?"#d97706":atkD===1?"#dc2626":"#3b82f6"}}>{"🎲"+atkD}</span>
           <span style={{color:"#9397ab"}}>+</span>
           <span style={{background:"#2b2e40",borderRadius:5,padding:"2px 6px",textAlign:"center"}}>
-            <span style={{color:"#9397ab",fontSize:7,display:"block"}}>REF</span>
+            <span style={{color:"#9397ab",fontSize:7,display:"block"}}>{atk.atkStatName||"REF"}</span>
             <span style={{fontFamily:"'Inter',sans-serif",fontSize:13,fontWeight:700}}>{atkREF}</span>
           </span>
           <span style={{color:"#9397ab"}}>+</span>
@@ -96,6 +96,10 @@ function GMAttackPanel(pr){
           {atkBonus!==0&&<span style={{background:"#2b2e40",borderRadius:5,padding:"2px 6px",textAlign:"center"}}>
             <span style={{color:"#9397ab",fontSize:7,display:"block"}}>Бнс</span>
             <span style={{fontFamily:"'Inter',sans-serif",fontSize:13,fontWeight:700}}>{atkBonus}</span>
+          </span>}
+          {!!atk.atkPenalty&&<span style={{background:"#2b2e40",borderRadius:5,padding:"2px 6px",textAlign:"center"}}>
+            <span style={{color:"#9397ab",fontSize:7,display:"block"}}>Штраф</span>
+            <span style={{fontFamily:"'Inter',sans-serif",fontSize:13,fontWeight:700,color:"#ef4444"}}>{atk.atkPenalty}</span>
           </span>}
         </div>
         <div style={{fontFamily:"'Inter',sans-serif",fontSize:32,fontWeight:900,color:"#dc2626"}}>{"= "+atk.hitRoll}</div>

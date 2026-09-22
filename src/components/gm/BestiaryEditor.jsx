@@ -82,7 +82,7 @@ function pickShield(it){sNSh(it.type||"light");sNShH(it.hp||15);sNShNM(it.name||
 function spawnNpc(cat,id){var t=templ[cat]&&templ[cat][id];if(!t)return;var sp=Object.assign({},spawned);var sid="s_"+Date.now();sp[sid]=Object.assign({},t,{_catId:cat,_tmplId:id,spawnedAt:Date.now()});pr.saveSpawned(sp);pr.addLog({who:"ГМ",type:"spawn",label:"👹 "+t.name+" появился!",detail:"",total:0})}
 function despawn(id){var sp=Object.assign({},spawned);delete sp[id];pr.saveSpawned(sp)}
 function updateSpawned(id,data){var sp=Object.assign({},spawned);sp[id]=data;pr.saveSpawned(sp)}
-/* Текущая Воля NPC (по умолчанию = базовый стат, если ещё не тратилась) и штраф −5 при уходе в минус */
+/* Текущая Воля NPC (по умолчанию = базовый стат, если ещё не тратилась) и штраф = самой отрицательной Воле при уходе в минус */
 function npcCurWill(s){return s.curWill!=null?s.curWill:((s.stats||{}).WILL||0)}
 function npcWillPen(s){return willPenalty(npcCurWill(s))}
 function rollInitiative(){
@@ -137,7 +137,7 @@ function npcAttack(s,w){
   if(!playerTgtId){sRollP({label:s.name+" — "+w.name+" Попад.",d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:atName,value:rv},{label:skNm,value:skVal},{label:"Бнс",value:w.bonus||0}],total:t,subtext:"(нет цели)"});}
   if(playerTgtId&&pr.savePendingAttack){
     pr.savePendingAttack({id:"atk_"+Date.now(),attackerName:s.name,targetId:playerTgtId,targetName:tgtName,
-      hitRoll:t,atkD:d,atkREF:rv,atkSkill:skVal,atkSkillName:skNm,atkBonus:w.bonus||0,atkCrit:R.crit,atkFumble:R.fumble,
+      hitRoll:t,atkD:d,atkREF:rv,atkSkill:skVal,atkSkillName:skNm,atkBonus:w.bonus||0,atkPenalty:wp,atkCrit:R.crit,atkFumble:R.fumble,
       weaponName:w.name,dmgDice:w.dice||"1d6",dmgType:w.dmgType||"Р",dmgBonus:w.bonus||0,magic:!!w.magic,
       zone:playerZone,aimedZone:aimP?playerZone:null,status:"pending_dodge",ts:Date.now()});
   }
@@ -183,9 +183,9 @@ function npcMagic(s,npcSpawnId){
   var will=st.WILL||0;var msk=(s.skills||{}).spellcast||0;var R=rollHit();var wpM=npcWillPen(s);var hitC=R.d+will+msk+wpM;
   var tgtChar=playerTgtId?playerChars.find(function(x){return x._fbId===playerTgtId}):null;
   var tgtName=tgtChar?tgtChar.name:"";
-  pr.addLog({who:s.name,type:"magic",label:"🔮 "+s.name+" — чудо удалось (d6="+cc+")"+(tgtName?" → "+tgtName:"")+(R.crit?" 🌟КРИТ":""),detail:"🎲"+R.d+" + WILL("+will+") + Miracle("+msk+") = "+hitC,total:hitC});
+  pr.addLog({who:s.name,type:"magic",label:"🔮 "+s.name+" — чудо удалось (d6="+cc+")"+(tgtName?" → "+tgtName:"")+(R.crit?" 🌟КРИТ":""),detail:"🎲"+R.d+" + WILL("+will+") + Miracle("+msk+")"+(wpM?" − деморализован("+Math.abs(wpM)+")":"")+" = "+hitC,total:hitC});
   if(playerTgtId&&pr.savePendingAttack){
-    pr.savePendingAttack({id:"atk_"+Date.now(),attackerName:s.name,targetId:playerTgtId,targetName:tgtName,hitRoll:hitC,atkD:R.d,atkREF:will,atkStatName:"WILL",atkSkill:msk,atkSkillName:"Miracle",atkBonus:0,atkCrit:R.crit,atkFumble:false,weaponName:"Чудо",dmgDice:"3d12",dmgType:"Д",dmgBonus:cbon,magic:true,zone:playerZone,status:"pending_dodge",ts:Date.now()});
+    pr.savePendingAttack({id:"atk_"+Date.now(),attackerName:s.name,targetId:playerTgtId,targetName:tgtName,hitRoll:hitC,atkD:R.d,atkREF:will,atkStatName:"WILL",atkSkill:msk,atkSkillName:"Miracle",atkBonus:0,atkPenalty:wpM,atkCrit:R.crit,atkFumble:false,weaponName:"Чудо",dmgDice:"3d12",dmgType:"Д",dmgBonus:cbon,magic:true,zone:playerZone,status:"pending_dodge",ts:Date.now()});
   } else {
     sRollP({label:s.name+" 🔮 Чудо",d10:R.d,crit:R.crit,parts:[{label:"WILL",value:will},{label:"Miracle",value:msk}],total:hitC,subtext:"Каст удался — нет цели"});
   }
@@ -205,7 +205,7 @@ function npcFear(s,id){
   pr.addLog({who:s.name,type:"fear",label:"😨 "+s.name+" пытается устрашить"+(tgtName?" → "+tgtName:"")+(R.crit?" 🌟КРИТ":R.fumble?" 💀ПРОВАЛ":""),detail:"🎲"+d+" + "+statNm+"("+rv+") + "+skNm+"("+skVal+")"+(wp?" − деморализован("+Math.abs(wp)+")":"")+" = "+t,total:t});
   if(playerTgtId&&pr.savePendingAttack){
     pr.savePendingAttack({id:"atk_"+Date.now(),attackerName:s.name,targetId:playerTgtId,targetName:tgtName,fear:true,
-      hitRoll:t,atkD:d,atkREF:rv,atkStatName:statNm,atkSkill:skVal,atkSkillName:skNm,atkBonus:0,atkCrit:R.crit,atkFumble:R.fumble,
+      hitRoll:t,atkD:d,atkREF:rv,atkStatName:statNm,atkSkill:skVal,atkSkillName:skNm,atkBonus:0,atkPenalty:wp,atkCrit:R.crit,atkFumble:R.fumble,
       weaponName:"Устрашение",status:"pending_dodge",ts:Date.now()});
   }
 }
@@ -309,7 +309,7 @@ return <div key={id} style={{background:"#232532",border:"1px solid #34374a",bor
 {s.armorHead&&s.armorHead!=="none"&&<div style={{fontSize:7,color:"#9397ab",marginTop:1}}>🧠 {s.armorHeadName||(ARMOR_T.find(function(a){return a.id===s.armorHead})||{}).name||s.armorHead} {s.armorHeadHp||0}/{s.armorHeadMaxHp||0}</div>}
 {s.armorBody&&s.armorBody!=="none"&&<div style={{fontSize:7,color:"#9397ab"}}>🫀 {s.armorBodyName||(ARMOR_T.find(function(a){return a.id===s.armorBody})||{}).name||s.armorBody} {s.armorBodyHp||0}/{s.armorBodyMaxHp||0}</div>}
 {s.shieldType&&s.shieldType!=="none"&&<div style={{fontSize:7,color:"#9397ab"}}>🛡 {s.shieldName||(SHIELD_T.find(function(t){return t.id===s.shieldType})||{}).name||s.shieldType} {s.shieldHp||0}/{s.shieldMaxHp||0}</div>}
-<div style={{fontSize:7,color:npcCurWill(s)<0?"#ef4444":"#9397ab",fontWeight:npcCurWill(s)<0?700:400}}>🔥 Воля {npcCurWill(s)}/{(s.stats||{}).WILL||0}{npcCurWill(s)<0?" (−5 ко всем броскам)":""}</div>
+<div style={{fontSize:7,color:npcCurWill(s)<0?"#ef4444":"#9397ab",fontWeight:npcCurWill(s)<0?700:400}}>🔥 Воля {npcCurWill(s)}/{(s.stats||{}).WILL||0}{npcCurWill(s)<0?" ("+npcWillPen(s)+" ко всем броскам)":""}</div>
 {(s.broken||s.shakenPenalty>0)&&<div style={{display:"flex",gap:3,marginTop:2,flexWrap:"wrap",alignItems:"center"}}>
 {s.broken&&<span style={{fontSize:7,fontWeight:700,color:"#ef4444",background:"#311717",borderRadius:4,padding:"1px 5px"}}>💀 Сломлен</span>}
 {s.shakenPenalty>0&&<span style={{fontSize:7,fontWeight:700,color:"#f0b352",background:"#231b08",borderRadius:4,padding:"1px 5px"}}>{"😰 Потрясён −"+s.shakenPenalty}</span>}

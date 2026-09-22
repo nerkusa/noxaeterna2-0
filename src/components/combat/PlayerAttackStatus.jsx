@@ -38,6 +38,7 @@ function PlayerAttackStatus(pr){
           <span style={{background:"#2b2e40",borderRadius:5,padding:"2px 6px",textAlign:"center"}}><span style={{color:"#9397ab",fontSize:7,display:"block"}}>{atkSkillName}</span><span style={{fontFamily:"'Inter',sans-serif",fontSize:13,fontWeight:700}}>{atkSkill}</span></span>
           {atkBonus!==0&&<span style={{color:"#9397ab"}}>+</span>}
           {atkBonus!==0&&<span style={{background:"#2b2e40",borderRadius:5,padding:"2px 6px",textAlign:"center"}}><span style={{color:"#9397ab",fontSize:7,display:"block"}}>Бнс</span><span style={{fontFamily:"'Inter',sans-serif",fontSize:13,fontWeight:700}}>{atkBonus}</span></span>}
+          {!!atk.atkPenalty&&<span style={{background:"#2b2e40",borderRadius:5,padding:"2px 6px",textAlign:"center"}}><span style={{color:"#9397ab",fontSize:7,display:"block"}}>Штраф</span><span style={{fontFamily:"'Inter',sans-serif",fontSize:13,fontWeight:700,color:"#ef4444"}}>{atk.atkPenalty}</span></span>}
         </div>
         <div style={{fontFamily:"'Inter',sans-serif",fontSize:32,fontWeight:900,color:"#60a5fa"}}>{"= "+atk.hitRoll}</div>
         {atk.atkCrit&&<div style={{fontSize:11,color:"#d97706",fontWeight:700}}>🌟 КРИТ ×1.5</div>}{atk.atkFumble&&<div style={{fontSize:11,color:"#dc2626",fontWeight:700}}>💀 ПРОВАЛ</div>}

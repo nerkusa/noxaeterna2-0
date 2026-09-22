@@ -144,7 +144,7 @@ function Overview(pr) {
     if (!window.confirm('Полностью восстановить HP и Волю всем ' + pr.characters.length + ' персонажам партии?')) return;
     pr.characters.forEach(function (c) {
       const mx = c.hpOv || mHP(cF(c).fs, c);
-      pr.saveChar(c._fbId, Object.assign({}, c, { curHp: mx, curWill: c.willOv || cF(c).fs.WILL || 1 }));
+      pr.saveChar(c._fbId, Object.assign({}, c, { curHp: mx, curWill: c.willOv || cF(c).fs.WILL || 1, shakenPenalty: 0, broken: false }));
     });
     if (pr.addGmLog) pr.addGmLog({ who: pr.myName || 'ГМ', label: '🌙 Отдых всей партии', detail: pr.characters.map(function (c) { return c.name || '?'; }).join(', ') });
   }

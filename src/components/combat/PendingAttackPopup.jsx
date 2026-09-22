@@ -30,7 +30,7 @@ function PendingAttackPopup(pr){
   function doDodge(){
     if(isFear){
       var R2=rollHit();var d2=R2.d;var wv2=fs.WILL||0;var sc2=es["Самообладание"]||0;var t2=d2+wv2+sc2+rPen;
-      var det2="d10("+d2+")+WILL("+wv2+")+Самообладание("+sc2+")"+(wPen?" −5(деморализован)":"")+(sPen?" −2(потрясён)":"")+"="+t2;
+      var det2="d10("+d2+")+WILL("+wv2+")+Самообладание("+sc2+")"+(wPen?" "+wPen+"(деморализован)":"")+(sPen?" "+sPen+"(потрясён)":"")+"="+t2;
       var resisted=t2>=atk.hitRoll;
       update(ref(db,"rooms/"+pr.room+"/characters/"+myId),clearShakenPatch({}));
       if(resisted){
@@ -107,6 +107,7 @@ function PendingAttackPopup(pr){
             {atkREF>0&&<span style={{background:"#2b2e40",borderRadius:5,padding:"2px 6px",textAlign:"center"}}><span style={{color:"#9397ab",fontSize:7,display:"block"}}>{atk.atkStatName||"EMP"}</span><span style={{fontFamily:"'Inter',sans-serif",fontSize:13,fontWeight:700}}>{atkREF}</span></span>}
             {atkSkill>0&&<span style={{color:"#9397ab"}}>+</span>}
             {atkSkill>0&&<span style={{background:"#2b2e40",borderRadius:5,padding:"2px 6px",textAlign:"center"}}><span style={{color:"#9397ab",fontSize:7,display:"block"}}>{atkSkillName}</span><span style={{fontFamily:"'Inter',sans-serif",fontSize:13,fontWeight:700}}>{atkSkill}</span></span>}
+            {!!atk.atkPenalty&&<span style={{background:"#2b2e40",borderRadius:5,padding:"2px 6px",textAlign:"center"}}><span style={{color:"#9397ab",fontSize:7,display:"block"}}>Штраф</span><span style={{fontFamily:"'Inter',sans-serif",fontSize:13,fontWeight:700,color:"#ef4444"}}>{atk.atkPenalty}</span></span>}
           </div>
           <div style={{fontFamily:"'Inter',sans-serif",fontSize:32,fontWeight:900,color:accentF}}>{"= "+atk.hitRoll}</div>
         </div>
@@ -151,6 +152,7 @@ function PendingAttackPopup(pr){
           {atkSkill>0&&<span style={{background:"#2b2e40",borderRadius:5,padding:"2px 6px",textAlign:"center"}}><span style={{color:"#9397ab",fontSize:7,display:"block"}}>{atkSkillName}</span><span style={{fontFamily:"'Inter',sans-serif",fontSize:13,fontWeight:700}}>{atkSkill}</span></span>}
           {atkBonus!==0&&<span style={{color:"#9397ab"}}>+</span>}
           {atkBonus!==0&&<span style={{background:"#2b2e40",borderRadius:5,padding:"2px 6px",textAlign:"center"}}><span style={{color:"#9397ab",fontSize:7,display:"block"}}>Бнс</span><span style={{fontFamily:"'Inter',sans-serif",fontSize:13,fontWeight:700}}>{atkBonus}</span></span>}
+          {!!atk.atkPenalty&&<span style={{background:"#2b2e40",borderRadius:5,padding:"2px 6px",textAlign:"center"}}><span style={{color:"#9397ab",fontSize:7,display:"block"}}>Штраф</span><span style={{fontFamily:"'Inter',sans-serif",fontSize:13,fontWeight:700,color:"#ef4444"}}>{atk.atkPenalty}</span></span>}
         </div>
         <div style={{fontFamily:"'Inter',sans-serif",fontSize:32,fontWeight:900,color:"#dc2626"}}>{"= "+atk.hitRoll}</div>
         {atk.atkCrit&&<div style={{fontSize:11,color:"#d97706",fontWeight:700}}>🌟 КРИТ ×1.5</div>}{atk.atkFumble&&<div style={{fontSize:11,color:"#dc2626",fontWeight:700}}>💀 ПРОВАЛ</div>}

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { SD, SKD, skLabel } from '../data/stats';
 import { S } from '../styles/ui';
-import { cF, mHP, uSP, uSkP, rndStats, xpProgress } from '../utils/character';
+import { cF, mHP, uSP, uSkP, rndStats, xpProgress, willPenalty } from '../utils/character';
 import { rollHit } from '../utils/dice';
 import { getProfs } from '../utils/profStore';
 import { IconD10 } from '../icons/index';
@@ -16,6 +16,8 @@ var _os=useState(null);var oSt=_os[0];var sOS=_os[1];
 var _un=useState(null);var undo=_un[0];var sU=_un[1];
 var mx=c.hpOv||mHP(fs,c);var curHp=c.curHp!==null&&c.curHp!==undefined?c.curHp:mx;var hpP=mx>0?(curHp/mx)*100:0;
 var mxW=c.willOv||fs.WILL||1;var curW=c.curWill!==null&&c.curWill!==undefined?c.curWill:mxW;var wP=mxW>0?(curW/mxW)*100:0;
+var willPen=willPenalty(curW);var shakenPen=c.shakenPenalty?-c.shakenPenalty:0;var rollPen=willPen+shakenPen;
+function clearShaken(){if(c.shakenPenalty&&sv)sv(Object.assign({},c,{shakenPenalty:0}))}
 var xpp=xpProgress(c);
 var bsk=rc.bsp?1:0;var stL=40-uSP(c.stats||{});var skL=(60+bsk)-uSkP(c.skills||{});
 /* Есть ли что фиксировать: текущее распределение уже отличается от
@@ -79,7 +81,7 @@ return(<div key={st.key} style={{marginBottom:1}}>
 <span style={{fontSize:11,fontWeight:700,color:st.color,width:30,flexShrink:0}}>{st.key}</span>
 <span className="n-sidebar-hide-compact" style={{flex:1,fontSize:13,color:"var(--color-text)",minWidth:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{st.full}</span>
 <span style={{fontSize:16,fontWeight:700,color:"var(--color-text)"}}>{v}</span>
-<span onClick={function(e){e.stopPropagation();var R=rollHit();var d=R.d;var t=d+v;if(pr.addLog)pr.addLog({who:c.name||"???",type:"skill",label:"Бросок "+st.key+(R.crit?" 🌟КРИТ":R.fumble?" 💀ПРОВАЛ":""),detail:"d10("+d+") + "+st.key+"("+v+") = "+t,total:t});oR({label:st.key,d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:st.key,value:v}],total:t})}} title="Бросить характеристику" style={{color:st.color,cursor:"pointer",padding:"2px 2px 2px 4px",display:"flex",alignItems:"center"}}><IconD10 size={13}/></span>
+<span onClick={function(e){e.stopPropagation();var R=rollHit();var d=R.d;var t=d+v+rollPen;clearShaken();if(pr.addLog)pr.addLog({who:c.name||"???",type:"skill",label:"Бросок "+st.key+(R.crit?" 🌟КРИТ":R.fumble?" 💀ПРОВАЛ":""),detail:"d10("+d+") + "+st.key+"("+v+")"+(rollPen?" + штраф("+rollPen+")":"")+" = "+t,total:t});oR({label:st.key,d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:st.key,value:v}].concat(rollPen?[{label:"Штраф",value:rollPen}]:[]),total:t})}} title="Бросить характеристику" style={{color:st.color,cursor:"pointer",padding:"2px 2px 2px 4px",display:"flex",alignItems:"center"}}><IconD10 size={13}/></span>
 </button>
 <div style={{display:"flex",justifyContent:"flex-end",gap:4,padding:"0 8px 2px"}}>
 {(function(){var atFloor=c.locked&&!isGM&&(c.stats[st.key]||0)<=((c.lockedStats&&c.lockedStats[st.key])||1);return <button onClick={function(){uS(st.key,-1)}} disabled={atFloor} title={atFloor?"Это стартовое значение — вернуть можно только очки уровня":undefined} style={Object.assign({},S.sm,{width:20,height:18,fontSize:10,opacity:atFloor?0.35:1,cursor:atFloor?"default":"pointer"})}>−</button>})()}
@@ -91,7 +93,7 @@ return(<div key={st.key} style={{marginBottom:1}}>
 {(function(){var atFloor=c.locked&&!isGM&&(c.skills[sk.name]||0)<=((c.lockedSkills&&c.lockedSkills[sk.name])||0);return <button onClick={function(){uSk(sk.name,-1)}} disabled={atFloor} title={atFloor?"Это стартовое значение — вернуть можно только очки уровня":undefined} style={Object.assign({},S.sm,{width:18,height:18,fontSize:9,opacity:atFloor?0.35:1,cursor:atFloor?"default":"pointer"})}>−</button>})()}
 <span style={{fontSize:13,fontWeight:700,minWidth:16,textAlign:"center",color:ev>0?st.color:"var(--color-text-muted)"}}>{ev}</span>
 <button onClick={function(){uSk(sk.name,1)}} style={Object.assign({},S.sm,{width:18,height:18,fontSize:9,color:st.color})}>+</button>
-<span onClick={function(){var R=rollHit();var d=R.d;var sv2=fs[st.key];var t=d+sv2+ev;if(pr.addLog)pr.addLog({who:c.name||"???",type:"skill",label:"Бросок "+skLabel(sk.name)+(R.crit?" 🌟КРИТ":R.fumble?" 💀ПРОВАЛ":""),detail:"d10("+d+") + "+st.key+"("+sv2+") + "+skLabel(sk.name)+"("+ev+") = "+t,total:t});oR({label:skLabel(sk.name),d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:st.key,value:sv2},{label:skLabel(sk.name),value:ev}],total:t})}} style={{color:st.color,cursor:"pointer",opacity:ev>0?1:0.4,display:"flex",alignItems:"center"}}><IconD10 size={12}/></span>
+<span onClick={function(){var R=rollHit();var d=R.d;var sv2=fs[st.key];var t=d+sv2+ev+rollPen;clearShaken();if(pr.addLog)pr.addLog({who:c.name||"???",type:"skill",label:"Бросок "+skLabel(sk.name)+(R.crit?" 🌟КРИТ":R.fumble?" 💀ПРОВАЛ":""),detail:"d10("+d+") + "+st.key+"("+sv2+") + "+skLabel(sk.name)+"("+ev+")"+(rollPen?" + штраф("+rollPen+")":"")+" = "+t,total:t});oR({label:skLabel(sk.name),d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:st.key,value:sv2},{label:skLabel(sk.name),value:ev}].concat(rollPen?[{label:"Штраф",value:rollPen}]:[]),total:t})}} style={{color:st.color,cursor:"pointer",opacity:ev>0?1:0.4,display:"flex",alignItems:"center"}}><IconD10 size={12}/></span>
 </div>)})}
 </div>}
 </div>)})}
