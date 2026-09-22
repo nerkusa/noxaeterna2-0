@@ -21,11 +21,12 @@ function PlayerAttackStatus(pr){
   var atkBonus=atk.atkBonus||0;var atkSkillName=atk.atkSkillName||"Навык";
   var dodgeDetail=atk.dodgeDetail||"";
   var isMag=!!atk.magic;
+  var isFear=!!atk.fear;
   return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.72)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:997,animation:"fadeIn 0.2s"}}>
-    <div style={{background:"#161826",border:"3px solid "+(waiting?"#f59e0b":dodged?"#10b981":shieldPhaseGM?"#38bdf8":isMag?"#a78bfa":"#ef4444"),borderRadius:16,padding:"18px 22px",textAlign:"center",minWidth:270,maxWidth:350,boxShadow:"0 20px 60px rgba(0,0,0,0.5)",animation:"popIn 0.3s"}}>
+    <div style={{background:"#161826",border:"3px solid "+(waiting?"#f59e0b":dodged?"#10b981":shieldPhaseGM?"#38bdf8":isFear?"#f472b6":isMag?"#a78bfa":"#ef4444"),borderRadius:16,padding:"18px 22px",textAlign:"center",minWidth:270,maxWidth:350,boxShadow:"0 20px 60px rgba(0,0,0,0.5)",animation:"popIn 0.3s"}}>
       <div style={{display:"flex",justifyContent:"flex-end",marginBottom:2}}>{waiting&&<button onClick={function(){remove(ref(db,"rooms/"+pr.room+"/pendingAttacks/"+id));}} style={{background:"none",border:"none",fontSize:18,cursor:"pointer",color:"#75798c",lineHeight:1}} title="Отменить атаку">✕</button>}</div>
-      <div style={{fontSize:24,marginBottom:4}}>{isMag?"✨":"🎯"}</div>
-      <div style={{fontFamily:"'Inter',sans-serif",fontWeight:900,fontSize:15,color:isMag?"#a78bfa":"#60a5fa",marginBottom:8}}>{(isMag?"Ты творишь чудо на ":"Ты атакуешь ")+atk.npcName+"!"}</div>
+      <div style={{fontSize:24,marginBottom:4}}>{isFear?"😨":isMag?"✨":"🎯"}</div>
+      <div style={{fontFamily:"'Inter',sans-serif",fontWeight:900,fontSize:15,color:isFear?"#f472b6":isMag?"#a78bfa":"#60a5fa",marginBottom:8}}>{(isFear?"Ты пытаешься устрашить ":isMag?"Ты творишь чудо на ":"Ты атакуешь ")+atk.npcName+"!"}</div>
       {/* Бросок атаки */}
       <div style={{background:"#232532",border:"1px solid #34374a",borderRadius:10,padding:"8px 12px",marginBottom:10}}>
         <div style={{fontSize:8,color:"#9397ab",marginBottom:4}}>Твой бросок на попадание</div>
@@ -44,8 +45,13 @@ function PlayerAttackStatus(pr){
       </div>
       {/* Уклонение NPC */}
       <div style={{background:"#232532",border:"1px solid "+(waiting?"#34374a":shieldPhaseGM?"#38bdf840":"#10b98140"),borderRadius:10,padding:"8px 12px"}}>
-        <div style={{fontSize:8,color:"#9397ab",marginBottom:4}}>{(isMag?"Сопротивление чуду ":"Уклонение ")+atk.npcName}</div>
-        {waiting
+        <div style={{fontSize:8,color:"#9397ab",marginBottom:4}}>{(isFear?"Самообладание ":isMag?"Сопротивление чуду ":"Уклонение ")+atk.npcName}</div>
+        {isFear
+          ?<div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,padding:"8px 0"}}>
+            <div style={{width:8,height:8,borderRadius:"50%",background:"#f59e0b"}}/>
+            <span style={{fontSize:12,color:"#75798c",fontStyle:"italic"}}>ГМ бросает Самообладание — итог в логе события</span>
+          </div>
+          :waiting
           ?<div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,padding:"8px 0"}}>
             <div style={{width:8,height:8,borderRadius:"50%",background:"#f59e0b"}}/>
             <span style={{fontSize:12,color:"#75798c",fontStyle:"italic"}}>{isMag?"ГМ бросает Miracle Resist...":"ГМ бросает уклонение..."}</span>

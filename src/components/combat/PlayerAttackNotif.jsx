@@ -67,32 +67,55 @@ function PlayerAttackNotif(pr){
   var entry=needDodge[0];var id=entry[0];var atk=entry[1];
   var npc=spawned[atk.npcId];
   var isMag=!!atk.magic;
+  var isFear=!!atk.fear;
+  function npcCurWill(){return npc?(npc.curWill!=null?npc.curWill:((npc.stats||{}).WILL||0)):0}
+  function resolveFear(t,det){
+    var lost=t<atk.hitRoll;
+    if(lost){
+      var wLoss=2+Math.floor(Math.random()*2);var cw=npcCurWill();var newWill=cw-wLoss;
+      var spAll=Object.assign({},spawned);spAll[atk.npcId]=Object.assign({},npc,{curWill:newWill});saveSpawned(spAll);
+      addLog({who:npc.name,type:"fear",label:"😨 "+npc.name+" не устоял перед "+atk.attackerName+" — теряет Волю",detail:det+" vs "+atk.hitRoll+" | Воля "+cw+"→"+newWill,total:t});
+      onRoll&&onRoll({label:atk.attackerName+" 😨 Устрашение",d10:null,parts:[],total:t,subtext:npc.name+" не устоял!\nВоля: "+cw+" → "+newWill+" (−"+wLoss+")"});
+    } else {
+      addLog({who:npc.name,type:"fear",label:"😤 "+npc.name+" устоял перед "+atk.attackerName,detail:det+" vs "+atk.hitRoll,total:t});
+      onRoll&&onRoll({label:atk.attackerName+" 😨 Устрашение",d10:null,parts:[],total:t,subtext:npc.name+" устоял!"});
+    }
+    remove(ref(db,"rooms/"+pr.room+"/pendingAttacks/"+id));
+  }
   function doDodge(){
     if(!npc)return;
-    var st=npc.stats||{};var sk=npc.skills||{};
+    var st=npc.stats||{};var sk=npc.skills||{};var exsk=npc.extraSkills||{};
+    var wp=npcCurWill()<0?-5:0;
     var R=rollHit();var d=R.d;
+    if(isFear){
+      var wv0=st.WILL||0;var sc0=exsk["Самообладание"]||0;var t0=d+wv0+sc0+wp;
+      var det0="d10("+d+")+WILL("+wv0+")+Самообладание("+sc0+")"+(wp?"−5(деморализован)":"")+"="+t0;
+      resolveFear(t0,det0);
+      return;
+    }
     var dv=isMag?(st.WILL||0):(st.DEX||0);
     var dg=isMag?(sk.mresist||0):(sk.dodge||0);
-    var t=d+dv+dg;
-    var det=isMag?("d10("+d+")+WILL("+dv+")+Сопр.чудотв.("+dg+")="+t):("d10("+d+")+DEX("+dv+")+Уклонение("+dg+")="+t);
+    var t=d+dv+dg+wp;
+    var det=isMag?("d10("+d+")+WILL("+dv+")+Сопр.чудотв.("+dg+")"+(wp?"−5(деморализован)":"")+"="+t):("d10("+d+")+DEX("+dv+")+Уклонение("+dg+")"+(wp?"−5(деморализован)":"")+"="+t);
     var dodged=t>=atk.hitRoll;
     update(ref(db,"rooms/"+pr.room+"/pendingAttacks/"+id),{dodgeRoll:t,status:dodged?"done":"pending_dmg",dodgeDetail:det});
     addLog({who:npc.name,type:isMag?"magic":"dodge",label:(isMag?(dodged?"✨ Устоял против чуда — ":"❌ Не устоял против чуда — "):(dodged?"✅ Уклонился от ":"❌ Не уклонился от "))+atk.attackerName,detail:det+" vs "+atk.hitRoll,total:t});
     /* onRoll убран — результат показывается в PlayerAttackStatus у игрока */
   }
   function acceptHit(){
+    if(isFear){resolveFear(-999,"без сопротивления");return;}
     update(ref(db,"rooms/"+pr.room+"/pendingAttacks/"+id),{dodgeRoll:0,status:"pending_dmg"});
   }
   var atkD2=atk.atkD||"?";var atkREF2=atk.atkREF||0;var atkStat2=atk.atkStatName||"REF";var atkSkill2=atk.atkSkill||0;var atkBonus2=atk.atkBonus||0;var atkSkillName2=atk.atkSkillName||"Навык";
   var npcDex=npc?(npc.stats||{}).DEX||0:0;var npcDodge=npc?(npc.skills||{}).dodge||0:0;
   var npcWill=npc?(npc.stats||{}).WILL||0:0;var npcMR=npc?(npc.skills||{}).mresist||0:0;
-  var accent=isMag?"#a78bfa":"#3b82f6";
+  var accent=isFear?"#f472b6":isMag?"#a78bfa":"#3b82f6";
   return(<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.72)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:998,animation:"fadeIn 0.2s"}}>
     <div style={{background:"#161826",border:"3px solid "+accent,borderRadius:16,padding:"18px 22px",textAlign:"center",minWidth:270,maxWidth:350,boxShadow:"0 20px 60px rgba(0,0,0,0.5)",animation:"popIn 0.3s"}}>
       <div style={{display:"flex",justifyContent:"flex-end",marginBottom:2}}><button onClick={acceptHit} style={{background:"none",border:"none",fontSize:18,cursor:"pointer",color:"#9397ab",lineHeight:1}}>✕</button></div>
       {needDodge.length>1&&<div style={{fontSize:9,color:"#9397ab",marginBottom:4}}>{"Атака 1 из "+needDodge.length}</div>}
-      <div style={{fontSize:24,marginBottom:4}}>{isMag?"✨":"🎯"}</div>
-      <div style={{fontFamily:"'Inter',sans-serif",fontWeight:900,fontSize:15,color:isMag?"#a78bfa":"#60a5fa",marginBottom:8}}>{atk.attackerName+(isMag?" творит чудо на ":" атакует ")+atk.npcName+"!"}</div>
+      <div style={{fontSize:24,marginBottom:4}}>{isFear?"😨":isMag?"✨":"🎯"}</div>
+      <div style={{fontFamily:"'Inter',sans-serif",fontWeight:900,fontSize:15,color:isFear?"#f472b6":isMag?"#a78bfa":"#60a5fa",marginBottom:8}}>{atk.attackerName+(isFear?" пытается устрашить ":isMag?" творит чудо на ":" атакует ")+atk.npcName+"!"}</div>
       {isMag&&atk.castIntent&&<div style={{fontSize:10,color:"#a78bfa",fontStyle:"italic",marginBottom:8,padding:"4px 8px",background:"#1f1330",borderRadius:7}}>«{atk.castIntent}»</div>}
       {/* Бросок атаки с деталями */}
       <div style={{background:"#232532",border:"1px solid #34374a",borderRadius:10,padding:"8px 12px",marginBottom:10}}>
@@ -111,12 +134,12 @@ function PlayerAttackNotif(pr){
         <div style={{fontSize:9,color:"#9397ab",marginTop:2}}>{(atk.weaponName||"")+(atk.dmgType?" · "+atk.dmgType:"")}</div>
       </div>
       {/* Защита NPC */}
-      <div style={{background:"#232532",border:"1px solid "+(isMag?"#a78bfa40":"#34374a"),borderRadius:10,padding:"8px 12px",marginBottom:10}}>
-        <div style={{fontSize:8,color:"#9397ab",marginBottom:4}}>{isMag?("✨ Сопротивление чуду "+atk.npcName):("Уклонение "+atk.npcName)}</div>
-        <div style={{fontSize:9,color:"#9397ab",marginBottom:6}}>{isMag?("d10 + WILL("+npcWill+") + Сопротивление чудотворству("+npcMR+")"):("d10 + DEX("+npcDex+") + Уклонение("+npcDodge+")")}</div>
-        <button onClick={doDodge} style={{width:"100%",padding:"10px",borderRadius:9,border:"none",background:isMag?"#7c3aed":"#10b981",color:"#fff",fontFamily:"'Inter',sans-serif",fontWeight:900,fontSize:14,cursor:"pointer"}}>{isMag?"✨ Бросить Сопротивление чудотворству!":"🛡️ Бросить уклонение!"}</button>
+      <div style={{background:"#232532",border:"1px solid "+(isFear?"#f472b640":isMag?"#a78bfa40":"#34374a"),borderRadius:10,padding:"8px 12px",marginBottom:10}}>
+        <div style={{fontSize:8,color:"#9397ab",marginBottom:4}}>{isFear?("😨 Самообладание "+atk.npcName):isMag?("✨ Сопротивление чуду "+atk.npcName):("Уклонение "+atk.npcName)}</div>
+        <div style={{fontSize:9,color:"#9397ab",marginBottom:6}}>{isFear?("d10 + WILL("+npcWill+") + Самообладание("+((npc&&(npc.extraSkills||{})["Самообладание"])||0)+")"):isMag?("d10 + WILL("+npcWill+") + Сопротивление чудотворству("+npcMR+")"):("d10 + DEX("+npcDex+") + Уклонение("+npcDodge+")")}</div>
+        <button onClick={doDodge} style={{width:"100%",padding:"10px",borderRadius:9,border:"none",background:isFear?"#f472b6":isMag?"#7c3aed":"#10b981",color:"#fff",fontFamily:"'Inter',sans-serif",fontWeight:900,fontSize:14,cursor:"pointer"}}>{isFear?"😨 Бросить Самообладание!":isMag?"✨ Бросить Сопротивление чудотворству!":"🛡️ Бросить уклонение!"}</button>
       </div>
-      <button onClick={acceptHit} style={{width:"100%",padding:6,borderRadius:7,border:"2px solid "+accent+"40",background:"none",color:"#9397ab",fontWeight:700,fontSize:10,cursor:"pointer"}}>{isMag?"Принять чудо без сопротивления":"Принять удар без уклонения"}</button>
+      <button onClick={acceptHit} style={{width:"100%",padding:6,borderRadius:7,border:"2px solid "+accent+"40",background:"none",color:"#9397ab",fontWeight:700,fontSize:10,cursor:"pointer"}}>{isFear?"Не сопротивляться страху":isMag?"Принять чудо без сопротивления":"Принять удар без уклонения"}</button>
     </div>
   </div>)}
 

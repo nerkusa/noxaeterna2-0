@@ -63,4 +63,8 @@ function rnd(pId){var P=getProfs();var pr=P.find(function(p){return p.id===pId})
 /* Рандом только цифр: имя/класс/раса сохраняются */
 function rndStats(pId,raceId){var P=getProfs();var pr=P.find(function(p){return p.id===pId})||P[0];var R=getRaces();var rc=R.find(function(r){return r.id===raceId})||R[0];return rndCore(pr,rc)}
 
-export { iS, iSk, uSP, uSkP, gE, cF, mHP, nC, rnd, rndStats, xpForLevel, xpProgress, levelUpReward };
+/* Постоянный эффект отрицательной Воли: пока текущая WILL < 0 — штраф −5
+   ко всем броскам (снимается сам, как только Воля восстановится до 0+). */
+function willPenalty(curWill){return curWill<0?-5:0}
+
+export { iS, iSk, uSP, uSkP, gE, cF, mHP, nC, rnd, rndStats, xpForLevel, xpProgress, levelUpReward, willPenalty };

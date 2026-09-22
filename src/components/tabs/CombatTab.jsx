@@ -4,7 +4,7 @@ import { ZONES, ARMOR_T, aimPen, weapDur, weaponWear, armorPenaltyOf, woundDmgPe
 import { getProfs } from '../../utils/profStore';
 import { DT, WS, WT, wStat, wtLabel } from '../../data/stats';
 import { PROF_DESC } from '../../data/professions';
-import { cF, mHP } from '../../utils/character';
+import { cF, mHP, willPenalty } from '../../utils/character';
 import { applyDmgToNpc } from '../../utils/combat';
 import { tryPay } from '../../utils/currency';
 import { hasTraitEffect } from '../../data/traits';
@@ -41,6 +41,8 @@ var spawnedArr=Object.entries(spawned).filter(function(e){var hp=e[1].hp!==undef
 var tgtNpc=tgtId?spawned[tgtId]:null;
 var mx=c.hpOv||mHP(fs,c);var curHp=c.curHp!==null&&c.curHp!==undefined?c.curHp:mx;
 var mxW=c.willOv||fs.WILL||1;var curW=c.curWill!==null&&c.curWill!==undefined?c.curWill:mxW;
+var willPen=willPenalty(curW);var shakenPen=c.shakenPenalty?-c.shakenPenalty:0;var rollPen=willPen+shakenPen;
+function clearShaken(){if(c.shakenPenalty)sv(Object.assign({},c,{shakenPenalty:0}))}
 var atkPen=armorPenaltyOf(c,fs).atk;var woundPen=woundDmgPenalty(curHp,mx);
 var hpP=mx>0?(curHp/mx)*100:0;
 var isGM=pr.isGM;
@@ -59,9 +61,12 @@ return(<div style={{display:"flex",flexDirection:"column",gap:14}}>
 </div>
 
 <div style={{display:"flex",gap:8}}>
-<div className="n-card" style={{flex:1,display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 14px"}}>
+<div className="n-card" style={{flex:1,display:"flex",flexDirection:"column",gap:2,padding:"8px 14px"}}>
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
 <Lbl>Воля</Lbl>
-<div style={{display:"flex",alignItems:"center",gap:5}}><button onClick={function(){sv(Object.assign({},c,{curWill:Math.max(0,curW-1)}))}} className="n-btn n-btn-secondary" style={{width:20,height:20,padding:0,fontSize:11}}>−</button><span style={{fontWeight:700,fontSize:13,color:"var(--color-accent)"}}>{curW+"/"+mxW}</span><button onClick={function(){sv(Object.assign({},c,{curWill:Math.min(mxW,curW+1)}))}} className="n-btn n-btn-secondary" style={{width:20,height:20,padding:0,fontSize:11}}>+</button></div>
+<div style={{display:"flex",alignItems:"center",gap:5}}><button onClick={function(){sv(Object.assign({},c,{curWill:Math.max(0,curW-1)}))}} className="n-btn n-btn-secondary" style={{width:20,height:20,padding:0,fontSize:11}}>−</button><span style={{fontWeight:700,fontSize:13,color:willPen?"#ef4444":"var(--color-accent)"}}>{curW+"/"+mxW}</span><button onClick={function(){sv(Object.assign({},c,{curWill:Math.min(mxW,curW+1)}))}} className="n-btn n-btn-secondary" style={{width:20,height:20,padding:0,fontSize:11}}>+</button></div>
+</div>
+{willPen!==0&&<div style={{fontSize:10,color:"#ef4444",textAlign:"right"}}>−5 ко всем броскам</div>}
 </div>
 <button onClick={function(){sv(Object.assign({},c,{curHp:mx,curWill:mxW,warriorBonus:false,warriorBonusUsed:false,sensitiveBonus:false,customStance:false,merchantUsed:false,repairUsed:false}));pr.addLog({who:c.name||"???",type:"rest",label:"Отдых — способности восстановлены",detail:"",total:0})}} className="n-btn n-btn-secondary" style={{color:"#34d399",padding:"6px 14px"}}>Отдых</button>
 </div>
@@ -137,7 +142,7 @@ return(<div key={(w.id!=null?w.id:"w")+"_"+wIdx} style={{background:isEq?"rgba(1
   }
 }} className="n-btn n-btn-secondary" style={{marginTop:6,fontSize:10,color:"#f0b352"}}>{"Перезарядить"+(ammo<=0?" · пусто":"")}</button>}
 <div style={{display:"flex",gap:6,marginTop:6}}>
-<button onClick={function(){if(broken){alert(w.name+" сломано — почини набором инструментов!");return}if(isGun&&ammo<=0){alert("Нет боеприпасов — перезаряди!");return}if(isBow&&atype&&projLeft<=0){alert("Нет боеприпасов: "+atype);return}var R=rollHit();var d=R.d;var rv=fs[statKey]||0;var sv2=es[sk]||0;var warBon=(c.warriorBonus&&(pf.id==="warrior"||pf.abilityType==="bonus_attack"))?5:0;var _patch={};if(warBon)_patch.warriorBonus=false;var wP=null;if(isGun)wP=Object.assign(wP||{},{clip:clip,ammo:Math.max(0,ammo-1)});if(wMaxDur>0){wP=Object.assign(wP||{},{maxDur:wMaxDur,dur:Math.max(0,wDur-weaponWear(R.fumble))});}if(wP)_patch.weapons=(c.weapons||[]).map(function(x){return x.id===w.id?Object.assign({},x,wP):x});if(isBow&&atype){var bLeft=1;_patch.inventory=(c.inventory||[]).map(function(i){if(bLeft>0&&i.proj&&i.ptype===atype){var t=Math.min(i.qty||0,bLeft);bLeft-=t;return Object.assign({},i,{qty:(i.qty||0)-t})}return i}).filter(function(i){return !i.proj||(i.qty||0)>0});}if(Object.keys(_patch).length)sv(Object.assign({},c,_patch));var aimP=(aim&&tgtNpc)?aimPen(selZone):0;var t=d+rv+sv2+(w.bonus||0)+warBon-aimP+atkPen;pr.addLog({who:c.name||"???",type:"hit",label:w.name+(tgtNpc?" → "+tgtNpc.name:"")+(aimP?" · "+selZone+"(−"+aimP+")":"")+(warBon?" · +5":"")+(R.crit?" · крит":R.fumble?" · провал":""),detail:"d10("+d+") + "+statKey+"("+rv+") + "+sk+"("+sv2+") + бонус("+(w.bonus||0)+")"+(aimP?" − прицел("+aimP+")":"")+(atkPen?" − шлем("+Math.abs(atkPen)+")":"")+" = "+t,total:t});
+<button onClick={function(){if(broken){alert(w.name+" сломано — почини набором инструментов!");return}if(isGun&&ammo<=0){alert("Нет боеприпасов — перезаряди!");return}if(isBow&&atype&&projLeft<=0){alert("Нет боеприпасов: "+atype);return}var R=rollHit();var d=R.d;var rv=fs[statKey]||0;var sv2=es[sk]||0;var warBon=(c.warriorBonus&&(pf.id==="warrior"||pf.abilityType==="bonus_attack"))?5:0;var _patch={};if(warBon)_patch.warriorBonus=false;var wP=null;if(isGun)wP=Object.assign(wP||{},{clip:clip,ammo:Math.max(0,ammo-1)});if(wMaxDur>0){wP=Object.assign(wP||{},{maxDur:wMaxDur,dur:Math.max(0,wDur-weaponWear(R.fumble))});}if(wP)_patch.weapons=(c.weapons||[]).map(function(x){return x.id===w.id?Object.assign({},x,wP):x});if(isBow&&atype){var bLeft=1;_patch.inventory=(c.inventory||[]).map(function(i){if(bLeft>0&&i.proj&&i.ptype===atype){var t=Math.min(i.qty||0,bLeft);bLeft-=t;return Object.assign({},i,{qty:(i.qty||0)-t})}return i}).filter(function(i){return !i.proj||(i.qty||0)>0});}if(shakenPen)_patch.shakenPenalty=0;if(Object.keys(_patch).length)sv(Object.assign({},c,_patch));var aimP=(aim&&tgtNpc)?aimPen(selZone):0;var t=d+rv+sv2+(w.bonus||0)+warBon-aimP+atkPen+rollPen;pr.addLog({who:c.name||"???",type:"hit",label:w.name+(tgtNpc?" → "+tgtNpc.name:"")+(aimP?" · "+selZone+"(−"+aimP+")":"")+(warBon?" · +5":"")+(R.crit?" · крит":R.fumble?" · провал":""),detail:"d10("+d+") + "+statKey+"("+rv+") + "+sk+"("+sv2+") + бонус("+(w.bonus||0)+")"+(aimP?" − прицел("+aimP+")":"")+(atkPen?" − шлем("+Math.abs(atkPen)+")":"")+(willPen?" − деморализован("+Math.abs(willPen)+")":"")+(shakenPen?" − потрясён("+Math.abs(shakenPen)+")":"")+" = "+t,total:t});
 if(tgtNpc&&tgtId&&pr.savePendingAttack){pr.savePendingAttack({id:"atk_"+Date.now(),fromPlayer:true,attackerId:c._fbId,attackerName:c.name||"???",npcId:tgtId,npcName:tgtNpc.name,hitRoll:t,atkD:d,atkREF:rv,atkStatName:statKey,atkSkill:sv2,atkSkillName:sk,atkBonus:w.bonus||0,atkCrit:R.crit,atkFumble:R.fumble,weaponName:w.name,dmgDice:activeDice||"1d6",dmgType:w.dmgType||"Р",dmgBonus:activeBon-durPen-woundPen,zone:selZone,aimedZone:aimP?selZone:null,status:"pending_dodge",ts:Date.now()});}
 else{oR({label:w.name+" Попад."+(aimP?" · "+selZone:""),d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:statKey,value:rv},{label:sk,value:sv2},{label:"Бнс",value:w.bonus||0}].concat(aimP?[{label:"Прицел",value:-aimP}]:[]).concat(atkPen?[{label:"Шлем",value:atkPen}]:[]),total:t});}}}
  className="n-btn n-btn-secondary" style={{flex:1,fontSize:11,color:"#60a5fa"}}>{"Попадание"+(tgtNpc?" → "+tgtNpc.name.slice(0,10):"")}</button>
@@ -172,11 +177,12 @@ else{oR({label:w.name+" Попад."+(aimP?" · "+selZone:""),d10:d,crit:R.crit,
   var mainW=(c.weapons||[]).find(function(w){return w.id===c.equippedWeapon&&w.hands===1});
   var offW=(c.weapons||[]).find(function(w){return w.id===c.equippedWeaponOff&&w.hands===1});
   if(!mainW||!offW||mainW.id===offW.id)return null;
-  function rollOne(w,penalty){var R=rollHit();var d=R.d;var statKey=wStat(w.type);var sk=WS[w.type]||"Простое оружие";var rv=fs[statKey]||0;var sv2=es[sk]||0;var wMax=weapDur(w.type);var wD=(w.dur!==undefined&&w.dur!==null)?w.dur:wMax;var t=d+rv+sv2+(w.bonus||0)-penalty+atkPen;var m=w.dmgDice.match(/(\d+)d(\d+)/);var dice=m?rN(parseInt(m[1]),parseInt(m[2])):[0];var dmg=Math.max(0,sm(dice)+(w.bonus||0)-woundPen);var wP=wMax>0?{maxDur:wMax,dur:Math.max(0,wD-weaponWear(R.fumble))}:null;return{hit:t,dmg:dmg,d:d,rv:rv,sv2:sv2,statKey:statKey,sk:sk,fumble:R.fumble,wP:wP}}
+  function rollOne(w,penalty){var R=rollHit();var d=R.d;var statKey=wStat(w.type);var sk=WS[w.type]||"Простое оружие";var rv=fs[statKey]||0;var sv2=es[sk]||0;var wMax=weapDur(w.type);var wD=(w.dur!==undefined&&w.dur!==null)?w.dur:wMax;var t=d+rv+sv2+(w.bonus||0)-penalty+atkPen+rollPen;var m=w.dmgDice.match(/(\d+)d(\d+)/);var dice=m?rN(parseInt(m[1]),parseInt(m[2])):[0];var dmg=Math.max(0,sm(dice)+(w.bonus||0)-woundPen);var wP=wMax>0?{maxDur:wMax,dur:Math.max(0,wD-weaponWear(R.fumble))}:null;return{hit:t,dmg:dmg,d:d,rv:rv,sv2:sv2,statKey:statKey,sk:sk,fumble:R.fumble,wP:wP}}
   return(<button onClick={function(){
     var res1=rollOne(mainW,0);var res2=rollOne(offW,2);
     var newWeapons=(c.weapons||[]).map(function(x){if(x.id===mainW.id&&res1.wP)return Object.assign({},x,res1.wP);if(x.id===offW.id&&res2.wP)return Object.assign({},x,res2.wP);return x});
-    sv(Object.assign({},c,{weapons:newWeapons}));
+    var dwPatch={weapons:newWeapons};if(shakenPen)dwPatch.shakenPenalty=0;
+    sv(Object.assign({},c,dwPatch));
     pr.addLog({who:c.name||"???",type:"hit",label:"⚔️⚔️ Двойная атака: "+mainW.name+" + "+offW.name+(tgtNpc?" → "+tgtNpc.name:""),detail:mainW.name+": d10("+res1.d+")+"+res1.statKey+"("+res1.rv+")+"+res1.sk+"("+res1.sv2+")"+(atkPen?"−шлем("+Math.abs(atkPen)+")":"")+"="+res1.hit+"\n"+offW.name+" (−2 офф-хенд): d10("+res2.d+")+"+res2.statKey+"("+res2.rv+")+"+res2.sk+"("+res2.sv2+")−2"+(atkPen?"−шлем("+Math.abs(atkPen)+")":"")+"="+res2.hit,total:0});
     oR({label:"Двойная атака",d10:null,parts:[{label:mainW.name+" попад.",value:res1.hit},{label:offW.name+" попад. (−2)",value:res2.hit}],total:res1.hit+res2.hit,subtext:mainW.name+" урон: "+res1.dmg+"\n"+offW.name+" урон: "+res2.dmg+(tgtNpc?"\n→ "+tgtNpc.name:"")});
   }} className="n-btn n-btn-primary" style={{width:"100%",marginTop:6}}>{"⚔️⚔️ Двойная атака: "+mainW.name+" + "+offW.name}</button>);
@@ -208,9 +214,23 @@ else{oR({label:w.name+" Попад."+(aimP?" · "+selZone:""),d10:d,crit:R.crit,
 
 <div style={{display:"flex",gap:6}}>
 <button onClick={function(){var d=r1(6);var z=ZONES[d-1];sZone(z.name);pr.addLog({who:c.name||"???",type:"zone",label:z.name+" ×"+z.mult,detail:"1d6="+d,total:d});oR({label:"Зона",d10:d,parts:[],total:d,subtext:z.name+" ×"+z.mult+(z.ignoreArmor?" (игнор брони)":"")})}} className="n-btn n-btn-secondary" style={{flex:1,color:"#f0b352"}}>Зона</button>
-<button onClick={function(){var R=rollHit();var d=R.d;var dv=fs.DEX||0;var dg=es["Уклонение"]||0;var t=d+dv+dg;pr.addLog({who:c.name||"???",type:"dodge",label:"Уклонение"+(R.crit?" · крит":R.fumble?" · провал":""),detail:"d10("+d+") + DEX("+dv+") + Уклонение("+dg+") = "+t,total:t});oR({label:"Уклонение",d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:"DEX",value:dv},{label:"Уклонение",value:dg}],total:t})}} className="n-btn n-btn-secondary" style={{flex:1,color:"#34d399"}}>Уклонение</button>
-<button onClick={function(){var R=rollHit();var d=R.d;var wv=fs.WILL||0;var mr=es["Сопротивление магии"]||0;var t=d+wv+mr;pr.addLog({who:c.name||"???",type:"magic",label:"Сопр. чуду"+(R.crit?" · крит":R.fumble?" · провал":""),detail:"d10("+d+") + WILL("+wv+") + Сопр.чудотв.("+mr+") = "+t,total:t});oR({label:"Сопротивление чуду",d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:"WILL",value:wv},{label:"Сопр.чудотв.",value:mr}],total:t})}} className="n-btn n-btn-secondary" style={{flex:1,color:"var(--color-accent)"}}>Сопр. чуду</button>
+<button onClick={function(){var R=rollHit();var d=R.d;var dv=fs.DEX||0;var dg=es["Уклонение"]||0;var t=d+dv+dg+rollPen;clearShaken();pr.addLog({who:c.name||"???",type:"dodge",label:"Уклонение"+(R.crit?" · крит":R.fumble?" · провал":""),detail:"d10("+d+") + DEX("+dv+") + Уклонение("+dg+")"+(rollPen?" + штраф("+rollPen+")":"")+" = "+t,total:t});oR({label:"Уклонение",d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:"DEX",value:dv},{label:"Уклонение",value:dg}].concat(rollPen?[{label:"Штраф",value:rollPen}]:[]),total:t})}} className="n-btn n-btn-secondary" style={{flex:1,color:"#34d399"}}>Уклонение</button>
+<button onClick={function(){var R=rollHit();var d=R.d;var wv=fs.WILL||0;var mr=es["Сопротивление магии"]||0;var t=d+wv+mr+rollPen;clearShaken();pr.addLog({who:c.name||"???",type:"magic",label:"Сопр. чуду"+(R.crit?" · крит":R.fumble?" · провал":""),detail:"d10("+d+") + WILL("+wv+") + Сопр.чудотв.("+mr+")"+(rollPen?" + штраф("+rollPen+")":"")+" = "+t,total:t});oR({label:"Сопротивление чуду",d10:d,crit:R.crit,fumble:R.fumble,parts:[{label:"WILL",value:wv},{label:"Сопр.чудотв.",value:mr}].concat(rollPen?[{label:"Штраф",value:rollPen}]:[]),total:t})}} className="n-btn n-btn-secondary" style={{flex:1,color:"var(--color-accent)"}}>Сопр. чуду</button>
 </div>
+
+{/* Страх/Мораль: контест EMP+Запугивание vs WILL+Самообладание, тот же принцип, что и атака — выбор цели сверху в карте "Цель" */}
+<button onClick={function(){
+  if(!tgtNpc||!tgtId){alert("Выбери цель в карточке «Цель» ниже");return}
+  var R=rollHit();var d=R.d;var ev=fs.EMP||0;var isk=es["Запугивание"]||0;var t=d+ev+isk+rollPen;
+  if(shakenPen)sv(Object.assign({},c,{shakenPenalty:0}));
+  pr.addLog({who:c.name||"???",type:"fear",label:"😨 Устрашение → "+tgtNpc.name+(R.crit?" · крит":R.fumble?" · провал":""),detail:"d10("+d+") + EMP("+ev+") + Запугивание("+isk+")"+(rollPen?" + штраф("+rollPen+")":"")+" = "+t,total:t});
+  if(pr.savePendingAttack)pr.savePendingAttack({id:"atk_"+Date.now(),fromPlayer:true,fear:true,attackerId:c._fbId,attackerName:c.name||"???",npcId:tgtId,npcName:tgtNpc.name,hitRoll:t,atkD:d,atkREF:ev,atkStatName:"EMP",atkSkill:isk,atkSkillName:"Запугивание",atkBonus:0,atkCrit:R.crit,atkFumble:R.fumble,weaponName:"Устрашение",status:"pending_dodge",ts:Date.now()});
+}} className="n-btn n-btn-secondary" style={{width:"100%",color:"#f472b6"}}>{"😨 Устрашение"+(tgtNpc?" → "+tgtNpc.name:"")}</button>
+
+{(c.shakenPenalty>0||c.broken)&&<div className="n-card" style={{padding:"8px 12px",display:"flex",flexDirection:"column",gap:6,borderColor:c.broken?"#ef4444":"#f59e0b"}}>
+{c.shakenPenalty>0&&<div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontSize:12,color:"#f0b352"}}>{"😰 Потрясён — −"+c.shakenPenalty+" к следующему броску"}</span><button onClick={function(){sv(Object.assign({},c,{shakenPenalty:0}))}} className="n-btn n-btn-secondary" style={{padding:"2px 8px",fontSize:10}}>Снять</button></div>}
+{c.broken&&<div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontSize:12,color:"#ef4444",fontWeight:700}}>💀 Сломлен — пропуск хода / вынужденное отступление в этот раунд</span><button onClick={function(){sv(Object.assign({},c,{broken:false}))}} className="n-btn n-btn-secondary" style={{padding:"2px 8px",fontSize:10}}>Оправился</button></div>}
+</div>}
 
 {/* Чувствительный */}
 {pf.id==="sensitive"&&<div className="n-card" style={{display:"flex",flexDirection:"column",gap:6}}>
@@ -246,7 +266,7 @@ else{oR({label:w.name+" Попад."+(aimP?" · "+selZone:""),d10:d,crit:R.crit,
   }
   /* Каст удался (d6 4-6) — теперь враг кидает защиту (Miracle Resist) */
   if(tgtNpc&&tgtId&&pr.savePendingAttack){
-    var R=rollHit();var dd=R.d;var wv=fs.WILL||0;var msk=es["Чародейство"]||0;var hitC=dd+wv+msk;
+    var R=rollHit();var dd=R.d;var wv=fs.WILL||0;var msk=es["Чародейство"]||0;var hitC=dd+wv+msk+rollPen;
     pr.savePendingAttack({id:"atk_"+Date.now(),fromPlayer:true,magic:true,attackerId:c._fbId,attackerName:c.name||"???",npcId:tgtId,npcName:tgtNpc.name,hitRoll:hitC,atkD:dd,atkREF:wv,atkStatName:"WILL",atkSkill:msk,atkSkillName:"Чудотворство",atkBonus:0,atkCrit:R.crit,atkFumble:false,weaponName:mInt||"Чудо",dmgDice:"3d12",dmgType:"Д",dmgBonus:cbon,zone:selZone,castIntent:mInt||"",status:"pending_dodge",ts:Date.now()});
     pr.addLog({who:c.name||"???",type:"magic",label:(mInt||"Чудо")+" → "+tgtNpc.name+" (каст удался d6="+cc+")"+(R.crit?" · крит":""),detail:"d10("+dd+") + WILL("+wv+") + Чудотворство("+msk+") = "+hitC,total:hitC});
     oR({label:mInt||"Чудо",d10:dd,crit:R.crit,parts:[{label:"WILL",value:wv},{label:"Чудотворство",value:msk}],total:hitC,subtext:(mInt?"«"+mInt+"»\n":"")+"Каст удался (d6="+cc+")\n−1 WILL\n→ "+tgtNpc.name+" сопротивляется…"});
