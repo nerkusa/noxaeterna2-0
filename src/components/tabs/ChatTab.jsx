@@ -45,11 +45,13 @@ function fmtYkt(ts){
 
 function Avatar(ap){
   var ch=(pr.characters||[]).find(function(c){return c.name===ap.name});
+  var npcMatch=!ch&&Object.values(pr.spawned||{}).find(function(s){return s.name===ap.name});
   var isGM=ap.name==="Мастер";
-  var portrait=ch&&ch.portrait;
-  var initial=((ch&&ch.name)||ap.name||"?")[0];
+  var isNpc=!!npcMatch;
+  var portrait=(ch&&ch.portrait)||(npcMatch&&npcMatch.avatar);
+  var initial=((ch&&ch.name)||(npcMatch&&npcMatch.name)||ap.name||"?")[0];
   var sz=ap.size||28;
-  return(<div style={{width:sz,height:sz,borderRadius:"50%",flexShrink:0,background:portrait?"none":(isGM?"linear-gradient(135deg,#7c3aed,#a78bfa)":"linear-gradient(135deg,var(--color-accent-2),var(--color-accent))"),display:"flex",alignItems:"center",justifyContent:"center",fontSize:Math.round(sz*0.42),fontWeight:700,color:"#161826",overflow:"hidden"}}>{portrait?<img src={portrait} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>:initial}</div>)
+  return(<div style={{width:sz,height:sz,borderRadius:"50%",flexShrink:0,background:portrait?"none":(isGM?"linear-gradient(135deg,#7c3aed,#a78bfa)":isNpc?"linear-gradient(135deg,#ef4444,#f59e0b)":"linear-gradient(135deg,var(--color-accent-2),var(--color-accent))"),display:"flex",alignItems:"center",justifyContent:"center",fontSize:Math.round(sz*0.42),fontWeight:700,color:"#161826",overflow:"hidden"}}>{portrait?<img src={portrait} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}}/>:initial}</div>)
 }
 
 useEffect(function(){

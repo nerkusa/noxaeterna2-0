@@ -162,6 +162,20 @@ export default function CheatTab() {
           • После фиксации откат для этого уровня недоступен, а на следующем уровне счёт начинается заново — накопить очки «про запас» и слить их разом нельзя.
         </div>
       </div>
+
+      <div style={card}>
+        <div style={h}>💰 Деньги</div>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead><tr><th style={th}>Монета</th><th style={th}>Значок</th><th style={th}>Равно</th></tr></thead>
+          <tbody>
+            <tr><td style={td}><b>🟡 Золото</b></td><td style={td}>🟡</td><td style={td}>10 серебра</td></tr>
+            <tr><td style={td}><b>⚪ Серебро</b></td><td style={td}>⚪</td><td style={td}>100 бронзы</td></tr>
+            <tr><td style={td}><b>🟠 Бронза</b></td><td style={td}>🟠</td><td style={td}>10 меди</td></tr>
+            <tr><td style={td}><b>🟤 Медь</b></td><td style={td}>🟤</td><td style={td}>— (мелкая монета)</td></tr>
+          </tbody>
+        </table>
+        <div style={{ fontSize: 9, color: '#75798c', marginTop: 5 }}>Цена в магазине вида «🟡2 ⚪5 🟠3» читается как 2 золота, 5 серебра, 3 бронзы. Не хватает старших монет — потратятся младшие, разменивать вручную не нужно.</div>
+      </div>
     </div>
   );
 }

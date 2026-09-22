@@ -104,7 +104,7 @@ return(<div key={it.id} style={{display:"flex",alignItems:"center",gap:6,backgro
 <div style={{background:"#2a2008",borderRadius:8,padding:"6px 8px",display:"flex",flexWrap:"wrap",gap:8,justifyContent:"space-between"}}>
 {CUR_ORDER.map(function(k){return(<div key={k} style={{display:"flex",alignItems:"center",gap:3}}>
 <span style={{fontSize:11}}>{CUR_ICON[k]}</span>
-<span style={{fontSize:8,color:"#9397ab",fontWeight:700,width:14}}>{CUR_LABEL[k]}</span>
+<span style={{fontSize:8,color:"#9397ab",fontWeight:700,width:22}}>{CUR_LABEL[k]}</span>
 <button onClick={function(){setCur(k,-1)}} style={S.sm}>−</button>
 <LiveField type="number" min="0" value={curr[k]||0} onCommit={function(val){setCurAbs(k,val)}} style={{fontFamily:"'Inter',sans-serif",fontSize:12,fontWeight:700,color:"#d97706",background:"#1b1d29",border:"1px solid #34374a",borderRadius:5,width:44,textAlign:"center",padding:"2px 0",outline:"none"}}/>
 <button onClick={function(){setCur(k,1)}} style={S.sm}>+</button>

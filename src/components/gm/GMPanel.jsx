@@ -221,7 +221,7 @@ function ChatSection(pr) {
         </div>
       )}
       <div style={{ flex: 1, minHeight: 0 }}>
-        <ChatTab chat={pr.chat} logs={pr.logs} sendChat={pr.sendChat} addLog={pr.addLog} onRoll={setChatRoll} onCoopRoll={setChatCoopRoll} characters={pr.characters} who={activeSpeaker} />
+        <ChatTab chat={pr.chat} logs={pr.logs} sendChat={pr.sendChat} addLog={pr.addLog} onRoll={setChatRoll} onCoopRoll={setChatCoopRoll} characters={pr.characters} spawned={pr.spawned} who={activeSpeaker} />
       </div>
     </div>
   );

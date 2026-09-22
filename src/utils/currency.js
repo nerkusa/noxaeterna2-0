@@ -1,7 +1,7 @@
 /* Валюта: золото → серебро → бронза → медь.
    1 золото = 10 серебра, 1 серебро = 100 бронзы, 1 бронза = 10 меди. */
 var CUR_ORDER = ["gold", "silver", "bronze", "copper"];
-var CUR_LABEL = { gold: "З", silver: "С", bronze: "Бр", copper: "М" };
+var CUR_LABEL = { gold: "Зол", silver: "Сер", bronze: "Брз", copper: "Мед" };
 var CUR_ICON = { gold: "🟡", silver: "⚪", bronze: "🟠", copper: "🟤" };
 var CUR_NAME = { gold: "Золото", silver: "Серебро", bronze: "Бронза", copper: "Медь" };
 var CUR_RATE = { gold: 10000, silver: 1000, bronze: 10, copper: 1 };
@@ -23,10 +23,12 @@ function fromCopper(total) {
   return out;
 }
 
+/* Компактная цена для бейджей ("💰 5 3 2") — иконка вместо буквы, чтобы
+   не путать "З/С/Бр/М" на глаз. Полные названия — см. CUR_NAME/Памятку. */
 function fmtCurrency(cur) {
   cur = cur || {};
-  var parts = CUR_ORDER.filter(function (k) { return cur[k]; }).map(function (k) { return cur[k] + CUR_LABEL[k]; });
-  return parts.length ? parts.join(" ") : "0" + CUR_LABEL.copper;
+  var parts = CUR_ORDER.filter(function (k) { return cur[k]; }).map(function (k) { return CUR_ICON[k] + cur[k]; });
+  return parts.length ? parts.join(" ") : CUR_ICON.copper + "0";
 }
 
 /* Списывает цену с кошелька персонажа. Возвращает патч {currency:...} для
